@@ -8,6 +8,30 @@ export type TimeBiteItem = {
   body?: string
   eyebrow?: string
   assetUrl?: string
+  question?: string
+  answer?: string
+}
+
+export type PricingFeature = {
+  text: string
+}
+
+export type PricingTier = {
+  name: string
+  price: string
+  cadence: string
+  featured?: boolean
+  badge?: string
+  features: PricingFeature[]
+  cta: Cta
+}
+
+export type PricingBlock = {
+  blockType: 'pricingBlock'
+  eyebrow?: string
+  headline?: string
+  body?: string
+  tiers: PricingTier[]
 }
 
 export type TimeBiteBlock = {
@@ -24,11 +48,7 @@ export type TimeBiteBlock = {
   steps?: TimeBiteItem[]
   tabs?: TimeBiteItem[]
   screens?: TimeBiteItem[]
+  tiers?: PricingTier[]
 }
 
-export type FAQBlock = TimeBiteBlock & {
-  items?: {
-    question?: string
-    answer?: string
-  }[]
-}
+export type FAQBlock = TimeBiteBlock
