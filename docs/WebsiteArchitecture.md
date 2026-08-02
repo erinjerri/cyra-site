@@ -71,6 +71,29 @@ The site is not 100 percent CMS-only. These values remain in code or environment
 If a string or section should be editable by an editor, it should be modeled as a Payload field, global, or block.
 If it is deployment-specific or purely technical, it should stay in env/config.
 
+## CMS audit summary
+
+1. **Already editable in Payload.**
+   - homepage and philosophy page content
+   - page drafts, slugs, titles, and SEO metadata
+   - header and footer copy/link groups
+   - uploaded media records
+2. **Editable once seeded or changed in Payload.**
+   - the existing navigation/footer labels and placeholder links
+   - TimeBite page copy in the seeded `home` and `philosophy` documents
+   - FAQ, roadmap, showcase, and platform content on the homepage
+3. **Still hard-coded or env-driven.**
+   - fallback branding text and meta defaults in `src/utilities/generateMeta.ts`, `src/utilities/mergeOpenGraph.ts`,
+     `src/components/JsonLd.tsx`, and `src/app/(frontend)/opengraph-image.tsx`
+   - beta signup POST target and Substack fallback in `src/components/TimeBite/BetaSignup.tsx`
+   - site URL, DB URI, Payload secret, and R2 settings from environment variables
+   - app layout, styling system, and route logic
+4. **What to change next if you want full editor control.**
+   - move fallback brand copy into a small `siteSettings` global
+   - move beta/form targets into CMS fields if non-technical users need to change them
+   - add editable SEO defaults if the product name or positioning may change
+   - add media storage adapter support before relying on production uploads
+
 ## Decisions and why
 
 - **Header/Footer are Payload Globals, not page blocks.** They're identical on every page; modeling them as a
