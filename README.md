@@ -25,26 +25,20 @@ Core features:
 
 ## Quick Start
 
-To spin up this example locally, follow these steps:
+To spin up this app locally:
 
-### Clone
+1. `cp .env.example .env`
+1. Set `DATABASE_URI` to a local or hosted MongoDB instance.
+1. Set `PAYLOAD_SECRET` to a long random string.
+1. Run `pnpm install`
+1. Run `pnpm generate:types`
+1. Run `pnpm generate:importmap`
+1. Run `pnpm seed`
+1. Run `pnpm dev`
+1. Open `http://localhost:3000`
 
-If you have not done so already, you need to have standalone copy of this repo on your machine. If you've already cloned this repo, skip to [Development](#development).
-
-Use the `create-payload-app` CLI to clone this template directly to your machine:
-
-```bash
-pnpx create-payload-app my-project -t website
-```
-
-### Development
-
-1. First [clone the repo](#clone) if you have not done so already
-1. `cd my-project && cp .env.example .env` to copy the example environment variables
-1. `pnpm install && pnpm dev` to install dependencies and start the dev server
-1. open `http://localhost:3000` to open the app in your browser
-
-That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. Then check out [Production](#production) once you're ready to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
+That gets you the standard local install. When you visit `/admin`, create the first admin user there. If you
+already have a database you care about, skip `pnpm seed` until you are ready to load the starter content.
 
 ## How it works
 
@@ -242,59 +236,26 @@ To run Payload in production, you need to build and start the Admin panel. To do
 1. Finally run `pnpm start` or `npm run start` to run Node in production and serve Payload from the `.build` directory.
 1. When you're ready to go live, see Deployment below for more details.
 
-### Deploying to Vercel
+### Deploying to Cloudflare
 
-This template can also be deployed to Vercel for free. You can get started by choosing the Vercel DB adapter during the setup of the template or by manually installing and configuring it:
+For `creatingyourreality.co` on Cloudflare, the production checklist is:
 
-```bash
-pnpm add @payloadcms/db-vercel-postgres
-```
+1. Point the domain to the app host you choose for the Next.js/Payload runtime.
+1. Use a hosted MongoDB instance for `DATABASE_URI`.
+1. Set `NEXT_PUBLIC_SERVER_URL=https://creatingyourreality.co`.
+1. Wire media uploads to Cloudflare R2 or a persistent volume before launch.
+1. Set the remaining environment variables from `.env.example`.
 
-```ts
-// payload.config.ts
-import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
-
-export default buildConfig({
-  // ...
-  db: vercelPostgresAdapter({
-    pool: {
-      connectionString: process.env.POSTGRES_URL || '',
-    },
-  }),
-  // ...
-```
-
-We also support Vercel's blob storage:
-
-```bash
-pnpm add @payloadcms/storage-vercel-blob
-```
-
-```ts
-// payload.config.ts
-import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
-
-export default buildConfig({
-  // ...
-  plugins: [
-    vercelBlobStorage({
-      collections: {
-        [Media.slug]: true,
-      },
-      token: process.env.BLOB_READ_WRITE_TOKEN || '',
-    }),
-  ],
-  // ...
-```
-
-There is also a simplified [one click deploy](https://github.com/payloadcms/payload/tree/templates/with-vercel-postgres) to Vercel should you need it.
+Cloudflare R2 is the right fit for uploaded images if you want media to survive redeploys and scale beyond local
+disk. MongoDB is still required for Payload itself, but it should not be used as the image store.
 
 ### Self-hosting
 
 Before deploying your app, you need to:
 
 1. Ensure your app builds and serves in production. See [Production](#production) for more details.
-2. You can then deploy Payload as you would any other Node.js or Next.js application either directly on a VPS, DigitalOcean's Apps Platform, via Coolify or more. More guides coming soon.
+1. Deploy Payload as you would any other Node.js or Next.js application, such as on a VPS, DigitalOcean's Apps
+   Platform, Coolify, or a Cloudflare-compatible runtime.
 
 You can also deploy your app manually, check out the [deployment documentation](https://payloadcms.com/docs/production/deployment) for full details.
 
