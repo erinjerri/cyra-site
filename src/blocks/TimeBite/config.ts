@@ -1,137 +1,198 @@
 import type { Block } from 'payload'
 
-import { itemFields, sectionFields } from './shared'
+import { ctaFields, headingFields, itemFields } from './shared'
 
 export const HeroBlock: Block = {
   slug: 'heroBlock',
   interfaceName: 'HeroBlock',
   labels: { singular: 'Hero', plural: 'Hero Blocks' },
   fields: [
-    ...sectionFields,
+    ...headingFields,
+    { name: 'cta', type: 'group', fields: ctaFields },
+    { name: 'secondaryCta', type: 'group', fields: ctaFields },
+  ],
+}
+
+export const QuoteBlock: Block = {
+  slug: 'quoteBlock',
+  interfaceName: 'QuoteBlock',
+  labels: { singular: 'Quote', plural: 'Quote Blocks' },
+  fields: [
+    { name: 'eyebrow', type: 'text' },
+    { name: 'statement', type: 'textarea', required: true },
+    { name: 'emphasis', type: 'textarea' },
+    { name: 'attribution', type: 'text' },
+  ],
+}
+
+export const TimelineBlock: Block = {
+  slug: 'timelineBlock',
+  interfaceName: 'TimelineBlock',
+  labels: { singular: 'Timeline', plural: 'Timeline Blocks' },
+  fields: [
+    ...headingFields,
+    { name: 'steps', type: 'array', minRows: 1, fields: itemFields },
     {
-      name: 'secondaryCta',
-      type: 'group',
+      name: 'image',
+      type: 'upload',
+      relationTo: 'media',
+      admin: {
+        description:
+          'App screenshot for this section — e.g. the half-day rings. Falls back to the built-in time loop graphic when empty.',
+      },
+    },
+    { name: 'assetUrl', type: 'text', admin: { description: 'Optional public image URL used when no upload is set.' } },
+    { name: 'imageAlt', type: 'text', admin: { description: 'Describe the image for screen readers.' } },
+  ],
+}
+
+/**
+ * Explains the name — the bridge from philosophy to something a person can
+ * actually hold. `wordParts` splits the wordmark (Time / Bite) with a meaning
+ * under each.
+ */
+export const AboutBlock: Block = {
+  slug: 'aboutBlock',
+  interfaceName: 'AboutBlock',
+  labels: { singular: 'About the Name', plural: 'About Blocks' },
+  fields: [
+    ...headingFields,
+    {
+      name: 'wordParts',
+      type: 'array',
+      maxRows: 3,
       fields: [
-        { name: 'label', type: 'text' },
-        { name: 'url', type: 'text' },
+        { name: 'part', type: 'text', required: true },
+        { name: 'meaning', type: 'textarea' },
       ],
     },
+    { name: 'closingStatement', type: 'textarea' },
+  ],
+}
+
+export const FrameworkSectionBlock: Block = {
+  slug: 'frameworkSectionBlock',
+  interfaceName: 'FrameworkSectionBlock',
+  labels: { singular: 'Framework Section', plural: 'Framework Section Blocks' },
+  fields: [
+    ...headingFields,
     {
-      name: 'stats',
+      name: 'pillars',
       type: 'array',
-      fields: itemFields,
+      minRows: 1,
+      fields: [{ name: 'label', type: 'text', required: true }],
+    },
+    { name: 'closingStatement', type: 'text' },
+    { name: 'cta', type: 'group', fields: ctaFields },
+  ],
+}
+
+export const FeatureGridBlock: Block = {
+  slug: 'featureGridBlock',
+  interfaceName: 'FeatureGridBlock',
+  labels: { singular: 'Feature Grid', plural: 'Feature Grid Blocks' },
+  fields: [
+    ...headingFields,
+    { name: 'items', type: 'array', minRows: 1, fields: itemFields },
+  ],
+}
+
+export const PlatformCardsBlock: Block = {
+  slug: 'platformCardsBlock',
+  interfaceName: 'PlatformCardsBlock',
+  labels: { singular: 'Platform Cards', plural: 'Platform Cards Blocks' },
+  fields: [
+    ...headingFields,
+    {
+      name: 'platforms',
+      type: 'array',
+      minRows: 1,
+      fields: [
+        { name: 'title', type: 'text', required: true },
+        { name: 'body', type: 'textarea' },
+        {
+          name: 'status',
+          type: 'select',
+          defaultValue: 'planned',
+          options: [
+            { label: 'Available', value: 'available' },
+            { label: 'In development', value: 'in-development' },
+            { label: 'Planned', value: 'planned' },
+          ],
+        },
+      ],
     },
   ],
 }
 
-export const AuthorityStripBlock: Block = {
-  slug: 'authorityStripBlock',
-  interfaceName: 'AuthorityStripBlock',
-  labels: { singular: 'Authority Strip', plural: 'Authority Strips' },
+/**
+ * Slim teaser only. The full board lives in an external roadmap tool
+ * (Sunsama-style), linked via `cta`. The CTA is hidden until a URL is set,
+ * so this never renders a dead button before the board exists.
+ */
+export const RoadmapBlock: Block = {
+  slug: 'roadmapBlock',
+  interfaceName: 'RoadmapBlock',
+  labels: { singular: 'Roadmap', plural: 'Roadmap Blocks' },
   fields: [
-    ...sectionFields,
+    ...headingFields,
     {
-      name: 'items',
+      name: 'highlights',
       type: 'array',
-      fields: itemFields,
+      fields: [{ name: 'label', type: 'text', required: true }],
+    },
+    {
+      name: 'cta',
+      type: 'group',
+      fields: ctaFields,
+      admin: {
+        description: 'Link to the external roadmap board. Hidden until a URL is set.',
+      },
     },
   ],
 }
 
-export const ProblemAgitationBlock: Block = {
-  slug: 'problemAgitationBlock',
-  interfaceName: 'ProblemAgitationBlock',
-  labels: { singular: 'Problem Agitation', plural: 'Problem Agitation Blocks' },
+/**
+ * Product photography (physical planner) and app screenshots.
+ * Rows with no image render as clean text — never an empty placeholder box.
+ */
+export const ShowcaseBlock: Block = {
+  slug: 'showcaseBlock',
+  interfaceName: 'ShowcaseBlock',
+  labels: { singular: 'Showcase', plural: 'Showcase Blocks' },
   fields: [
-    ...sectionFields,
+    ...headingFields,
     {
-      name: 'items',
+      name: 'rows',
       type: 'array',
-      fields: itemFields,
+      fields: [
+        { name: 'title', type: 'text', required: true },
+        { name: 'body', type: 'textarea' },
+        { name: 'image', type: 'upload', relationTo: 'media' },
+        {
+          name: 'assetUrl',
+          type: 'text',
+          admin: { description: 'Optional public image URL used when no upload is set.' },
+        },
+        {
+          name: 'imageAlt',
+          type: 'text',
+          admin: { description: 'Describe the image for screen readers.' },
+        },
+      ],
     },
   ],
 }
 
-export const HowItWorksBlock: Block = {
-  slug: 'howItWorksBlock',
-  interfaceName: 'HowItWorksBlock',
-  labels: { singular: 'How It Works', plural: 'How It Works Blocks' },
+export const NewsletterBlock: Block = {
+  slug: 'newsletterBlock',
+  interfaceName: 'NewsletterBlock',
+  labels: { singular: 'Newsletter', plural: 'Newsletter Blocks' },
   fields: [
-    ...sectionFields,
-    {
-      name: 'steps',
-      type: 'array',
-      fields: itemFields,
-    },
-  ],
-}
-
-export const FeatureTabsBlock: Block = {
-  slug: 'featureTabsBlock',
-  interfaceName: 'FeatureTabsBlock',
-  labels: { singular: 'Feature Tabs', plural: 'Feature Tabs Blocks' },
-  fields: [
-    ...sectionFields,
-    {
-      name: 'tabs',
-      type: 'array',
-      fields: itemFields,
-    },
-  ],
-}
-
-export const ProductScreensBlock: Block = {
-  slug: 'productScreensBlock',
-  interfaceName: 'ProductScreensBlock',
-  labels: { singular: 'Product Screens', plural: 'Product Screens Blocks' },
-  fields: [
-    ...sectionFields,
-    {
-      name: 'screens',
-      type: 'array',
-      fields: itemFields,
-    },
-  ],
-}
-
-export const AIArchitectureBlock: Block = {
-  slug: 'aiArchitectureBlock',
-  interfaceName: 'AIArchitectureBlock',
-  labels: { singular: 'AI Architecture', plural: 'AI Architecture Blocks' },
-  fields: [
-    ...sectionFields,
-    {
-      name: 'items',
-      type: 'array',
-      fields: itemFields,
-    },
-  ],
-}
-
-export const BetaSignupBlock: Block = {
-  slug: 'betaSignupBlock',
-  interfaceName: 'BetaSignupBlock',
-  labels: { singular: 'Beta Signup', plural: 'Beta Signup Blocks' },
-  fields: [
-    ...sectionFields,
-    {
-      name: 'formNote',
-      type: 'textarea',
-    },
-  ],
-}
-
-export const FounderCredibilityBlock: Block = {
-  slug: 'founderCredibilityBlock',
-  interfaceName: 'FounderCredibilityBlock',
-  labels: { singular: 'Founder Credibility', plural: 'Founder Credibility Blocks' },
-  fields: [
-    ...sectionFields,
-    {
-      name: 'items',
-      type: 'array',
-      fields: itemFields,
-    },
+    ...headingFields,
+    { name: 'cta', type: 'group', fields: ctaFields },
+    { name: 'secondaryCta', type: 'group', fields: ctaFields },
+    { name: 'formNote', type: 'textarea' },
   ],
 }
 
@@ -140,7 +201,7 @@ export const FAQBlock: Block = {
   interfaceName: 'FAQBlock',
   labels: { singular: 'FAQ', plural: 'FAQ Blocks' },
   fields: [
-    ...sectionFields,
+    ...headingFields,
     {
       name: 'items',
       type: 'array',
@@ -152,15 +213,49 @@ export const FAQBlock: Block = {
   ],
 }
 
+export const CtaBlock: Block = {
+  slug: 'ctaBlock',
+  interfaceName: 'CtaBlock',
+  labels: { singular: 'CTA', plural: 'CTA Blocks' },
+  fields: [
+    ...headingFields,
+    { name: 'cta', type: 'group', fields: ctaFields },
+    { name: 'secondaryCta', type: 'group', fields: ctaFields },
+  ],
+}
+
+export const TestimonialsBlock: Block = {
+  slug: 'testimonialsBlock',
+  interfaceName: 'TestimonialsBlock',
+  labels: { singular: 'Testimonials', plural: 'Testimonials Blocks' },
+  fields: [
+    ...headingFields,
+    {
+      name: 'items',
+      type: 'array',
+      fields: [
+        { name: 'quote', type: 'textarea', required: true },
+        { name: 'author', type: 'text', required: true },
+        { name: 'role', type: 'text' },
+        { name: 'company', type: 'text' },
+        { name: 'avatar', type: 'upload', relationTo: 'media' },
+      ],
+    },
+  ],
+}
+
 export const timeBiteBlocks = [
   HeroBlock,
-  AuthorityStripBlock,
-  ProblemAgitationBlock,
-  HowItWorksBlock,
-  FeatureTabsBlock,
-  ProductScreensBlock,
-  AIArchitectureBlock,
-  BetaSignupBlock,
-  FounderCredibilityBlock,
+  QuoteBlock,
+  TimelineBlock,
+  AboutBlock,
+  FrameworkSectionBlock,
+  FeatureGridBlock,
+  ShowcaseBlock,
+  PlatformCardsBlock,
+  RoadmapBlock,
+  NewsletterBlock,
   FAQBlock,
+  CtaBlock,
+  TestimonialsBlock,
 ]

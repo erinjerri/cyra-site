@@ -41,7 +41,6 @@
     "src/**/*.tsx",
     "next-env.d.ts",
     "next.config.js",
-    "next-sitemap.config.cjs",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
