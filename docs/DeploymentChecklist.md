@@ -42,6 +42,41 @@ Then visit:
 - `/philosophy` to confirm seeded content
 - `/does-not-exist` to confirm the 404 page
 
+## MongoDB and Payload setup
+
+Follow the MongoDB setup tutorials from All About Payload before you deploy:
+
+- [Building dynamic websites with Payload, App Router, and TypeScript | DB & File Storage](https://www.youtube.com/watch?v=-0CCUkoBDSY&t=692s)
+- [How to set up Payload with Supabase](https://www.youtube.com/watch?v=L5w2QYB9-UU&t=161s)
+
+For this repo, prefer MongoDB plus Cloudflare R2 rather than Supabase for the production setup.
+
+### MongoDB Atlas checklist
+
+Use the tutorial flow as your guide, then make sure you complete:
+
+1. Create a new MongoDB account.
+1. Create a new project.
+1. Create a new cluster.
+1. Add your local IP address or deployment host to the network access list.
+1. Create a database user with a strong password.
+1. Copy the connection string into `DATABASE_URI` or `MONGODB_URI`.
+1. Keep the same database URI in every environment that should share content.
+
+### Payload setup checklist
+
+After MongoDB is ready:
+
+1. Copy `.env.example` to `.env`.
+1. Set `DATABASE_URI` or `MONGODB_URI`.
+1. Set `PAYLOAD_SECRET` to a long random string.
+1. Run `pnpm install`.
+1. Run `pnpm generate:types`.
+1. Run `pnpm generate:importmap`.
+1. Run `pnpm seed`.
+1. Run `pnpm dev`.
+1. Create the first admin user at `/admin`.
+
 ## First run
 The `pnpm seed` command upserts Header, Footer, home page, and philosophy page. It is safe to re-run.
 
