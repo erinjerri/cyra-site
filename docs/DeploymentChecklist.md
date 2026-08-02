@@ -106,3 +106,31 @@ These are known, deliberately-deferred gaps (see also `docs/Roadmap.md`):
 3. **First admin user.** Create it via `/admin` on the target database before handing off editor access.
 4. **`plugin-form-builder` / `plugin-search`** are installed but unused — only wire them if a real form or
    site search becomes a requirement; don't turn them on speculatively.
+
+## R2 image smoke test
+
+Use this as the live setup checklist when you are wiring image storage for the first time:
+
+1. Create the MongoDB database first and confirm `DATABASE_URI` works locally.
+2. Create the Cloudflare R2 bucket.
+3. Create an access key pair for that bucket.
+4. Set the R2 env vars in `.env`:
+   - `R2_BUCKET`
+   - `R2_ENDPOINT`
+   - `R2_ACCESS_KEY_ID`
+   - `R2_SECRET_ACCESS_KEY`
+   - `R2_PUBLIC_URL`
+5. Wire the Payload storage adapter in code so the `media` collection writes to R2 instead of `public/media`.
+6. Start the app locally with `pnpm dev`.
+7. Open `/admin`.
+8. Upload one image in the Media collection.
+9. Confirm the image loads in the admin preview and on the frontend.
+10. Redeploy the app.
+11. Confirm the same media still loads after deploy.
+
+Important:
+
+- MongoDB stores the media document and metadata.
+- R2 stores the actual file bytes.
+- If the upload adapter is still using `staticDir: 'public/media'`, the image will work locally but will not survive a redeploy.
+- For the live production test, upload a new image through Payload after the adapter is wired, then reference that media in a page or block and verify the frontend renders it.
