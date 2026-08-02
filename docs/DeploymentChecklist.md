@@ -134,3 +134,37 @@ Important:
 - R2 stores the actual file bytes.
 - If the upload adapter is still using `staticDir: 'public/media'`, the image will work locally but will not survive a redeploy.
 - For the live production test, upload a new image through Payload after the adapter is wired, then reference that media in a page or block and verify the frontend renders it.
+
+## Netlify deployment
+
+If you are deploying the app on Netlify, treat Netlify as the runtime host and Cloudflare as the domain/DNS host.
+
+### Netlify setup checklist
+
+1. Connect the GitHub repository to a Netlify site.
+2. Set the build command to `pnpm build`.
+3. Set the publish directory to `.next`.
+4. Set the Node version in Netlify to match the repo's local runtime as closely as possible.
+5. Add all env vars from `.env.example` in the Netlify site settings.
+6. Make sure `DATABASE_URI` points to the production MongoDB cluster.
+7. Make sure `PAYLOAD_SECRET` is set to the same value for that production environment.
+8. Set `NEXT_PUBLIC_SERVER_URL=https://creatingyourreality.co`.
+9. Wire the media adapter to Cloudflare R2 before relying on image uploads.
+10. Deploy once from Netlify and confirm the app boots.
+
+### Cloudflare domain step for Netlify
+
+Once the Netlify site exists and builds successfully:
+
+1. Add `creatingyourreality.co` as a custom domain in Netlify.
+2. Let Netlify show the DNS records it wants.
+3. In Cloudflare, point the domain to Netlify using the records Netlify provides.
+4. Verify the domain resolves to the Netlify deployment.
+5. Confirm the app still serves media from R2 and content from MongoDB.
+
+### Netlify notes
+
+- Netlify is hosting the app runtime, not the CMS data.
+- MongoDB still stores the CMS content and media metadata.
+- R2 still stores the uploaded files.
+- If you change the content or upload a new image in Payload, redeploying Netlify should show the updated live site as long as the content is in MongoDB and the media is in R2.
