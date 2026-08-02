@@ -48,6 +48,29 @@ matching presentational component in `src/components/TimeBite/RenderTimeBiteBloc
 `page.tsx` statically imported a TypeScript object (`timeBiteHome`) and the `pages` collection existed but was
 never actually queried.
 
+## What editors can change in Payload
+
+These parts of the site are CMS-driven and should be edited in `/admin` instead of code:
+
+- homepage and philosophy page content
+- page titles, slugs, drafts, and SEO metadata
+- global header copy and nav links
+- global footer copy and footer link groups
+- media entries and their metadata
+
+## What still lives in code or env vars
+
+The site is not 100 percent CMS-only. These values remain in code or environment variables by design:
+
+- the app shell and visual system
+- default fallback copy such as `TimeBite` and `Creating Your Reality`
+- `NEXT_PUBLIC_SERVER_URL`, `DATABASE_URI`, `PAYLOAD_SECRET`, beta signup URL, and R2 settings
+- beta form submission target and Substack embed URL
+- any future one-off product marketing copy that is not meant to be edited by non-technical users
+
+If a string or section should be editable by an editor, it should be modeled as a Payload field, global, or block.
+If it is deployment-specific or purely technical, it should stay in env/config.
+
 ## Decisions and why
 
 - **Header/Footer are Payload Globals, not page blocks.** They're identical on every page; modeling them as a
