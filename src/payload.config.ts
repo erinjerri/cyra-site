@@ -12,6 +12,7 @@ import { getURL } from './utilities/getURL'
 import { Footer } from './globals/Footer'
 import { Header } from './globals/Header'
 import { SiteSettings } from './globals/SiteSettings'
+import { storagePlugins } from './plugins/storage'
 
 export default buildConfig({
   admin: {
@@ -39,6 +40,8 @@ export default buildConfig({
     redirectsPlugin({
       collections: ['pages'],
     }),
+    // Empty unless USE_R2_STORAGE=true and R2 credentials are present.
+    ...storagePlugins,
   ],
   typescript: {
     outputFile: 'src/payload-types.ts',
