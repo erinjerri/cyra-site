@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og'
 
-export const alt = 'TimeBite — the AI-powered personal operating system for intentional living'
+export const alt = 'TimeBite — remember what you meant to do.'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -31,14 +31,23 @@ export default function Image() {
         >
           TimeBite by Creating Your Reality
         </div>
-        <div style={{ display: 'flex', fontSize: 66, fontWeight: 300, marginTop: 32, lineHeight: 1.15 }}>
-          The AI-powered personal
+        <div style={{ display: 'flex', fontSize: 76, fontWeight: 300, marginTop: 34, lineHeight: 1.14 }}>
+          Remember what
         </div>
-        <div style={{ display: 'flex', fontSize: 66, fontWeight: 300, lineHeight: 1.15, color: '#a9d6e5' }}>
-          operating system for
+        <div style={{ display: 'flex', fontSize: 76, fontWeight: 300, lineHeight: 1.14, color: '#a9d6e5' }}>
+          you meant to do.
         </div>
-        <div style={{ display: 'flex', fontSize: 66, fontWeight: 300, lineHeight: 1.15 }}>
-          intentional living.
+        <div
+          style={{
+            display: 'flex',
+            fontSize: 26,
+            marginTop: 30,
+            lineHeight: 1.5,
+            color: '#a2a2a8',
+            maxWidth: 780,
+          }}
+        >
+          One shared memory for your notes, calendar, goals, and reflections.
         </div>
       </div>
     ),

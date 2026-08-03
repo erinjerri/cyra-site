@@ -2,9 +2,7 @@ import type { Metadata } from 'next'
 
 import { getURL } from './getURL'
 import { mergeOpenGraph } from './mergeOpenGraph'
-
-const DEFAULT_DESCRIPTION =
-  'TimeBite is the AI-powered personal operating system for intentional living, built on the Creating Your Reality framework.'
+import { getSiteSettings } from './getSiteSettings'
 
 type MetaImage = { url?: string | null } | string | null | undefined
 
@@ -24,14 +22,19 @@ function resolveImageUrl(image: MetaImage): string | undefined {
   return image.url || undefined
 }
 
-function fallbackTitle(doc?: MetaDoc | null): string {
-  if (!doc?.title) return 'TimeBite'
-  return doc.title === 'TimeBite' ? doc.title : `${doc.title} | TimeBite`
+function fallbackTitle(doc?: MetaDoc | null, brandName = 'TimeBite'): string {
+  if (!doc?.title) return brandName
+  return doc.title === brandName ? doc.title : `${doc.title} | ${brandName}`
 }
 
-export function generateMeta({ doc }: { doc?: MetaDoc | null }): Metadata {
-  const title = doc?.meta?.title || fallbackTitle(doc)
-  const description = doc?.meta?.description || DEFAULT_DESCRIPTION
+export async function generateMeta({ doc }: { doc?: MetaDoc | null }): Promise<Metadata> {
+  const settings = await getSiteSettings()
+  const brandName = settings?.brandName || 'TimeBite'
+  const description =
+    doc?.meta?.description ||
+    settings?.productDescription ||
+    'TimeBite keeps your notes, calendar, goals, and reflections in one shared memory, so the things you care about stop slipping through the week.'
+  const title = doc?.meta?.title || fallbackTitle(doc, brandName)
   const path = doc?.slug && doc.slug !== 'home' ? `/${doc.slug}` : '/'
   const url = `${getURL()}${path}`
   const imageUrl = resolveImageUrl(doc?.meta?.image)

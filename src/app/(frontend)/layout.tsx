@@ -7,9 +7,14 @@ import { getURL } from '@/utilities/getURL'
 import { bodyFont, displayFont } from './fonts'
 import './globals.css'
 
-export const metadata: Metadata = {
-  metadataBase: new URL(getURL()),
-  ...generateMeta({ doc: null }),
+// generateMeta is async (it reads the site-settings global), so this must be
+// an async generateMetadata export. Spreading the promise into a static
+// `metadata` object silently yields {} and drops every tag.
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    metadataBase: new URL(getURL()),
+    ...(await generateMeta({ doc: null })),
+  }
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

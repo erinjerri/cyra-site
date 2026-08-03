@@ -11,13 +11,14 @@ import { Users } from './collections/Users'
 import { getURL } from './utilities/getURL'
 import { Footer } from './globals/Footer'
 import { Header } from './globals/Header'
+import { SiteSettings } from './globals/SiteSettings'
 
 export default buildConfig({
   admin: {
     user: Users.slug,
   },
   collections: [Pages, Media, Users],
-  globals: [Header, Footer],
+  globals: [Header, Footer, SiteSettings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'timebite-local-dev-secret',
   sharp,
@@ -31,7 +32,7 @@ export default buildConfig({
       generateTitle: ({ doc }: { doc: { title?: string } }) =>
         doc?.title && doc.title !== 'TimeBite' ? `${doc.title} | TimeBite` : 'TimeBite',
       generateDescription: () =>
-        'TimeBite is the AI-powered personal operating system for intentional living, built on the Creating Your Reality framework.',
+        'TimeBite keeps your notes, calendar, goals, and reflections in one shared memory, so the things you care about stop slipping through the week.',
       generateURL: ({ doc }: { doc: { slug?: string } }) =>
         `${getURL()}${doc?.slug && doc.slug !== 'home' ? `/${doc.slug}` : ''}`,
     }),

@@ -5,9 +5,9 @@ import { getURL } from './getURL'
 const defaultOpenGraph: Metadata['openGraph'] = {
   type: 'website',
   siteName: 'TimeBite',
-  title: 'TimeBite — the AI-powered personal operating system for intentional living',
+  title: 'TimeBite — remember what you meant to do.',
   description:
-    'TimeBite helps you discover what matters, turn it into action, and build a life you intentionally design.',
+    'TimeBite keeps your notes, calendar, goals, and reflections in one shared memory, so the things you care about stop slipping through the week.',
   url: getURL(),
 }
 

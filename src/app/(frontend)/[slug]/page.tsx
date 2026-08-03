@@ -18,7 +18,7 @@ type Args = {
 export async function generateMetadata({ params }: Args): Promise<Metadata> {
   const { slug } = await params
   const page = await getPageBySlug(slug)
-  return generateMeta({ doc: page })
+  return await generateMeta({ doc: page })
 }
 
 export default async function Page({ params }: Args) {

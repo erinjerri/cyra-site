@@ -25,7 +25,7 @@ export function JsonLd() {
       applicationCategory: 'LifestyleApplication',
       operatingSystem: 'iOS, macOS',
       description:
-        'TimeBite is the AI-powered personal operating system for intentional living, built on the Creating Your Reality framework.',
+        'TimeBite keeps your notes, calendar, goals, and reflections in one shared memory, so the things you care about stop slipping through the week.',
       url,
       offers: {
         '@type': 'Offer',

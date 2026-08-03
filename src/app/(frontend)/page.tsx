@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic'
 
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getPageBySlug('home')
-  return generateMeta({ doc: page })
+  return await generateMeta({ doc: page })
 }
 
 export default async function Page() {

@@ -94,10 +94,12 @@ export interface Config {
   globals: {
     header: Header;
     footer: Footer;
+    'site-settings': SiteSetting;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
   };
   locale: null;
   user: User & {
@@ -1127,6 +1129,27 @@ export interface Footer {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: string;
+  brandName?: string | null;
+  organizationName?: string | null;
+  siteTagline?: string | null;
+  brandDescription?: string | null;
+  productDescription?: string | null;
+  openGraphDescription?: string | null;
+  headerTag?: string | null;
+  footerBrandStatement?: string | null;
+  betaButtonLabel?: string | null;
+  substackButtonLabel?: string | null;
+  notFoundCtaLabel?: string | null;
+  legalNote?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
@@ -1233,6 +1256,27 @@ export interface FooterSelect<T extends boolean = true> {
               id?: T;
             };
       };
+  legalNote?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  brandName?: T;
+  organizationName?: T;
+  siteTagline?: T;
+  brandDescription?: T;
+  productDescription?: T;
+  openGraphDescription?: T;
+  headerTag?: T;
+  footerBrandStatement?: T;
+  betaButtonLabel?: T;
+  substackButtonLabel?: T;
+  notFoundCtaLabel?: T;
   legalNote?: T;
   updatedAt?: T;
   createdAt?: T;

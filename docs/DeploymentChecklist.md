@@ -22,6 +22,61 @@ If you are deploying to Cloudflare and want uploads to persist, you also need on
 
 MongoDB does not store the binary image files themselves. It stores the document metadata that points to the files.
 
+See [`docs/SystemDesign.md`](./SystemDesign.md) for the stack diagram and the reason this repo uses MongoDB for the CMS site while keeping D1 as an optional fit for other parts of the ecosystem.
+
+## Launch Order
+
+Use this sequence when bringing the site fully live:
+
+1. Set up the repo and local app first so you can work against the real codebase.
+2. Set up MongoDB and connect Payload to it.
+3. Set up Cloudflare R2 and wire media storage before you rely on real uploads.
+4. Set up Netlify as the runtime host.
+5. Deploy the app once the database and media storage are connected.
+6. Upload one image in Payload and confirm it renders locally.
+7. Push/deploy and confirm the same image renders on the live site.
+8. Point `creatingyourreality.co` at the Netlify deployment through Cloudflare DNS.
+
+This is the core production path for the site:
+
+- MongoDB stores the CMS content and media records.
+- Cloudflare R2 stores uploaded image files.
+- Netlify runs the app.
+- Cloudflare routes the domain.
+
+If you already created the repo, MongoDB, and Payload first, that is not wrong. The important ordering rule is that Cloudflare R2 must be in place before you treat image uploads as production-ready.
+
+### Relation to the official Cloudflare template
+
+The official Payload Cloudflare template (`with-cloudflare-d1`) follows a different stack and setup order:
+
+- Cloudflare Workers is the runtime
+- D1 is the database instead of MongoDB
+- R2 is configured during the Cloudflare setup flow
+- `wrangler login` is part of the local setup
+- deploy runs through Wrangler after migrations
+
+That means the template's setup order is closer to:
+
+1. Start from the template or connect the repo in Cloudflare.
+2. Attach D1 and R2 in Cloudflare.
+3. Install dependencies and run locally with Wrangler bindings.
+4. Create migrations.
+5. Deploy through Cloudflare.
+
+For this repo, do not copy the D1 database flow directly into the CMS site. The important lesson from the template is that object storage should be wired before you depend on uploaded media in production.
+
+## D1 notes for the broader ecosystem
+
+If you decide to use D1 in other TimeBite projects, the key setup pattern is:
+
+1. Let Cloudflare create the D1 database in the same setup flow as the Worker or template.
+2. Bind the D1 database to the runtime.
+3. Use Wrangler or the Cloudflare deployment flow to manage local bindings and migrations.
+4. Keep D1 for the Cloudflare-native app or service layer, not necessarily the public CMS marketing site.
+
+That makes D1 a better fit for a Worker-based app or an internal tool than for this repo's CMS stack.
+
 ## Standard installation
 
 This is the expected install flow for a clean machine or CI environment:
