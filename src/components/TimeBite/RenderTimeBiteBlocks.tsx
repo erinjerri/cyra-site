@@ -1,71 +1,26 @@
-import type { ReactElement } from 'react'
 import { BetaSignup } from './BetaSignup'
-import type { FAQBlock, PricingTier, TimeBiteBlock, TimeBiteItem } from './types'
+import { TimeLoop } from './TimeLoop'
+import type {
+  FAQBlockType,
+  ShowcaseRow,
+  TestimonialsBlockType,
+  TimeBiteBlock,
+  TimeBiteItem,
+} from './types'
 
 const cx = (...classes: Array<string | false | undefined>) => classes.filter(Boolean).join(' ')
 
-/* ── SVG icon system ── */
-function IconCheck({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <polyline points="2.5 8 6 11.5 12.5 4" />
-    </svg>
-  )
+const statusLabel: Record<string, string> = {
+  available: 'Available now',
+  'in-development': 'In development',
+  planned: 'Planned',
 }
 
-function IconCycle({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 36 36" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="18" cy="18" r="13" />
-      <path d="M18 5v4M18 27v4M5 18h4M27 18h4" strokeWidth="2" />
-      <circle cx="18" cy="18" r="5" fill="currentColor" opacity="0.2" />
-    </svg>
-  )
-}
+type HeaderContent = { eyebrow?: string; headline?: string; body?: string }
 
-function IconMatrix({ className }: { className?: string }) {
+function SectionHeader({ block, align = 'center' }: { block: HeaderContent; align?: 'center' | 'left' }) {
   return (
-    <svg className={className} viewBox="0 0 36 36" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
-      <rect x="4" y="10" width="14" height="4" rx="1" />
-      <rect x="4" y="17" width="22" height="4" rx="1" />
-      <rect x="4" y="24" width="10" height="4" rx="1" />
-    </svg>
-  )
-}
-
-function IconAgent({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 36 36" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect x="6" y="6" width="10" height="10" rx="2" />
-      <rect x="20" y="6" width="10" height="10" rx="2" />
-      <rect x="6" y="20" width="10" height="10" rx="2" />
-      <rect x="20" y="20" width="10" height="10" rx="2" />
-    </svg>
-  )
-}
-
-function IconIntent({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 36 36" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
-      <line x1="8" y1="12" x2="28" y2="12" />
-      <line x1="8" y1="18" x2="22" y2="18" />
-      <line x1="8" y1="24" x2="26" y2="24" />
-      <circle cx="28" cy="24" r="4" strokeWidth="1.5" />
-    </svg>
-  )
-}
-
-const CARD_ICONS: Record<number, (p: { className: string }) => ReactElement> = {
-  0: IconCycle,
-  1: IconMatrix,
-  2: IconAgent,
-  3: IconIntent,
-}
-
-/* ── Shared components ── */
-function SectionHeader({ block, align = 'left' }: { block: TimeBiteBlock; align?: 'center' | 'left' }) {
-  return (
-    <div className={cx('tb-section-header', align === 'center' && 'text-center')}>
+    <div className={cx('tb-section-header', align === 'left' && 'tb-section-header-left')}>
       {block.eyebrow ? <p className="tb-eyebrow">{block.eyebrow}</p> : null}
       {block.headline ? <h2>{block.headline}</h2> : null}
       {block.body ? <p>{block.body}</p> : null}
@@ -75,6 +30,7 @@ function SectionHeader({ block, align = 'left' }: { block: TimeBiteBlock; align?
 
 function Button({ cta, variant = 'primary' }: { cta?: { label?: string; url?: string }; variant?: 'primary' | 'secondary' }) {
   if (!cta?.label) return null
+
   return (
     <a className={cx('tb-button', variant === 'secondary' && 'tb-button-secondary')} href={cta.url || '#'}>
       {cta.label}
@@ -83,11 +39,9 @@ function Button({ cta, variant = 'primary' }: { cta?: { label?: string; url?: st
 }
 
 function Card({ item, index }: { item: TimeBiteItem; index?: number }) {
-  const IconComp = typeof index === 'number' ? CARD_ICONS[index % 4] : undefined
-
   return (
     <article className="tb-card">
-      {IconComp ? <IconComp className="tb-card-icon" /> : null}
+      {typeof index === 'number' ? <span className="tb-card-index">{String(index + 1).padStart(2, '0')}</span> : null}
       {item.eyebrow ? <p className="tb-card-eyebrow">{item.eyebrow}</p> : null}
       {item.title ? <h3>{item.title}</h3> : null}
       {item.body ? <p>{item.body}</p> : null}
@@ -95,102 +49,225 @@ function Card({ item, index }: { item: TimeBiteItem; index?: number }) {
   )
 }
 
-/* ── Nav ── */
-function Nav() {
-  return (
-    <nav className="tb-nav" aria-label="Primary">
-      <div className="tb-shell tb-nav-inner">
-        <span className="tb-nav-brand">TimeBite / CYRA</span>
-        <div className="tb-nav-right">
-          <a className="tb-nav-link" href="#features">Product</a>
-          <a className="tb-nav-link" href="#pricing">Pricing</a>
-          <a className="tb-nav-link" href="#beta">Beta</a>
-        </div>
-      </div>
-    </nav>
-  )
-}
-
-/* ── Cycle Matrix panel (hero right) ── */
-type MatrixRow = { label: string; time: string; pct: number; variant?: string }
-
-const MATRIX_ROWS: MatrixRow[] = [
-  { label: 'App',    time: '3h 20m', pct: 34 },
-  { label: 'Income', time: '2h 10m', pct: 22, variant: 'alt' },
-  { label: 'Brand',  time: '1h 40m', pct: 17 },
-  { label: 'Health', time: '1h 05m', pct: 11, variant: 'alt' },
-  { label: 'Admin',  time: '0h 50m', pct: 9,  variant: 'alt2' },
-  { label: 'Life',   time: '0h 35m', pct: 6,  variant: 'alt2' },
-]
-
-function CycleMatrixPanel() {
-  return (
-    <div className="tb-matrix-panel" aria-label="Cycle Matrix preview">
-      <div className="tb-matrix-header">
-        <span>Cycle Matrix</span>
-        <span>Week 16 / 2025</span>
-      </div>
-      <div className="tb-matrix-rows" role="list">
-        {MATRIX_ROWS.map((row) => (
-          <div className="tb-matrix-row" key={row.label} role="listitem">
-            <span className="tb-matrix-label">{row.label}</span>
-            <div className="tb-matrix-bar-track">
-              <div
-                className={cx('tb-matrix-bar', row.variant && `tb-matrix-bar-${row.variant}`)}
-                style={{ width: `${row.pct * 2.5}%` }}
-              />
-            </div>
-            <span className="tb-matrix-time">{row.time}</span>
-            <span className="tb-matrix-pct">{row.pct}%</span>
-          </div>
-        ))}
-      </div>
-      <div className="tb-matrix-footer">
-        <span>Intent vs Actual</span>
-        <strong>72% aligned</strong>
-      </div>
-    </div>
-  )
-}
-
-/* ── Hero ── */
 function Hero({ block }: { block: TimeBiteBlock }) {
   return (
     <section className="tb-hero">
-      <div className="tb-shell">
-        <span className="tb-crumb">TimeBite / CYRA</span>
-        <div className="tb-hero-grid">
-          <div className="tb-hero-copy">
-            {block.eyebrow ? <p className="tb-eyebrow">{block.eyebrow}</p> : null}
-            <h1>
-              {block.headline ? (
-                block.headline.replace('Engineer your focus.', '').trim()
-                  ? (
-                    <>
-                      <em>Engineer your focus.</em>
-                      {' '}
-                      {block.headline.replace('Engineer your focus.', '').trim()}
-                    </>
-                  )
-                  : block.headline
-              ) : null}
-            </h1>
-            {block.body ? <p className="tb-hero-body">{block.body}</p> : null}
-            <div className="tb-actions">
-              <Button cta={block.cta} />
-              <Button cta={block.secondaryCta} variant="secondary" />
-            </div>
-          </div>
-          <CycleMatrixPanel />
+      <div className="tb-shell tb-hero-copy">
+        {block.eyebrow ? <p className="tb-eyebrow tb-hero-eyebrow">{block.eyebrow}</p> : null}
+        <h1>{block.headline}</h1>
+        {block.body ? <p className="tb-hero-body">{block.body}</p> : null}
+        <div className="tb-actions tb-actions-center">
+          <Button cta={block.cta} />
+          <Button cta={block.secondaryCta} variant="secondary" />
         </div>
-        {block.stats?.length ? (
-          <div className="tb-stat-strip" role="list">
-            {block.stats.map((item, i) => (
-              <div className="tb-stat" key={i} role="listitem">
-                <h3>{item.title}</h3>
-                {item.body ? <p>{item.body}</p> : null}
+      </div>
+    </section>
+  )
+}
+
+function Quote({ block }: { block: TimeBiteBlock }) {
+  return (
+    <section className="tb-section tb-quote">
+      <div className="tb-shell tb-quote-inner">
+        {block.eyebrow ? <p className="tb-eyebrow">{block.eyebrow}</p> : null}
+        {block.statement ? <p className="tb-quote-statement">{block.statement}</p> : null}
+        {block.emphasis ? <p className="tb-quote-emphasis">{block.emphasis}</p> : null}
+        {block.attribution ? <p className="tb-quote-attribution">{block.attribution}</p> : null}
+      </div>
+    </section>
+  )
+}
+
+function Timeline({ block }: { block: TimeBiteBlock }) {
+  const steps = block.steps || []
+  const image = resolveImage(block)
+
+  return (
+    <section className="tb-section" id="how-it-works">
+      <div className="tb-shell">
+        <SectionHeader block={block} />
+        <div className="tb-loop-layout">
+          <div className="tb-loop-media">
+            {image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={image.src} alt={image.alt} loading="lazy" />
+            ) : (
+              <TimeLoop />
+            )}
+          </div>
+          <ol className="tb-timeline">
+            {steps.map((step, index) => (
+              <li className="tb-timeline-step" key={index}>
+                <span className="tb-timeline-index">{String(index + 1).padStart(2, '0')}</span>
+                <div>
+                  {step.title ? <h3>{step.title}</h3> : null}
+                  {step.body ? <p>{step.body}</p> : null}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function About({ block }: { block: TimeBiteBlock }) {
+  const parts = block.wordParts || []
+
+  return (
+    <section className="tb-section tb-about" id="about">
+      <div className="tb-shell tb-about-inner">
+        <SectionHeader block={block} />
+        {parts.length ? (
+          <dl className="tb-word-parts">
+            {parts.map((part, index) => (
+              <div className="tb-word-part" key={index}>
+                <dt>{part.part}</dt>
+                {part.meaning ? <dd>{part.meaning}</dd> : null}
               </div>
             ))}
+          </dl>
+        ) : null}
+        {block.closingStatement ? <p className="tb-about-closing">{block.closingStatement}</p> : null}
+      </div>
+    </section>
+  )
+}
+
+function FrameworkSection({ block }: { block: TimeBiteBlock }) {
+  const pillars = block.pillars || []
+
+  return (
+    <section className="tb-section tb-framework">
+      <div className="tb-shell tb-framework-inner">
+        <SectionHeader block={block} align="left" />
+        <div className="tb-framework-content">
+          <ul className="tb-pillars">
+            {pillars.map((pillar, index) => (
+              <li key={index}>{pillar.label}</li>
+            ))}
+          </ul>
+          {block.closingStatement ? <p className="tb-framework-closing">{block.closingStatement}</p> : null}
+          <div className="tb-actions">
+            <Button cta={block.cta} />
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function FeatureGrid({ block }: { block: TimeBiteBlock }) {
+  const items = block.items || []
+
+  return (
+    <section className="tb-section" id="features">
+      <div className="tb-shell tb-section-layout">
+        <SectionHeader block={block} />
+        <div className="tb-grid tb-feature-grid">
+          {items.map((item, index) => (
+            <Card item={item} key={index} />
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function PlatformCards({ block }: { block: TimeBiteBlock }) {
+  const platforms = block.platforms || []
+
+  return (
+    <section className="tb-section tb-platforms" id="platforms">
+      <div className="tb-shell tb-section-layout">
+        <SectionHeader block={block} />
+        <div className="tb-grid tb-platform-grid">
+          {platforms.map((platform, index) => (
+            <article
+              className={cx('tb-card', platform.status === 'available' && 'tb-platform-card-available')}
+              key={index}
+            >
+              {platform.status ? <p className="tb-platform-status">{statusLabel[platform.status] || platform.status}</p> : null}
+              {platform.title ? <h3>{platform.title}</h3> : null}
+              {platform.body ? <p>{platform.body}</p> : null}
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+type ImageSource = Pick<ShowcaseRow, 'image' | 'assetUrl' | 'imageAlt'>
+
+function resolveImage(source: ImageSource): { src: string; alt: string } | null {
+  const upload = source.image && typeof source.image === 'object' ? source.image : null
+  const src = upload?.url || source.assetUrl
+
+  if (!src) return null
+
+  return { src, alt: source.imageAlt || upload?.alt || '' }
+}
+
+function Showcase({ block }: { block: TimeBiteBlock }) {
+  const rows = block.rows || []
+
+  if (rows.length === 0) return null
+
+  return (
+    <section className="tb-section tb-showcase">
+      <div className="tb-shell">
+        <SectionHeader block={block} />
+        <div className="tb-showcase-rows">
+          {rows.map((row, index) => {
+            const image = resolveImage(row)
+
+            return (
+              <div
+                className={cx(
+                  'tb-showcase-row',
+                  !image && 'tb-showcase-row-text-only',
+                  Boolean(image) && index % 2 === 1 && 'tb-showcase-row-reverse',
+                )}
+                key={index}
+              >
+                <div className="tb-showcase-copy">
+                  {row.title ? <h3>{row.title}</h3> : null}
+                  {row.body ? <p>{row.body}</p> : null}
+                </div>
+                {image ? (
+                  <figure className="tb-showcase-media">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={image.src} alt={image.alt} loading="lazy" />
+                  </figure>
+                ) : null}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function Roadmap({ block }: { block: TimeBiteBlock }) {
+  const highlights = block.highlights || []
+
+  return (
+    <section className="tb-section tb-roadmap" id="roadmap">
+      <div className="tb-shell tb-roadmap-inner">
+        <SectionHeader block={block} />
+        {highlights.length ? (
+          <ul className="tb-roadmap-highlights">
+            {highlights.map((item, index) => (
+              <li key={index}>{item.label}</li>
+            ))}
+          </ul>
+        ) : null}
+        {block.cta?.url ? (
+          <div className="tb-actions tb-actions-center">
+            <Button cta={block.cta} variant="secondary" />
           </div>
         ) : null}
       </div>
@@ -198,129 +275,25 @@ function Hero({ block }: { block: TimeBiteBlock }) {
   )
 }
 
-/* ── Generic 2-col section ── */
-function ItemSection({ block, itemKey = 'items', variant }: { block: TimeBiteBlock; itemKey?: 'items' | 'steps' | 'tabs' | 'screens'; variant?: string }) {
-  const items = block[itemKey] || []
-
-  if (itemKey === 'screens') {
-    return (
-      <section className={cx('tb-section', variant)} id="features">
-        <div className="tb-shell">
-          <div className="tb-section-layout" style={{ marginBottom: '48px' }}>
-            <SectionHeader block={block} />
-          </div>
-          <div className="tb-screens-grid">
-            {items.map((item, i) => (
-              <div className="tb-screen-card" key={i}>
-                <div className="tb-screen-mock" aria-hidden="true">
-                  <div className="tb-screen-mock-line" />
-                  <div className="tb-screen-mock-line" />
-                  <div className="tb-screen-mock-line" />
-                  <div className="tb-screen-mock-line" />
-                </div>
-                <h3>{item.title}</h3>
-                {item.body ? <p>{item.body}</p> : null}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    )
-  }
-
-  return (
-    <section className={cx('tb-section', variant)} id={variant?.includes('authority') ? 'features' : undefined}>
-      <div className={cx('tb-shell', 'tb-section-layout')}>
-        <SectionHeader block={block} />
-        <div className={cx('tb-grid', itemKey === 'steps' && 'tb-steps')}>
-          {items.map((item, i) => (
-            itemKey === 'steps'
-              ? (
-                <article className="tb-card" key={i}>
-                  <span className="tb-step-num">{String(i + 1).padStart(2, '0')}</span>
-                  <h3>{item.title}</h3>
-                  {item.body ? <p>{item.body}</p> : null}
-                </article>
-              )
-              : <Card item={item} index={i} key={i} />
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-/* ── Pricing ── */
-function Pricing({ block }: { block: TimeBiteBlock }) {
-  const tiers = block.tiers || []
-
-  return (
-    <section className="tb-section tb-pricing" id="pricing">
-      <div className="tb-shell">
-        <div style={{ maxWidth: '560px' }}>
-          <SectionHeader block={block} />
-        </div>
-        <div className="tb-pricing-grid" role="list">
-          {tiers.map((tier: PricingTier, i) => (
-            <div className={cx('tb-plan', tier.featured && 'tb-plan-featured')} key={i} role="listitem">
-              {tier.badge ? <span className="tb-plan-badge">{tier.badge}</span> : null}
-              <p className="tb-plan-name">{tier.name}</p>
-              <div className="tb-plan-price">
-                {tier.price === 'Free' ? (
-                  tier.price
-                ) : tier.price === 'Custom' ? (
-                  tier.price
-                ) : (
-                  <><sup>$</sup>{tier.price}</>
-                )}
-              </div>
-              <p className="tb-plan-cadence">{tier.cadence}</p>
-              <div className="tb-plan-divider" />
-              <ul className="tb-plan-features">
-                {tier.features.map((f, fi) => (
-                  <li className="tb-plan-feature" key={fi}>
-                    <IconCheck className="tb-plan-feature-check" />
-                    <span>{f.text}</span>
-                  </li>
-                ))}
-              </ul>
-              <a
-                className={cx('tb-plan-cta', tier.featured && 'tb-plan-cta-featured')}
-                href={tier.cta?.url || '#beta'}
-              >
-                {tier.cta?.label}
-              </a>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-/* ── Beta signup ── */
-function Beta({ block }: { block: TimeBiteBlock }) {
+function Newsletter({ block }: { block: TimeBiteBlock }) {
   return (
     <section className="tb-section tb-beta" id="beta">
       <div className="tb-shell tb-beta-grid">
-        <SectionHeader block={block} />
-        <BetaSignup cta={block.cta} note={block.formNote} />
+        <SectionHeader block={block} align="left" />
+        <BetaSignup cta={block.cta} secondaryCta={block.secondaryCta} note={block.formNote} />
       </div>
     </section>
   )
 }
 
-/* ── FAQ ── */
-function FAQ({ block }: { block: FAQBlock }) {
+function FAQ({ block }: { block: FAQBlockType }) {
   return (
-    <section className="tb-section tb-faq">
+    <section className="tb-section tb-faq" id="faq">
       <div className="tb-shell">
-        <div style={{ maxWidth: '520px', margin: '0 auto', textAlign: 'center' }}>
-          <SectionHeader block={block} />
-        </div>
+        <SectionHeader block={block} />
         <div className="tb-faq-list">
-          {block.items?.map((item, i) => (
-            <details key={i}>
+          {block.items?.map((item, index) => (
+            <details key={index}>
               <summary>{item.question}</summary>
               <p>{item.answer}</p>
             </details>
@@ -331,90 +304,81 @@ function FAQ({ block }: { block: FAQBlock }) {
   )
 }
 
-/* ── Footer ── */
-function Footer() {
+function CtaBanner({ block }: { block: TimeBiteBlock }) {
   return (
-    <footer className="tb-footer">
-      <div className="tb-shell">
-        <div className="tb-footer-top">
-          <div className="tb-footer-brand-col">
-            <span className="tb-footer-brand">TimeBite / CYRA</span>
-            <p className="tb-footer-tagline">Engineer your focus.<br />See where your time actually goes.</p>
-          </div>
-          <nav className="tb-footer-nav" aria-label="Footer">
-            <div className="tb-footer-col">
-              <p className="tb-footer-col-heading">CYRA</p>
-              <a href="https://cyra.ai">About</a>
-              <a href="mailto:hello@cyra.ai">Contact</a>
-              <a href="#beta">Careers</a>
-            </div>
-            <div className="tb-footer-col">
-              <p className="tb-footer-col-heading">Product</p>
-              <a href="#features">Features</a>
-              <a href="#pricing">Pricing</a>
-              <a href="#beta">Beta access</a>
-              <a href="#beta">How it works</a>
-            </div>
-            <div className="tb-footer-col">
-              <p className="tb-footer-col-heading">Platforms</p>
-              <a href="#beta">iOS</a>
-              <a href="#beta">visionOS</a>
-              <a href="#beta">watchOS</a>
-              <a href="#beta">macOS</a>
-              <a href="#beta">Meta AI Glasses</a>
-            </div>
-            <div className="tb-footer-col">
-              <p className="tb-footer-col-heading">Legal</p>
-              <a href="/privacy">Privacy</a>
-              <a href="/terms">Terms</a>
-            </div>
-          </nav>
-        </div>
-        <div className="tb-footer-bottom">
-          <span>TimeBite by CYRA. Private beta.</span>
-          <span>All rights reserved.</span>
+    <section className="tb-section tb-cta-banner">
+      <div className="tb-shell tb-cta-banner-inner">
+        <SectionHeader block={block} />
+        <div className="tb-actions tb-actions-center">
+          <Button cta={block.cta} />
+          <Button cta={block.secondaryCta} variant="secondary" />
         </div>
       </div>
-    </footer>
+    </section>
   )
 }
 
-/* ── Root renderer ── */
+function Testimonials({ block }: { block: TestimonialsBlockType }) {
+  const items = block.items || []
+
+  if (items.length === 0) return null
+
+  return (
+    <section className="tb-section tb-testimonials">
+      <div className="tb-shell tb-section-layout">
+        <SectionHeader block={block} />
+        <div className="tb-grid">
+          {items.map((item, index) => (
+            <article className="tb-card" key={index}>
+              <span className="tb-card-signal" aria-hidden="true" />
+              {item.quote ? <p>&ldquo;{item.quote}&rdquo;</p> : null}
+              <p className="tb-testimonial-byline">
+                {item.author}
+                {item.role || item.company ? `, ${[item.role, item.company].filter(Boolean).join(' at ')}` : null}
+              </p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export function RenderTimeBiteBlocks({ blocks }: { blocks: TimeBiteBlock[] }) {
   return (
-    <>
-      <Nav />
-      <main className="tb-page">
-        {blocks.map((block, i) => {
-          switch (block.blockType) {
-            case 'heroBlock':
-              return <Hero block={block} key={i} />
-            case 'authorityStripBlock':
-              return <ItemSection block={block} variant="tb-authority" key={i} />
-            case 'problemAgitationBlock':
-              return <ItemSection block={block} variant="tb-problem" key={i} />
-            case 'howItWorksBlock':
-              return <ItemSection block={block} itemKey="steps" key={i} />
-            case 'featureTabsBlock':
-              return <ItemSection block={block} itemKey="tabs" variant="tb-feature-tabs" key={i} />
-            case 'productScreensBlock':
-              return <ItemSection block={block} itemKey="screens" variant="tb-screens" key={i} />
-            case 'aiArchitectureBlock':
-              return <ItemSection block={block} variant="tb-ai" key={i} />
-            case 'pricingBlock':
-              return <Pricing block={block} key={i} />
-            case 'betaSignupBlock':
-              return <Beta block={block} key={i} />
-            case 'founderCredibilityBlock':
-              return <ItemSection block={block} variant="tb-founder" key={i} />
-            case 'faqBlock':
-              return <FAQ block={block as FAQBlock} key={i} />
-            default:
-              return null
-          }
-        })}
-      </main>
-      <Footer />
-    </>
+    <main className="tb-page" id="main-content">
+      {blocks.map((block, index) => {
+        switch (block.blockType) {
+          case 'heroBlock':
+            return <Hero block={block} key={index} />
+          case 'quoteBlock':
+            return <Quote block={block} key={index} />
+          case 'timelineBlock':
+            return <Timeline block={block} key={index} />
+          case 'aboutBlock':
+            return <About block={block} key={index} />
+          case 'frameworkSectionBlock':
+            return <FrameworkSection block={block} key={index} />
+          case 'featureGridBlock':
+            return <FeatureGrid block={block} key={index} />
+          case 'showcaseBlock':
+            return <Showcase block={block} key={index} />
+          case 'platformCardsBlock':
+            return <PlatformCards block={block} key={index} />
+          case 'roadmapBlock':
+            return <Roadmap block={block} key={index} />
+          case 'newsletterBlock':
+            return <Newsletter block={block} key={index} />
+          case 'faqBlock':
+            return <FAQ block={block as FAQBlockType} key={index} />
+          case 'ctaBlock':
+            return <CtaBanner block={block} key={index} />
+          case 'testimonialsBlock':
+            return <Testimonials block={block as TestimonialsBlockType} key={index} />
+          default:
+            return null
+        }
+      })}
+    </main>
   )
 }

@@ -8,30 +8,31 @@ export type TimeBiteItem = {
   body?: string
   eyebrow?: string
   assetUrl?: string
-  question?: string
-  answer?: string
 }
 
-export type PricingFeature = {
-  text: string
-}
-
-export type PricingTier = {
-  name: string
-  price: string
-  cadence: string
-  featured?: boolean
-  badge?: string
-  features: PricingFeature[]
-  cta: Cta
-}
-
-export type PricingBlock = {
-  blockType: 'pricingBlock'
-  eyebrow?: string
-  headline?: string
+export type PlatformItem = {
+  title?: string
   body?: string
-  tiers: PricingTier[]
+  status?: 'available' | 'in-development' | 'planned'
+}
+
+export type Pillar = {
+  label?: string
+}
+
+export type BlockImage = { url?: string | null; alt?: string | null } | string | null
+
+export type ShowcaseRow = {
+  title?: string
+  body?: string
+  image?: BlockImage
+  assetUrl?: string
+  imageAlt?: string
+}
+
+export type WordPart = {
+  part?: string
+  meaning?: string
 }
 
 export type TimeBiteBlock = {
@@ -39,16 +40,37 @@ export type TimeBiteBlock = {
   eyebrow?: string
   headline?: string
   body?: string
+  statement?: string
+  emphasis?: string
+  attribution?: string
+  closingStatement?: string
   cta?: Cta
   secondaryCta?: Cta
   formNote?: string
-  assetUrl?: string
   items?: TimeBiteItem[]
-  stats?: TimeBiteItem[]
   steps?: TimeBiteItem[]
-  tabs?: TimeBiteItem[]
-  screens?: TimeBiteItem[]
-  tiers?: PricingTier[]
+  pillars?: Pillar[]
+  platforms?: PlatformItem[]
+  highlights?: Pillar[]
+  rows?: ShowcaseRow[]
+  wordParts?: WordPart[]
+  image?: BlockImage
+  assetUrl?: string
+  imageAlt?: string
 }
 
-export type FAQBlock = TimeBiteBlock
+export type FAQBlockType = Omit<TimeBiteBlock, 'items'> & {
+  items?: {
+    question?: string
+    answer?: string
+  }[]
+}
+
+export type TestimonialsBlockType = Omit<TimeBiteBlock, 'items'> & {
+  items?: {
+    quote?: string
+    author?: string
+    role?: string
+    company?: string
+  }[]
+}
