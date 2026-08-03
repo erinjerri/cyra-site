@@ -8,6 +8,13 @@ const NEXT_PUBLIC_SERVER_URL = process.env.VERCEL_PROJECT_PRODUCTION_URL
 
 const isDev = process.env.NODE_ENV === 'development'
 
+// R2 public hostname must be an allowed remote pattern, or next/image returns
+// 400 for every uploaded asset in production. See docs/MediaStorage.md.
+const r2PublicHost = (process.env.R2_PUBLIC_HOSTNAME || process.env.R2_PUBLIC_URL || '')
+  .trim()
+  .replace(/^https?:\/\//, '')
+  .replace(/\/+$/, '')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
@@ -24,6 +31,7 @@ const nextConfig = {
           protocol: url.protocol.replace(':', ''),
         }
       }),
+      ...(r2PublicHost ? [{ hostname: r2PublicHost, protocol: 'https' }] : []),
     ],
     // Allow localhost images
     localPatterns: [

@@ -151,10 +151,11 @@ nothing to spot-check in `public/`. Spot-check `/sitemap.xml` and `/robots.txt` 
 
 These are known, deliberately-deferred gaps (see also `docs/Roadmap.md`):
 
-1. **Media storage adapter.** `media` uploads currently write to `public/media` on local disk
-   (`src/collections/Media.ts`, `upload.staticDir`). That does not survive a serverless deploy or a container
-   redeploy without a persistent volume. Wire an object-storage adapter for Cloudflare R2 or mount persistent
-   storage in whatever container platform is used (the repo ships a `Dockerfile`).
+1. **Media storage adapter.** ✅ Wired — the Cloudflare R2 adapter lives in `src/plugins/storage.ts`.
+   It is **opt-in**: uploads still go to `public/media` on local disk until `USE_R2_STORAGE=true` and the
+   R2 credentials are set on the host. Until you do that on the production environment, uploaded images are
+   still lost on every redeploy. Full setup walkthrough, env vars, and verification steps:
+   **[docs/MediaStorage.md](./MediaStorage.md)**.
 2. **Social links.** All footer "Social" links are seeded as `comingSoon: true` placeholders — no real
    LinkedIn/GitHub/YouTube/Substack URLs exist yet. Set them in `/admin` (Footer global) once they do; the
    `comingSoon` checkbox flips them from a disabled label to a live link with no code change.
