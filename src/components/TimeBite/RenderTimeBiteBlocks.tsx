@@ -1,7 +1,9 @@
 import { BetaSignup } from './BetaSignup'
+import { PricingSection } from './PricingSection'
 import { TimeLoop } from './TimeLoop'
 import type {
   FAQBlockType,
+  PricingBlockType,
   ShowcaseRow,
   TestimonialsBlockType,
   TimeBiteBlock,
@@ -367,6 +369,8 @@ export function RenderTimeBiteBlocks({ blocks }: { blocks: TimeBiteBlock[] }) {
             return <PlatformCards block={block} key={index} />
           case 'roadmapBlock':
             return <Roadmap block={block} key={index} />
+          case 'pricingBlock':
+            return <PricingSection block={block as PricingBlockType} key={index} />
           case 'newsletterBlock':
             return <Newsletter block={block} key={index} />
           case 'faqBlock':
