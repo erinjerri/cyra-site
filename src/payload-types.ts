@@ -146,6 +146,7 @@ export interface Page {
     | ShowcaseBlock
     | PlatformCardsBlock
     | RoadmapBlock
+    | PricingBlock
     | NewsletterBlock
     | FAQBlock
     | CtaBlock
@@ -241,7 +242,7 @@ export interface Media {
   id: string;
   alt?: string | null;
   /**
-   * Public Cloudflare R2 URL when media is served externally.
+   * Legacy field. Not read by anything — the storage adapter now generates public URLs automatically. Safe to leave blank; kept only so existing values are not dropped.
    */
   r2Url?: string | null;
   updatedAt: string;
@@ -396,6 +397,119 @@ export interface RoadmapBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'roadmapBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PricingBlock".
+ */
+export interface PricingBlock {
+  eyebrow?: string | null;
+  headline: string;
+  body?: string | null;
+  cta?: {
+    label?: string | null;
+    url?: string | null;
+  };
+  secondaryCta?: {
+    label?: string | null;
+    url?: string | null;
+  };
+  /**
+   * Free trial line above the plans, e.g. "Try TimeBite free for 30 days."
+   */
+  trialCopy?: string | null;
+  digitalEyebrow?: string | null;
+  monthlyLabel?: string | null;
+  annualLabel?: string | null;
+  /**
+   * Small badge beside the annual toggle, e.g. "Best value".
+   */
+  annualBadge?: string | null;
+  digitalPlans?:
+    | {
+        name: string;
+        /**
+         * Number only, no currency symbol. Use "0" for free. Blank if not sold monthly.
+         */
+        monthlyPrice?: string | null;
+        /**
+         * Number only, no currency symbol. Blank if not sold annually.
+         */
+        annualPrice?: string | null;
+        /**
+         * Shown only on the annual view, e.g. "Two months free against paying monthly."
+         */
+        annualNote?: string | null;
+        description?: string | null;
+        badge?: string | null;
+        featured?: boolean | null;
+        features?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        cta?: {
+          label?: string | null;
+          url?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Invite-code promotion. The code itself is never rendered — redemption belongs to the billing provider.
+   */
+  betaPromotion?: {
+    enabled?: boolean | null;
+    label?: string | null;
+    body?: string | null;
+    cta?: {
+      label?: string | null;
+      url?: string | null;
+    };
+  };
+  /**
+   * One line about cross-device access. Device status lives in the Platform Cards block.
+   */
+  platformNote?: {
+    text?: string | null;
+    cta?: {
+      label?: string | null;
+      url?: string | null;
+    };
+  };
+  physicalEyebrow?: string | null;
+  physicalHeadline?: string | null;
+  physicalBody?: string | null;
+  physicalProducts?:
+    | {
+        name: string;
+        price: string;
+        billingType?: ('preorder' | 'one-time') | null;
+        description?: string | null;
+        includedItems?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        badge?: string | null;
+        featured?: boolean | null;
+        /**
+         * Uncheck to keep an offer configured but hidden from the page.
+         */
+        enabled?: boolean | null;
+        cta?: {
+          label?: string | null;
+          url?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  footnote?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'pricingBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -622,6 +736,7 @@ export interface PagesSelect<T extends boolean = true> {
         showcaseBlock?: T | ShowcaseBlockSelect<T>;
         platformCardsBlock?: T | PlatformCardsBlockSelect<T>;
         roadmapBlock?: T | RoadmapBlockSelect<T>;
+        pricingBlock?: T | PricingBlockSelect<T>;
         newsletterBlock?: T | NewsletterBlockSelect<T>;
         faqBlock?: T | FAQBlockSelect<T>;
         ctaBlock?: T | CtaBlockSelect<T>;
@@ -821,6 +936,110 @@ export interface RoadmapBlockSelect<T extends boolean = true> {
         label?: T;
         url?: T;
       };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PricingBlock_select".
+ */
+export interface PricingBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  headline?: T;
+  body?: T;
+  cta?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+      };
+  secondaryCta?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+      };
+  trialCopy?: T;
+  digitalEyebrow?: T;
+  monthlyLabel?: T;
+  annualLabel?: T;
+  annualBadge?: T;
+  digitalPlans?:
+    | T
+    | {
+        name?: T;
+        monthlyPrice?: T;
+        annualPrice?: T;
+        annualNote?: T;
+        description?: T;
+        badge?: T;
+        featured?: T;
+        features?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        cta?:
+          | T
+          | {
+              label?: T;
+              url?: T;
+            };
+        id?: T;
+      };
+  betaPromotion?:
+    | T
+    | {
+        enabled?: T;
+        label?: T;
+        body?: T;
+        cta?:
+          | T
+          | {
+              label?: T;
+              url?: T;
+            };
+      };
+  platformNote?:
+    | T
+    | {
+        text?: T;
+        cta?:
+          | T
+          | {
+              label?: T;
+              url?: T;
+            };
+      };
+  physicalEyebrow?: T;
+  physicalHeadline?: T;
+  physicalBody?: T;
+  physicalProducts?:
+    | T
+    | {
+        name?: T;
+        price?: T;
+        billingType?: T;
+        description?: T;
+        includedItems?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        badge?: T;
+        featured?: T;
+        enabled?: T;
+        cta?:
+          | T
+          | {
+              label?: T;
+              url?: T;
+            };
+        id?: T;
+      };
+  footnote?: T;
   id?: T;
   blockName?: T;
 }

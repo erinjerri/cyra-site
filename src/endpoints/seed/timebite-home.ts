@@ -138,6 +138,137 @@ export const timeBiteHome = {
       cta: { label: 'See the full roadmap' },
     },
     {
+      // Launch pricing. Every number here is content — change it in /admin, not
+      // in code. Optional bundles ship with `enabled: false` so they can be
+      // switched on without a deploy. See docs/launch-pricing.md.
+      blockType: 'pricingBlock',
+      eyebrow: 'Pricing',
+      headline: 'Choose how you want to build your reality.',
+      body: 'Start on a screen, work on paper, or move between the two. TimeBite and the Creating Your Reality planner were designed as one system.',
+      trialCopy: 'Try TimeBite free for 30 days — long enough to know whether it belongs in your life.',
+      cta: { label: 'Try TimeBite free', url: '#beta' },
+      secondaryCta: { label: 'Pre-order the planner', url: '#planner' },
+      digitalEyebrow: 'Digital',
+      monthlyLabel: 'Monthly',
+      annualLabel: 'Annual',
+      annualBadge: 'Best value',
+      digitalPlans: [
+        {
+          name: 'Free',
+          monthlyPrice: '0',
+          annualPrice: '0',
+          badge: 'To begin with',
+          description: 'For beta members and anyone still deciding. Enough of the loop to find out whether it holds.',
+          features: [
+            { text: 'Quick capture' },
+            { text: 'Goals and daily action' },
+            { text: 'Reflection' },
+            { text: 'One device' },
+          ],
+          cta: { label: 'Join the beta', url: '#beta' },
+        },
+        {
+          name: 'Plus',
+          monthlyPrice: '12.55',
+          annualPrice: '125.55',
+          annualNote: 'Two months free against paying monthly.',
+          featured: true,
+          badge: 'Recommended',
+          description: 'The whole loop, kept in one memory, on every Apple device we support.',
+          features: [
+            { text: 'Everything in Free' },
+            { text: 'Calendar and time blocking' },
+            { text: 'Notes and journal' },
+            { text: 'Unlimited goals and history' },
+            { text: 'TimeBite Cycles' },
+            { text: 'Sync across your devices' },
+          ],
+          cta: { label: 'Try TimeBite free', url: '#beta' },
+        },
+        {
+          name: 'Pro',
+          monthlyPrice: '25.55',
+          annualPrice: '255.55',
+          badge: 'As it lands',
+          description: 'For the deeper end — richer planning and quiet automation, arriving as those pieces are built.',
+          features: [
+            { text: 'Everything in Plus' },
+            { text: 'Deeper planning surfaces — in development' },
+            { text: 'Longer-range review and reporting — in development' },
+            { text: 'Quiet automation across the loop — planned' },
+          ],
+          cta: { label: 'Join the waitlist', url: '#beta' },
+        },
+      ],
+      betaPromotion: {
+        enabled: true,
+        label: 'Friends of TimeBite',
+        body: 'An invite code adds two more months on top of the 30-day trial. Codes go to the people in the private beta.',
+        cta: { label: 'Have an invite code?', url: '#beta' },
+      },
+      platformNote: {
+        text: 'One membership, across every Apple device we support.',
+        cta: { label: 'See what runs where', url: '#platforms' },
+      },
+      physicalEyebrow: 'Analog',
+      physicalHeadline: 'The same framework, in print.',
+      physicalBody:
+        'A paper home for the ideas you are building in TimeBite — six months of intentional planning, reflection, goals, and daily action per planner.',
+      physicalProducts: [
+        {
+          name: 'Six-Month Planner',
+          price: '35.55',
+          billingType: 'preorder',
+          description: 'One planner, roughly six months of the loop on paper.',
+          includedItems: [
+            { text: 'One Creating Your Reality planner' },
+            { text: 'Guided goal, reflection, and daily action spreads' },
+          ],
+          cta: { label: 'Pre-order the planner', url: '#beta' },
+        },
+        {
+          name: 'Year of Planning',
+          price: '65.55',
+          billingType: 'preorder',
+          featured: true,
+          badge: 'Best value in paper',
+          description: 'A full year, without re-ordering in the middle of it.',
+          includedItems: [{ text: 'Two six-month planners' }, { text: 'One year of analog planning' }],
+          cta: { label: 'Pre-order the year', url: '#beta' },
+        },
+        {
+          name: 'Stationery Kit',
+          price: '55.55',
+          billingType: 'preorder',
+          description: 'The small things that make the planner easier to keep. Contents may change before printing.',
+          includedItems: [{ text: 'Branded sticky notes' }, { text: 'Sticker set' }, { text: 'Pen' }],
+          cta: { label: 'Pre-order the kit', url: '#beta' },
+        },
+        {
+          // Optional bundles: configured, hidden. Flip `enabled` to true in
+          // /admin when they are ready to sell.
+          name: 'Planner + Stationery',
+          price: '85.55',
+          billingType: 'preorder',
+          enabled: false,
+          description: 'Optional bundle, held back for a later launch.',
+          includedItems: [{ text: 'One six-month planner' }, { text: 'Stationery kit' }],
+          cta: { label: 'Pre-order the bundle', url: '#beta' },
+        },
+        {
+          name: 'Full Year Analog Set',
+          price: '115.55',
+          billingType: 'preorder',
+          enabled: false,
+          description: 'Optional bundle, held back for a later launch.',
+          includedItems: [{ text: 'Two six-month planners' }, { text: 'Stationery kit' }],
+          cta: { label: 'Pre-order the set', url: '#beta' },
+        },
+      ],
+      footnote:
+        'Launch pricing. Plans renew; planners and stationery are one-time pre-orders charged when they ship. Nothing is charged yet — pre-orders and paid plans open to the beta list first.',
+    },
+    {
       blockType: 'newsletterBlock',
       eyebrow: 'Private beta',
       headline: 'Come build it with us.',
@@ -168,6 +299,16 @@ export const timeBiteHome = {
         {
           question: 'Which devices can I use it on?',
           answer: 'iPhone first, then macOS, with Apple Watch and Vision Pro on the roadmap.',
+        },
+        {
+          question: 'What does it cost?',
+          answer:
+            'Free for 30 days, then $12.55 a month or $125.55 a year for Plus — the annual price is two months lighter. There is a free tier to begin with, and a Pro tier for the deeper features as they are built. Nothing is charged during the beta.',
+        },
+        {
+          question: 'Can I buy the paper planner yet?',
+          answer:
+            'Not quite. Pre-orders are listed so you can see what is coming and what it will cost, but checkout is not live — the beta list hears first when it opens.',
         },
       ],
     },
