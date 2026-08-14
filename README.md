@@ -1,303 +1,394 @@
-# Payload Website Template
+# Cyra Site
 
-This is the official [Payload Website Template](https://github.com/payloadcms/payload/blob/main/templates/website). Use it to power websites, blogs, or portfolios from small to enterprise. This repo includes a fully-working backend, enterprise-grade admin panel, and a beautifully designed, production-ready website.
+This repository is the TimeBite by CYRA marketing/CMS site.
 
-This template is right for you if you are working on:
+The intended stack is:
 
-- A personal or enterprise-grade website, blog, or portfolio
-- A content publishing platform with a fully featured publication workflow
-- Exploring the capabilities of Payload
+- Next.js 15 App Router for the public site and app runtime
+- Payload CMS 3 for content editing and media records
+- MongoDB for Payload content and user data
+- Cloudflare R2 for persistent media file storage
+- Netlify as the app host when using the hosted runtime
+- An analytics dashboard, typically PostHog, for traffic, conversion, and launch smoke checks
 
-Core features:
+The current codebase is partly wired for that model:
 
-- [Pre-configured Payload Config](#how-it-works)
-- [Authentication](#users-authentication)
-- [Access Control](#access-control)
-- [Layout Builder](#layout-builder)
-- [Draft Preview](#draft-preview)
-- [Live Preview](#live-preview)
-- [On-demand Revalidation](#on-demand-revalidation)
-- [SEO](#seo)
-- [Search](#search)
-- [Redirects](#redirects)
-- [Jobs and Scheduled Publishing](#jobs-and-scheduled-publish)
-- [Website](#website)
+- MongoDB is already configured through `@payloadcms/db-mongodb` in `src/payload.config.ts`.
+- The Payload collections are `pages`, `media`, and `users`.
+- R2 environment variable placeholders exist in `.env.example`, and content fields include `assetUrl` / `r2Url` fallbacks.
+- The R2 storage adapter is not installed or configured yet. Until that is added, Payload uploads use local disk at `public/media`.
+- Analytics environment variable placeholders exist in `.env.example`, but the app does not yet initialize an analytics client or emit custom events.
+- The public home page currently renders the seeded TypeScript fixture in `src/endpoints/seed/timebite-home.ts`, not a live Payload query.
 
-## Quick Start
+Do not treat CMS edits or media uploads as production-persistent until MongoDB, R2 storage, and the runtime host are configured together.
 
-To spin up this example locally, follow these steps:
+## CMS Model
 
-### Clone
+Payload config lives in `src/payload.config.ts`.
 
-If you have not done so already, you need to have standalone copy of this repo on your machine. If you've already cloned this repo, skip to [Development](#development).
+### Editable Collections
 
-Use the `create-payload-app` CLI to clone this template directly to your machine:
+`pages`
 
-```bash
-pnpx create-payload-app my-project -t website
-```
+- Editors can create draft/published page records.
+- Editable fields: `title`, `slug`, and `layout`.
+- `layout` is a Payload blocks field using the TimeBite block schemas in `src/blocks/TimeBite/config.ts`.
+- The schema can support multiple pages by slug, but this repo currently only has a public root route at `src/app/(frontend)/page.tsx`.
 
-### Development
+`media`
 
-1. First [clone the repo](#clone) if you have not done so already
-1. `cd my-project && cp .env.example .env` to copy the example environment variables
-1. `pnpm install && pnpm dev` to install dependencies and start the dev server
-1. open `http://localhost:3000` to open the app in your browser
+- Editors can create media records for images and videos.
+- Payload stores media metadata in MongoDB, including generated upload fields such as filename, MIME type, filesize, and any custom fields.
+- Custom editable fields are `alt` and `r2Url`.
+- File bytes are local-only today unless the R2/S3 storage adapter is added.
 
-That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. Then check out [Production](#production) once you're ready to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
+`users`
 
-## How it works
+- Auth-enabled CMS users.
+- Editors/admins with user access can log into the Payload admin once the Payload admin/API routes are present in the app.
 
-The Payload config is tailored specifically to the needs of most websites. It is pre-configured in the following ways:
+### Editable Blocks
 
-### Collections
+The registered CMS blocks are:
 
-See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend this functionality.
+- `heroBlock`
+- `authorityStripBlock`
+- `problemAgitationBlock`
+- `howItWorksBlock`
+- `featureTabsBlock`
+- `productScreensBlock`
+- `aiArchitectureBlock`
+- `betaSignupBlock`
+- `founderCredibilityBlock`
+- `faqBlock`
 
-- #### Users (Authentication)
+Most TimeBite blocks share these editable section fields:
 
-  Users are auth-enabled collections that have access to the admin panel and unpublished content. See [Access Control](#access-control) for more details.
+- `eyebrow`
+- `headline`
+- `body`
+- `cta.label`
+- `cta.url`
+- `media`
+- `assetUrl`
 
-  For additional help, see the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
+Repeatable item-style blocks expose arrays such as `items`, `stats`, `steps`, `tabs`, or `screens`. Items can include:
 
-- #### Posts
+- `title`
+- `body`
+- `eyebrow`
+- `image`
+- `assetUrl`
 
-  Posts are used to generate blog posts, news articles, or any other type of content that is published over time. All posts are layout builder enabled so you can generate unique layouts for each post using layout-building blocks, see [Layout Builder](#layout-builder) for more details. Posts are also draft-enabled so you can preview them before publishing them to your website, see [Draft Preview](#draft-preview) for more details.
+`heroBlock` also exposes `secondaryCta` and `stats`.
 
-- #### Pages
+`betaSignupBlock` also exposes `formNote`.
 
-  All pages are layout builder enabled so you can generate unique layouts for each page using layout-building blocks, see [Layout Builder](#layout-builder) for more details. Pages are also draft-enabled so you can preview them before publishing them to your website, see [Draft Preview](#draft-preview) for more details.
-
-- #### Media
-
-  This is the uploads enabled collection used by pages, posts, and projects to contain media like images, videos, downloads, and other assets. It features pre-configured sizes, focal point and manual resizing to help you manage your pictures.
-
-- #### Categories
-
-  A taxonomy used to group posts together. Categories can be nested inside of one another, for example "News > Technology". See the official [Payload Nested Docs Plugin](https://payloadcms.com/docs/plugins/nested-docs) for more details.
+`faqBlock` exposes repeatable `question` / `answer` items.
 
 ### Globals
 
-See the [Globals](https://payloadcms.com/docs/configuration/globals) docs for details on how to extend this functionality.
+There are no Payload globals configured in this repository yet. Header, footer, nav labels, legal links, and several product-display details are hard-coded in React.
 
-- `Header`
+### Hard-Coded Or Environment-Driven Content
 
-  The data required by the header on your front-end like nav links.
+The following are not currently editor-editable in Payload:
 
-- `Footer`
+- The public root route itself: `src/app/(frontend)/page.tsx`
+- The currently rendered homepage data: `src/endpoints/seed/timebite-home.ts`
+- Header/nav structure and footer links in `src/components/TimeBite/RenderTimeBiteBlocks.tsx`
+- The Cycle Matrix demo rows in `RenderTimeBiteBlocks.tsx`
+- The pricing section: `pricingBlock` is rendered by React and appears in the seed fixture, but it is not registered in `src/blocks/TimeBite/config.ts`, so editors cannot add or edit it in the CMS yet.
+- Signup integration URLs, which are environment-driven through `NEXT_PUBLIC_BETA_SIGNUP_URL` and `NEXT_PUBLIC_SUBSTACK_EMBED_URL`
+- Public canonical site URL, which should be set through `NEXT_PUBLIC_SERVER_URL`
+- Visual styling in `src/app/(frontend)/globals.css`
 
-  Same as above but for the footer of your site.
+## Installfest
 
-## Access control
+Use this path for a fresh local setup, launch prep, or a future port into another template such as `erinjerri-portf-template`.
 
-Basic access control is setup to limit access to various content based based on publishing status.
+Requirements:
 
-- `users`: Users can access the admin panel and create or edit content.
-- `posts`: Everyone can access published posts, but only users can create, update, or delete them.
-- `pages`: Everyone can access published pages, but only users can create, update, or delete them.
+- Node.js `^18.20.2` or `>=20.9.0`
+- pnpm `^9` or `^10`
+- A local MongoDB server for local development, or a MongoDB Atlas connection string
+- Optional analytics provider access, usually a PostHog project, if you want dashboard verification during install
 
-For more details on how to extend this functionality, see the [Payload Access Control](https://payloadcms.com/docs/access-control/overview#access-control) docs.
-
-## Layout Builder
-
-Create unique page layouts for any type of content using a powerful layout builder. This template comes pre-configured with the following layout building blocks:
-
-- Hero
-- Content
-- Media
-- Call To Action
-- Archive
-
-Each block is fully designed and built into the front-end website that comes with this template. See [Website](#website) for more details.
-
-## Lexical editor
-
-A deep editorial experience that allows complete freedom to focus just on writing content without breaking out of the flow with support for Payload blocks, media, links and other features provided out of the box. See [Lexical](https://payloadcms.com/docs/rich-text/overview) docs.
-
-## Draft Preview
-
-All posts and pages are draft-enabled so you can preview them before publishing them to your website. To do this, these collections use [Versions](https://payloadcms.com/docs/configuration/collections#versions) with `drafts` set to `true`. This means that when you create a new post, project, or page, it will be saved as a draft and will not be visible on your website until you publish it. This also means that you can preview your draft before publishing it to your website. To do this, we automatically format a custom URL which redirects to your front-end to securely fetch the draft version of your content.
-
-Since the front-end of this template is statically generated, this also means that pages, posts, and projects will need to be regenerated as changes are made to published documents. To do this, we use an `afterChange` hook to regenerate the front-end when a document has changed and its `_status` is `published`.
-
-For more details on how to extend this functionality, see the official [Draft Preview Example](https://github.com/payloadcms/payload/tree/examples/draft-preview).
-
-## Live preview
-
-In addition to draft previews you can also enable live preview to view your end resulting page as you're editing content with full support for SSR rendering. See [Live preview docs](https://payloadcms.com/docs/live-preview/overview) for more details.
-
-## On-demand Revalidation
-
-We've added hooks to collections and globals so that all of your pages, posts, footer, or header changes will automatically be updated in the frontend via on-demand revalidation supported by Nextjs.
-
-> Note: if an image has been changed, for example it's been cropped, you will need to republish the page it's used on in order to be able to revalidate the Nextjs image cache.
-
-## SEO
-
-This template comes pre-configured with the official [Payload SEO Plugin](https://payloadcms.com/docs/plugins/seo) for complete SEO control from the admin panel. All SEO data is fully integrated into the front-end website that comes with this template. See [Website](#website) for more details.
-
-## Search
-
-This template also pre-configured with the official [Payload Search Plugin](https://payloadcms.com/docs/plugins/search) to showcase how SSR search features can easily be implemented into Next.js with Payload. See [Website](#website) for more details.
-
-## Redirects
-
-If you are migrating an existing site or moving content to a new URL, you can use the `redirects` collection to create a proper redirect from old URLs to new ones. This will ensure that proper request status codes are returned to search engines and that your users are not left with a broken link. This template comes pre-configured with the official [Payload Redirects Plugin](https://payloadcms.com/docs/plugins/redirects) for complete redirect control from the admin panel. All redirects are fully integrated into the front-end website that comes with this template. See [Website](#website) for more details.
-
-## Jobs and Scheduled Publish
-
-We have configured [Scheduled Publish](https://payloadcms.com/docs/versions/drafts#scheduled-publish) which uses the [jobs queue](https://payloadcms.com/docs/jobs-queue/jobs) in order to publish or unpublish your content on a scheduled time. The tasks are run on a cron schedule and can also be run as a separate instance if needed.
-
-> Note: When deployed on Vercel, depending on the plan tier, you may be limited to daily cron only.
-
-## Website
-
-This template includes a beautifully designed, production-ready front-end built with the [Next.js App Router](https://nextjs.org), served right alongside your Payload app in a instance. This makes it so that you can deploy both your backend and website where you need it.
-
-Core features:
-
-- [Next.js App Router](https://nextjs.org)
-- [TypeScript](https://www.typescriptlang.org)
-- [React Hook Form](https://react-hook-form.com)
-- [Payload Admin Bar](https://github.com/payloadcms/payload/tree/main/packages/admin-bar)
-- [TailwindCSS styling](https://tailwindcss.com/)
-- [shadcn/ui components](https://ui.shadcn.com/)
-- User Accounts and Authentication
-- Fully featured blog
-- Publication workflow
-- Dark mode
-- Pre-made layout building blocks
-- SEO
-- Search
-- Redirects
-- Live preview
-
-### Cache
-
-Although Next.js includes a robust set of caching strategies out of the box, Payload Cloud proxies and caches all files through Cloudflare using the [Official Cloud Plugin](https://www.npmjs.com/package/@payloadcms/payload-cloud). This means that Next.js caching is not needed and is disabled by default. If you are hosting your app outside of Payload Cloud, you can easily reenable the Next.js caching mechanisms by removing the `no-store` directive from all fetch requests in `./src/app/_api` and then removing all instances of `export const dynamic = 'force-dynamic'` from pages files, such as `./src/app/(pages)/[slug]/page.tsx`. For more details, see the official [Next.js Caching Docs](https://nextjs.org/docs/app/building-your-application/caching).
-
-## Development
-
-To spin up this example locally, follow the [Quick Start](#quick-start). Then [Seed](#seed) the database with a few pages, posts, and projects.
-
-### Working with Postgres
-
-Postgres and other SQL-based databases follow a strict schema for managing your data. In comparison to our MongoDB adapter, this means that there's a few extra steps to working with Postgres.
-
-Note that often times when making big schema changes you can run the risk of losing data if you're not manually migrating it.
-
-#### Local development
-
-Ideally we recommend running a local copy of your database so that schema updates are as fast as possible. By default the Postgres adapter has `push: true` for development environments. This will let you add, modify and remove fields and collections without needing to run any data migrations.
-
-If your database is pointed to production you will want to set `push: false` otherwise you will risk losing data or having your migrations out of sync.
-
-#### Migrations
-
-[Migrations](https://payloadcms.com/docs/database/migrations) are essentially SQL code versions that keeps track of your schema. When deploy with Postgres you will need to make sure you create and then run your migrations.
-
-Locally create a migration
+Install:
 
 ```bash
-pnpm payload migrate:create
+git clone https://github.com/erinjerri/cyra-site.git
+cd cyra-site
+pnpm install
+cp .env.example .env
 ```
 
-This creates the migration files you will need to push alongside with your new configuration.
-
-On the server after building and before running `pnpm start` you will want to run your migrations
+For local development, set at least:
 
 ```bash
-pnpm payload migrate
+DATABASE_URI=mongodb://127.0.0.1/timebite-cyra-site
+PAYLOAD_SECRET=<long-random-secret>
+NEXT_PUBLIC_SERVER_URL=http://localhost:3000
 ```
 
-This command will check for any migrations that have not yet been run and try to run them and it will keep a record of migrations that have been run in the database.
-
-### Docker
-
-Alternatively, you can use [Docker](https://www.docker.com) to spin up this template locally. To do so, follow these steps:
-
-1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
-1. Next run `docker-compose up`
-1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
-
-That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
-
-### Seed
-
-To seed the database with a few pages, posts, and projects you can click the 'seed database' link from the admin panel.
-
-The seed script will also create a demo user for demonstration purposes only:
-
-- Demo Author
-  - Email: `demo-author@payloadcms.com`
-  - Password: `password`
-
-> NOTICE: seeding the database is destructive because it drops your current database to populate a fresh one from the seed template. Only run this command if you are starting a new project or can afford to lose your current data.
-
-## Production
-
-To run Payload in production, you need to build and start the Admin panel. To do so, follow these steps:
-
-1. Invoke the `next build` script by running `pnpm build` or `npm run build` in your project root. This creates a `.next` directory with a production-ready admin bundle.
-1. Finally run `pnpm start` or `npm run start` to run Node in production and serve Payload from the `.build` directory.
-1. When you're ready to go live, see Deployment below for more details.
-
-### Deploying to Vercel
-
-This template can also be deployed to Vercel for free. You can get started by choosing the Vercel DB adapter during the setup of the template or by manually installing and configuring it:
+Then start the app:
 
 ```bash
-pnpm add @payloadcms/db-vercel-postgres
+pnpm dev
 ```
 
-```ts
-// payload.config.ts
-import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
+Open `http://localhost:3000`.
 
-export default buildConfig({
-  // ...
-  db: vercelPostgresAdapter({
-    pool: {
-      connectionString: process.env.POSTGRES_URL || '',
-    },
-  }),
-  // ...
-```
+If you are doing CMS work, also confirm the Payload admin/API routes exist and that `/admin` loads. If `/admin` is missing or returns a 404, restore/add the standard Payload Next.js route files before asking editors to use the CMS.
 
-We also support Vercel's blob storage:
+For analytics installfest work, create the dashboard before launch even if the frontend tracking client is wired later. That gives the deployment a known destination for traffic checks and avoids inventing metrics after the site is live.
+
+Minimum analytics dashboard:
+
+- Public page views by path
+- Top referrers and UTM campaigns
+- Beta CTA clicks
+- Beta form submits or Substack embed conversions
+- CMS/admin route exclusion check, so `/admin` traffic does not pollute public-site reporting
+- Deploy verification event or annotation for each production release
+
+Current repo gap: `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST`, and `NEXT_PUBLIC_ANALYTICS_DASHBOARD_URL` are documented and listed in `.env.example`, but no PostHog package or analytics component is installed yet. When implementing analytics, add the client initialization in `src/app/(frontend)/layout.tsx` or a small client component mounted from that layout, then track CTA/form events in `src/components/TimeBite/RenderTimeBiteBlocks.tsx` and `src/components/TimeBite/BetaSignup.tsx`.
+
+## Environment Variables
+
+Required for every real environment:
+
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_URI` | MongoDB connection string used by Payload. `MONGODB_URI` is also accepted by `payload.config.ts`, but use `DATABASE_URI` as the standard name for this repo. |
+| `PAYLOAD_SECRET` | Payload encryption/signing secret. Use a long random value and never commit it. |
+| `NEXT_PUBLIC_SERVER_URL` | Canonical public URL for the site, for example `https://timebite.cyra.ai` or `https://www.cyra.ai`. Use `http://localhost:3000` locally. |
+
+Required after R2 storage is wired:
+
+| Variable | Purpose |
+| --- | --- |
+| `R2_BUCKET` | Cloudflare R2 bucket name. |
+| `R2_ENDPOINT` | R2 S3 API endpoint, used for uploads. Format: `https://<account-id>.r2.cloudflarestorage.com`. |
+| `R2_ACCESS_KEY_ID` | R2 token access key with object read/write permission for the bucket. |
+| `R2_SECRET_ACCESS_KEY` | R2 token secret access key. |
+| `R2_PUBLIC_URL` | Public URL used to serve files, either an R2 public development URL or a custom media domain such as `https://media.cyra.ai`. |
+
+Optional:
+
+| Variable | Purpose |
+| --- | --- |
+| `NEXT_PUBLIC_BETA_SIGNUP_URL` | Form action for the fallback beta signup form. |
+| `NEXT_PUBLIC_SUBSTACK_EMBED_URL` | Substack embed iframe URL. When present, it replaces the fallback form. |
+| `NEXT_PUBLIC_POSTHOG_KEY` | Public analytics project key if using PostHog. |
+| `NEXT_PUBLIC_POSTHOG_HOST` | Analytics ingestion host. Use `https://us.i.posthog.com`, `https://eu.i.posthog.com`, or your self-hosted endpoint as appropriate. |
+| `NEXT_PUBLIC_ANALYTICS_DASHBOARD_URL` | Internal reference URL for the launch analytics dashboard. This is for operators, not for rendering public UI. |
+
+## Type And Import Map Generation
+
+Run type generation after changing Payload collections, globals, block schemas, or field names:
 
 ```bash
-pnpm add @payloadcms/storage-vercel-blob
+pnpm generate:types
 ```
 
-```ts
-// payload.config.ts
-import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
+Commit the generated `src/payload-types.ts` when it changes.
 
-export default buildConfig({
-  // ...
-  plugins: [
-    vercelBlobStorage({
-      collections: {
-        [Media.slug]: true,
-      },
-      token: process.env.BLOB_READ_WRITE_TOKEN || '',
-    }),
-  ],
-  // ...
+Run import map generation when adding or changing custom Payload admin components:
+
+```bash
+pnpm generate:importmap
 ```
 
-There is also a simplified [one click deploy](https://github.com/payloadcms/payload/tree/templates/with-vercel-postgres) to Vercel should you need it.
+This repo does not currently define custom admin UI components, so import map generation is not part of normal content-only editing.
 
-### Self-hosting
+## Seeding
 
-Before deploying your app, you need to:
+The current seed content is the TypeScript fixture at `src/endpoints/seed/timebite-home.ts`.
 
-1. Ensure your app builds and serves in production. See [Production](#production) for more details.
-2. You can then deploy Payload as you would any other Node.js or Next.js application either directly on a VPS, DigitalOcean's Apps Platform, via Coolify or more. More guides coming soon.
+Use seed content only when:
 
-You can also deploy your app manually, check out the [deployment documentation](https://payloadcms.com/docs/production/deployment) for full details.
+- Starting a fresh local database
+- Recreating demo content in an empty staging database
+- Manually importing an initial homepage record before real editorial work begins
 
-## Questions
+Do not seed against production after editors have entered content. Seeding is destructive in most Payload workflows because it can overwrite or duplicate editorial records.
 
-If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).
+## Production Launch Order
+
+Follow this order. Do not deploy first and backfill persistence later.
+
+### 1. Set Up MongoDB
+
+Use MongoDB Atlas or another managed MongoDB host.
+
+1. Create the MongoDB project/cluster.
+2. Create a database user for this app.
+3. Restrict network access as tightly as your runtime allows.
+4. Create or choose the database name, for example `timebite-cyra-site`.
+5. Copy the connection string.
+6. Set `DATABASE_URI` in local `.env` and in the runtime host.
+7. Run the app locally against the hosted database only when you intentionally want to inspect or prepare that environment.
+
+MongoDB stores Payload documents, drafts, users, and media metadata. It does not store uploaded image/video bytes.
+
+### 2. Set Up Cloudflare R2
+
+R2 must be ready before production editors upload assets.
+
+1. Create an R2 bucket, for example `cyra-site-media`.
+2. Create an R2 API token with object read/write permission scoped to that bucket.
+3. Copy the S3 API endpoint into `R2_ENDPOINT`.
+4. Set `R2_BUCKET`, `R2_ACCESS_KEY_ID`, and `R2_SECRET_ACCESS_KEY`.
+5. Configure a public bucket URL or custom media domain.
+6. Set that public URL as `R2_PUBLIC_URL`.
+7. Wire Payload to R2 with `@payloadcms/storage-s3` before relying on uploads in production.
+
+For a Netlify/Node runtime, Payload's S3 storage adapter is the correct R2 path because R2 exposes an S3-compatible API. The Cloudflare Workers-only R2 adapter is not the right adapter for this deployment model.
+
+Current repo gap: `@payloadcms/storage-s3` is not in `package.json`, and `payload.config.ts` does not yet include an R2 storage plugin. Until that is implemented, uploaded files are written to `public/media` and can disappear across fresh clones, clean builds, or redeploys.
+
+### 3. Set Up The Analytics Dashboard
+
+Analytics should be prepared before the app is deployed so the first production smoke test is visible.
+
+1. Create or choose the analytics project, typically PostHog.
+2. Copy the public project key into `NEXT_PUBLIC_POSTHOG_KEY`.
+3. Copy the ingestion host into `NEXT_PUBLIC_POSTHOG_HOST`.
+4. Create a launch dashboard with page views, referrers, beta CTA clicks, beta form submits, and deploy annotations.
+5. Copy the dashboard URL into `NEXT_PUBLIC_ANALYTICS_DASHBOARD_URL` for operator reference.
+6. Decide which routes are excluded from public analytics, at minimum `/admin`.
+7. Wire the frontend analytics client before relying on dashboard data. Until that code exists, the dashboard can be configured but will not receive events from this app.
+
+For a portfolio-template port, keep the provider variables generic enough to reuse: `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST`, and `NEXT_PUBLIC_ANALYTICS_DASHBOARD_URL`.
+
+### 4. Set Up Netlify Or The Runtime Host
+
+If Netlify is the intended runtime:
+
+1. Import `https://github.com/erinjerri/cyra-site` into Netlify.
+2. Use the production branch you intend to deploy, usually `main`.
+3. Set the build command to `pnpm build`.
+4. Let Netlify's Next.js/OpenNext adapter handle the Next.js output.
+5. Set the Node version to a version accepted by `package.json`, for example Node 20.
+6. Add all required environment variables in Netlify project settings.
+7. Set `NEXT_PUBLIC_SERVER_URL` to the final production URL when known. Before the domain is attached, use the Netlify production URL.
+
+If the runtime host is not Netlify, use an app host that supports Next.js server rendering and Payload's Node runtime. Static-only hosting is not enough for Payload admin/API routes.
+
+### 5. Deploy The App
+
+1. Confirm `pnpm build` succeeds locally.
+2. Push the branch to GitHub.
+3. Trigger the Netlify deploy.
+4. Confirm the public page loads.
+5. Confirm `/admin` loads before handing the CMS to editors.
+6. Confirm the analytics dashboard receives at least one public page view after the analytics client is implemented.
+
+### 6. Run The Local Media Smoke Test
+
+Run this after MongoDB and R2 are configured.
+
+1. Start the app locally with `DATABASE_URI` pointing at the intended non-production test database and all `R2_*` variables set.
+2. Open Payload admin.
+3. Upload one small image to `Media`.
+4. Confirm the media record appears in Payload with a filename, MIME type, filesize, and `alt` text.
+5. Confirm the actual object appears in the Cloudflare R2 bucket.
+6. Use the media record in a page block's `media` field, or paste its public R2 URL into `assetUrl` if the frontend image rendering is still using URL fallbacks.
+7. Confirm the image renders at `http://localhost:3000`.
+8. Stop and restart the app.
+9. Confirm the same image still renders without relying on `public/media`.
+
+### 7. Run The Live Media Smoke Test
+
+1. Push and deploy the same code and environment model.
+2. Open the live site and Payload admin on the hosted URL.
+3. Confirm the test media record is visible in the CMS.
+4. Confirm the image URL points at `R2_PUBLIC_URL` or the configured public media domain.
+5. Redeploy the app without changing the media record.
+6. Confirm the image still renders live after redeploy.
+
+Passing this test proves the file bytes are not trapped on local or build-machine disk.
+
+### 8. Run The Analytics Smoke Test
+
+Run this after the analytics client is implemented and the production deploy is live.
+
+1. Open the production homepage in a clean browser session.
+2. Click the primary beta CTA.
+3. Submit the fallback beta form or complete the Substack embed flow, depending on the active signup mode.
+4. Open the analytics dashboard.
+5. Confirm the page view appears with the correct production hostname.
+6. Confirm the CTA click and signup event appear.
+7. Confirm `/admin` route visits are excluded or filtered out of public-site dashboard cards.
+8. Add a deploy annotation or release marker for the launch.
+
+If no events appear, check the public env vars in the runtime host, browser network requests to the analytics host, consent/ad-blocking behavior, and whether the client component is mounted from the frontend layout.
+
+### 9. Point The Domain Through Cloudflare DNS
+
+Do this after the app and media smoke tests pass.
+
+1. Add the custom domain in Netlify or the runtime host first.
+2. Copy the DNS target values the host gives you.
+3. In Cloudflare DNS, create the required records for the domain.
+4. Use a `CNAME` for `www` when the host provides one.
+5. For the apex/root domain, use the hosting provider's documented target. On Cloudflare this may use CNAME flattening when the host provides a CNAME target.
+6. Wait for DNS and TLS issuance.
+7. Update `NEXT_PUBLIC_SERVER_URL` to the final canonical URL.
+8. Redeploy so sitemap, analytics host filters, and any build-time public URL references use the final domain.
+9. Rerun the live media and analytics smoke tests on the final domain.
+
+The application domain is configured in the hosting provider. DNS is configured in Cloudflare. The media domain, if separate, is configured on the R2 bucket and also points through Cloudflare DNS.
+
+## Media Storage
+
+Payload media has two parts:
+
+- Metadata stored in MongoDB
+- File bytes stored by the upload adapter
+
+Metadata includes the media document, alt text, filename, MIME type, filesize, and any custom fields such as `r2Url`. MongoDB does not store the image or video bytes.
+
+Without R2, this repo's `media` collection writes uploads to `public/media`. That is acceptable for short local tests, but not for production. App hosts such as Netlify build and redeploy from source; local upload directories are not durable content storage.
+
+With R2 configured through Payload's S3 storage adapter, uploads should be written to the R2 bucket and served from `R2_PUBLIC_URL`. A redeploy should not affect existing media.
+
+## Domain And Hosting Notes
+
+- Configure the production app domain in Netlify or whichever runtime host serves the Next.js/Payload app.
+- Configure DNS records in Cloudflare so the domain points to that host.
+- Configure the media domain separately if using a custom R2 public domain such as `media.cyra.ai`.
+- Set `NEXT_PUBLIC_SERVER_URL` to the canonical public app URL, not the R2 media URL.
+- Set `R2_PUBLIC_URL` to the public media URL, not the app URL.
+- Keep analytics dashboard filters aligned with the final production hostname.
+- After changing any public URL, redeploy and rerun the public page, sitemap, media, and analytics smoke tests.
+
+## Porting To `erinjerri-portf-template`
+
+When moving this installfest into `erinjerri-portf-template`, preserve the setup order and replace only the repository-specific names:
+
+- Keep the order: MongoDB, R2, analytics dashboard, runtime host, deploy, media smoke test, analytics smoke test, domain.
+- Replace `timebite-cyra-site` with the template database name.
+- Replace TimeBite/CYRA block names with the template's actual Payload collections, globals, and blocks.
+- Keep `DATABASE_URI`, `PAYLOAD_SECRET`, `NEXT_PUBLIC_SERVER_URL`, `R2_*`, `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST`, and `NEXT_PUBLIC_ANALYTICS_DASHBOARD_URL` unless the template already standardizes different names.
+- Keep the warning that MongoDB stores media metadata, while R2 stores file bytes.
+- Keep the dashboard smoke test as part of launch acceptance, not as an afterthought.
+
+## Useful Commands
+
+```bash
+pnpm dev
+pnpm build
+pnpm start
+pnpm lint
+pnpm generate:types
+pnpm generate:importmap
+```
+
+## References
+
+- Payload storage adapters: https://payloadcms.com/docs/upload/storage-adapters
+- Payload uploads overview: https://payloadcms.com/docs/upload/overview
+- Netlify Next.js runtime: https://docs.netlify.com/build/frameworks/framework-setup-guides/nextjs/overview/
+- Netlify environment variables: https://docs.netlify.com/build/configure-builds/environment-variables/
