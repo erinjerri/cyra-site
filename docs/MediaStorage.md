@@ -40,6 +40,27 @@ The only R2-specific details are `region: 'auto'` and the
    - Location: **Automatic**, unless you need a specific jurisdiction.
 4. Create it. Leave the settings page open — you need the bucket name shortly.
 
+## Which values are shared across your sites
+
+R2 sits at the **account** level in Cloudflare, above all your domains. Buckets are
+not attached to a domain at all, which is why these values do not line up with your
+domain list:
+
+| Value | Same across your domains? |
+|---|---|
+| `R2_ACCOUNT_ID` | ✅ Identical — it identifies the Cloudflare *account* |
+| `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` | Belong to an **API token**, not a domain |
+| `R2_BUCKET` | ❌ One per site |
+| `R2_PUBLIC_HOSTNAME` | ❌ A subdomain of that specific site's domain |
+
+So if R2 already works for another site in the same account, copy `R2_ACCOUNT_ID`
+straight from that project rather than hunting for it.
+
+Access keys cannot be looked up anywhere — Cloudflare shows the secret once at
+creation. A token from another project would technically work if scoped broadly,
+but **make a separate token per site**: one leaked key would otherwise expose every
+site at once, and per-site tokens can be rotated independently.
+
 ## Part 2 — Get the account ID
 
 On any R2 page, the right sidebar shows **Account ID** (a 32-character hex string).
