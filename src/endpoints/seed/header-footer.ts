@@ -4,6 +4,7 @@ export const headerData = {
   navLinks: [
     { label: 'How it Works', url: '/#how-it-works' },
     { label: 'Philosophy', url: '/philosophy' },
+    { label: 'Pricing', url: '/#pricing' },
     { label: 'FAQ', url: '/#faq' },
   ],
   cta: { label: 'Join Beta', url: '/#beta' },
@@ -26,6 +27,7 @@ export const footerData = {
     links: [
       { label: 'TimeBite', url: '/' },
       { label: 'Features', url: '/#features' },
+      { label: 'Pricing', url: '/#pricing' },
       { label: 'Platforms', url: '/#platforms' },
       { label: 'Beta', url: '/#beta' },
     ],
@@ -34,7 +36,7 @@ export const footerData = {
     title: 'In the works',
     links: [
       { label: 'Studio', comingSoon: true },
-      { label: 'Paper Planner', comingSoon: true },
+      { label: 'Paper Planner', url: '/#planner' },
       { label: 'Vision Pro', comingSoon: true },
       { label: 'Apple Watch', comingSoon: true },
     ],

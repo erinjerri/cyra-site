@@ -6,6 +6,9 @@ export const Media: CollectionConfig = {
     read: () => true,
   },
   upload: {
+    // Local-disk fallback, used only when R2 is not configured. When
+    // USE_R2_STORAGE=true the s3 adapter takes over and this is ignored.
+    // See src/plugins/storage.ts and docs/MediaStorage.md.
     staticDir: 'public/media',
     mimeTypes: ['image/*', 'video/*'],
   },
@@ -15,7 +18,8 @@ export const Media: CollectionConfig = {
       name: 'r2Url',
       type: 'text',
       admin: {
-        description: 'Public Cloudflare R2 URL when media is served externally.',
+        description:
+          'Legacy field. Not read by anything — the storage adapter now generates public URLs automatically. Safe to leave blank; kept only so existing values are not dropped.',
       },
     },
   ],
