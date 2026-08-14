@@ -5,13 +5,10 @@ node_modules
 .env
 .next
 .vercel
+*.tsbuildinfo
 
 # Payload default media upload directory
 public/media/
-
-public/robots.txt
-public/sitemap*.xml
-
 
 # Playwright
 node_modules/
