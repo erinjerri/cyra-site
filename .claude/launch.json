@@ -5,7 +5,15 @@
       "name": "timebite-dev",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["run", "dev"],
-      "port": 3000
+      "port": 3000,
+      "autoPort": true
+    },
+    {
+      "name": "timebite-prod",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["run", "start"],
+      "port": 3000,
+      "autoPort": true
     }
   ]
 }

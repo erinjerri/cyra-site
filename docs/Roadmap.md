@@ -4,14 +4,22 @@
 
 TimeBite is the flagship product and the only thing this site sells right now. CYR is the philosophy behind
 it, not a competing product — the site's job is to market TimeBite and hint at what's next, not sell the
-ecosystem directly. Sequencing, as reflected in the `roadmapBlock` on the homepage:
+ecosystem directly.
 
-- **Now:** TimeBite private iOS beta.
-- **Coming Soon:** Studio (vision board, journaling, Ikigai, future-self work) — the deeper reflection
-  counterpart to TimeBite's daily loop. Physical Paper Planner — an analog extension of the same framework.
-- **Future:** Apple Watch (ambient, glanceable extension of TimeBite), Vision Pro (spatial cycles for deeper
-  review), and eventually AI coaching that spans the ecosystem once there's enough behavioral data across
-  products to make it more than a chatbot.
+TimeBite is **macOS-first**. The homepage no longer carries a `roadmapBlock`; sequencing is expressed through
+the status badges on the platform cards and the agents section, so the roadmap and the marketing claims
+cannot drift apart. Current state:
+
+- **Available now:** TimeBite on macOS — goals, milestones, actions, Eisenhower planning, Kanban, calendar
+  and time blocking, habit tracking, daily-to-annual review. Private beta.
+- **In development:** progress dashboards and charts, the long-range Gantt-style goal view, the iPhone app,
+  and the Goal Agent.
+- **Planned:** iPad, Apple Watch, Career Agent, Fitness Agent, the physical paper planner.
+- **Exploring:** Vision Pro, and a Finance Agent scoped to savings/budget goal tracking and education — not
+  investment advice, and not securities recommendations.
+
+The `roadmapBlock` remains registered in `src/blocks/TimeBite/config.ts` and can be added back to any page in
+`/admin` if a standalone roadmap teaser is wanted again.
 
 ## Engineering, near-term
 

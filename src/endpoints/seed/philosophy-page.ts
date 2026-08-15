@@ -21,10 +21,11 @@ export const philosophyPage = {
     },
     {
       blockType: 'quoteBlock',
-      eyebrow: 'Shared memory',
+      eyebrow: 'Philosophy, then product',
       statement:
-        'I had this idea last week. I promised myself I would do this. I learned something about myself and already lost it.',
-      emphasis: 'TimeBite is a shared memory between you, your devices, your past, and the person you are becoming.',
+        'I decided this mattered. I promised myself I would do it. Six months later I could not tell you whether I had.',
+      emphasis:
+        'Creating Your Reality decides what is worth doing. TimeBite is where that decision meets a calendar, and where you find out whether it held.',
     },
     {
       blockType: 'ctaBlock',

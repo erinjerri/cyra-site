@@ -3,7 +3,10 @@
 import { useState } from 'react'
 
 type NavLink = { label?: string | null; url?: string | null }
-type Cta = { label?: string | null; url?: string | null } | null | undefined
+type Cta =
+  | { label?: string | null; url?: string | null; newTab?: boolean | null; analyticsId?: string | null }
+  | null
+  | undefined
 
 export function MobileNavToggle({ navLinks, cta }: { navLinks: NavLink[]; cta?: Cta }) {
   const [open, setOpen] = useState(false)
@@ -28,7 +31,14 @@ export function MobileNavToggle({ navLinks, cta }: { navLinks: NavLink[]; cta?: 
             </a>
           ))}
           {cta?.label ? (
-            <a className="tb-button" href={cta.url || '#'} onClick={() => setOpen(false)}>
+            <a
+              className="tb-button"
+              data-analytics-event={cta.analyticsId || undefined}
+              href={cta.url || '#'}
+              onClick={() => setOpen(false)}
+              rel={cta.newTab ? 'noopener noreferrer' : undefined}
+              target={cta.newTab ? '_blank' : undefined}
+            >
               {cta.label}
             </a>
           ) : null}

@@ -1,6 +1,8 @@
 import { ImageResponse } from 'next/og'
 
-export const alt = 'TimeBite — remember what you meant to do.'
+import { OG_TITLE } from '@/utilities/brand'
+
+export const alt = OG_TITLE
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -31,11 +33,11 @@ export default function Image() {
         >
           TimeBite by Creating Your Reality
         </div>
-        <div style={{ display: 'flex', fontSize: 76, fontWeight: 300, marginTop: 34, lineHeight: 1.14 }}>
-          Remember what
+        <div style={{ display: 'flex', fontSize: 68, fontWeight: 300, marginTop: 34, lineHeight: 1.16 }}>
+          Turn your goals into a system
         </div>
-        <div style={{ display: 'flex', fontSize: 76, fontWeight: 300, lineHeight: 1.14, color: '#a9d6e5' }}>
-          you meant to do.
+        <div style={{ display: 'flex', fontSize: 68, fontWeight: 300, lineHeight: 1.16, color: '#a9d6e5' }}>
+          that learns how you work.
         </div>
         <div
           style={{
@@ -44,10 +46,10 @@ export default function Image() {
             marginTop: 30,
             lineHeight: 1.5,
             color: '#a2a2a8',
-            maxWidth: 780,
+            maxWidth: 820,
           }}
         >
-          One shared memory for your notes, calendar, goals, and reflections.
+          Plan your goals. Put them into time. Track what actually moved. macOS.
         </div>
       </div>
     ),

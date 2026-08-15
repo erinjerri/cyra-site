@@ -1,4 +1,6 @@
 import type { Footer as FooterData } from '@/payload-types'
+import { ORGANIZATION_NAME } from '@/utilities/brand'
+import { getSiteSettings } from '@/utilities/getSiteSettings'
 
 type LinkGroup = FooterData['explore']
 
@@ -23,12 +25,17 @@ function FooterColumn({ group }: { group?: LinkGroup | null }) {
   )
 }
 
-export function Footer({ data }: { data: FooterData | null }) {
+export async function Footer({ data }: { data: FooterData | null }) {
+  // The organisation name comes from site-settings rather than being typed
+  // here — it is the one piece of footer text that was still in code.
+  const settings = await getSiteSettings()
+  const organizationName = settings?.organizationName || ORGANIZATION_NAME
+
   return (
     <footer className="tb-footer">
       <div className="tb-shell tb-footer-inner">
         <div className="tb-footer-brand">
-          <span className="tb-logo-mark">Creating Your Reality</span>
+          <span className="tb-logo-mark">{organizationName}</span>
           {data?.brandStatement ? <p>{data.brandStatement}</p> : null}
         </div>
         <div className="tb-footer-columns">

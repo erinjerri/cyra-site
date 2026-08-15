@@ -1,3 +1,10 @@
+import {
+  ORGANIZATION_DESCRIPTION,
+  ORGANIZATION_NAME,
+  PRODUCT_DESCRIPTION,
+  PRODUCT_NAME,
+  SUPPORTED_PLATFORMS,
+} from '@/utilities/brand'
 import { getURL } from '@/utilities/getURL'
 
 export function JsonLd() {
@@ -7,25 +14,25 @@ export function JsonLd() {
     {
       '@context': 'https://schema.org',
       '@type': 'Organization',
-      name: 'Creating Your Reality',
+      name: ORGANIZATION_NAME,
       url,
-      description:
-        'Creating Your Reality is the philosophy, design methodology, and ecosystem behind TimeBite.',
+      description: ORGANIZATION_DESCRIPTION,
     },
     {
       '@context': 'https://schema.org',
       '@type': 'WebSite',
-      name: 'TimeBite',
+      name: PRODUCT_NAME,
       url,
     },
     {
       '@context': 'https://schema.org',
       '@type': 'SoftwareApplication',
-      name: 'TimeBite',
-      applicationCategory: 'LifestyleApplication',
-      operatingSystem: 'iOS, macOS',
-      description:
-        'TimeBite keeps your notes, calendar, goals, and reflections in one shared memory, so the things you care about stop slipping through the week.',
+      name: PRODUCT_NAME,
+      applicationCategory: 'ProductivityApplication',
+      // macOS only, and deliberately so — listing a platform the app does not
+      // ship on yet is a structured-data claim search engines will surface.
+      operatingSystem: SUPPORTED_PLATFORMS,
+      description: PRODUCT_DESCRIPTION,
       url,
       offers: {
         '@type': 'Offer',

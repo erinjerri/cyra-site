@@ -118,6 +118,30 @@ If it is deployment-specific or purely technical, it should stay in env/config.
   the Figma file, so wherever the Creating Your Reality philosophy is being presented (home teaser or the full
   `/philosophy` page) it reads as visually distinct from TimeBite's cyan product identity.
 
+## Positioning architecture (macOS-first product, agentic future)
+
+The site was originally written around a "shared memory for your notes, calendar, goals and reflections"
+positioning, with iPhone marked available and macOS in development. Both were wrong for the product as it
+stands. Three structural pieces were added so that class of drift is harder to reintroduce:
+
+- **One status vocabulary.** `statusField()` in `src/blocks/TimeBite/shared.ts` supplies
+  `available` / `in-development` / `planned` / `exploring`, rendered by one `StatusBadge` component on feature
+  cards, showcase steps, workspace modules, platform cards, plan features and agents. Availability is a field,
+  never a sentence — previously "— in development" was typed into pricing feature strings, which nobody would
+  have found on the day those features shipped.
+- **One media slot shape.** `mediaFields` + `resolveMedia()` + `MediaFrame` handle every screenshot and clip:
+  macOS window chrome, a fixed 16:10 stage, poster frames, and an empty state that draws a schematic
+  (`LayoutSketch`) rather than a stock screenshot or a grey box. Video renders with visible controls,
+  `preload="metadata"`, and never autoplays. See `docs/MediaSlots.md`.
+- **One set of positioning strings.** `src/utilities/brand.ts`. The old description was copy-pasted into seven
+  files; repositioning meant editing all seven.
+
+Agent copy follows a house rule the blocks encode structurally: agents are described by outcomes
+("helps you break this down", "keeps an eye on progress"), and every agent card carries a status badge and an
+optional `disclaimer` for scope limits. The Finance Agent uses it to state plainly that it covers goal
+tracking, savings progress, budgeting and education — not investment advice, and not securities
+recommendations.
+
 ## Fixes made to existing infrastructure
 
 These were pre-existing gaps/bugs in the repo, not new work requested directly, but blocking "reusable,

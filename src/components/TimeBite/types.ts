@@ -1,33 +1,120 @@
+/**
+ * Nullable throughout, because that is what Payload generates: an optional
+ * field an editor has never filled in comes back as `null`, not `undefined`.
+ * Declaring these as `string | undefined` makes every CTA read from
+ * payload-types fail to assign.
+ */
 export type Cta = {
-  label?: string
-  url?: string
+  label?: string | null
+  url?: string | null
+  /** External destinations (Substack) open in a new tab. Set per-link in the CMS. */
+  newTab?: boolean | null
+  /** Rendered as data-analytics-event so a button can be tracked. */
+  analyticsId?: string | null
 }
 
-export type TimeBiteItem = {
+/** The one availability vocabulary — see `statusOptions` in blocks/TimeBite/shared.ts. */
+export type Status = 'available' | 'beta' | 'in-development' | 'planned' | 'exploring'
+
+/** Lifecycle of a physical product — see collections/Products.ts. */
+export type ProductStatus = 'concept' | 'sample' | 'preorder' | 'available' | 'sold-out'
+
+export type ProductDoc = {
+  id?: string
+  name?: string
+  slug?: string
+  description?: string
+  productType?: string
+  variantNote?: string
+  status?: ProductStatus
+  images?: { image?: BlockImage; alt?: string }[]
+  price?: string
+  compareAtPrice?: string
+  cta?: Cta
+  sortOrder?: number
+  featured?: boolean
+  enabled?: boolean
+}
+
+export type SketchKind =
+  | 'workspace'
+  | 'goal'
+  | 'list'
+  | 'matrix'
+  | 'board'
+  | 'calendar'
+  | 'habits'
+  | 'chart'
+  | 'timeline'
+
+export type BlockImage = { url?: string | null; alt?: string | null } | string | null
+
+/** Shared shape behind every screenshot/video slot on the page. */
+export type MediaContent = {
+  image?: BlockImage
+  assetUrl?: string
+  imageAlt?: string
+  video?: BlockImage
+  videoUrl?: string
+  mediaCaption?: string
+  mediaFrame?: 'mac' | 'plain'
+  sketch?: SketchKind
+}
+
+export type TimeBiteItem = MediaContent & {
   title?: string
   body?: string
   eyebrow?: string
-  assetUrl?: string
+  status?: Status
+  enabled?: boolean
 }
 
 export type PlatformItem = {
   title?: string
   body?: string
-  status?: 'available' | 'in-development' | 'planned'
+  status?: Status
 }
 
 export type Pillar = {
   label?: string
 }
 
-export type BlockImage = { url?: string | null; alt?: string | null } | string | null
-
-export type ShowcaseRow = {
+export type ShowcaseRow = MediaContent & {
   title?: string
   body?: string
-  image?: BlockImage
-  assetUrl?: string
-  imageAlt?: string
+  status?: Status
+}
+
+export type ScaleLevel = {
+  label?: string
+  title?: string
+  body?: string
+}
+
+export type WorkspaceModule = {
+  name?: string
+  description?: string
+  sketch?: SketchKind
+  status?: Status
+  defaultOn?: boolean
+}
+
+export type WorkspaceSuggestion = {
+  source?: string
+  prompt?: string
+  moduleName?: string
+  sketch?: SketchKind
+  acceptLabel?: string
+  dismissLabel?: string
+  dismissedNote?: string
+}
+
+export type AgentCard = {
+  name?: string
+  body?: string
+  status?: Status
+  capabilities?: { text?: string }[]
+  disclaimer?: string
 }
 
 export type WordPart = {
@@ -37,6 +124,7 @@ export type WordPart = {
 
 export type PricingFeature = {
   text?: string
+  status?: Status
 }
 
 export type DigitalPlan = {
@@ -59,20 +147,12 @@ export type BetaPromotion = {
   cta?: Cta
 }
 
-export type PhysicalProduct = {
-  name?: string
-  price?: string
-  billingType?: 'preorder' | 'one-time'
-  description?: string
-  includedItems?: PricingFeature[]
-  badge?: string
-  featured?: boolean
-  /** Offers can stay configured but hidden — used for the optional bundles. */
-  enabled?: boolean
-  cta?: Cta
+export type ProductGridBlockType = Omit<TimeBiteBlock, 'items'> & {
+  /** Populated relationship docs. Empty means "show every enabled product". */
+  products?: (ProductDoc | string)[]
 }
 
-export type TimeBiteBlock = {
+export type TimeBiteBlock = MediaContent & {
   blockType: string
   eyebrow?: string
   headline?: string
@@ -84,16 +164,28 @@ export type TimeBiteBlock = {
   cta?: Cta
   secondaryCta?: Cta
   formNote?: string
+  availabilityNote?: string
   items?: TimeBiteItem[]
   steps?: TimeBiteItem[]
   pillars?: Pillar[]
   platforms?: PlatformItem[]
   highlights?: Pillar[]
   rows?: ShowcaseRow[]
+  numbered?: boolean
   wordParts?: WordPart[]
-  image?: BlockImage
-  assetUrl?: string
-  imageAlt?: string
+  levels?: ScaleLevel[]
+  duration?: string
+  transcript?: string
+  footnote?: string
+}
+
+export type WorkspaceBlockType = Omit<TimeBiteBlock, 'items'> & {
+  modules?: WorkspaceModule[]
+  suggestion?: WorkspaceSuggestion
+}
+
+export type AgentsBlockType = Omit<TimeBiteBlock, 'items'> & {
+  agents?: AgentCard[]
 }
 
 export type FAQBlockType = Omit<TimeBiteBlock, 'items'> & {
@@ -112,10 +204,6 @@ export type PricingBlockType = Omit<TimeBiteBlock, 'items'> & {
   digitalPlans?: DigitalPlan[]
   betaPromotion?: BetaPromotion
   platformNote?: { text?: string; cta?: Cta }
-  physicalEyebrow?: string
-  physicalHeadline?: string
-  physicalBody?: string
-  physicalProducts?: PhysicalProduct[]
   footnote?: string
 }
 

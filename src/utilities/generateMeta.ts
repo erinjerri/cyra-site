@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 
+import { PRODUCT_DESCRIPTION, PRODUCT_NAME } from './brand'
 import { getURL } from './getURL'
 import { mergeOpenGraph } from './mergeOpenGraph'
 import { getSiteSettings } from './getSiteSettings'
@@ -22,18 +23,15 @@ function resolveImageUrl(image: MetaImage): string | undefined {
   return image.url || undefined
 }
 
-function fallbackTitle(doc?: MetaDoc | null, brandName = 'TimeBite'): string {
+function fallbackTitle(doc?: MetaDoc | null, brandName: string = PRODUCT_NAME): string {
   if (!doc?.title) return brandName
   return doc.title === brandName ? doc.title : `${doc.title} | ${brandName}`
 }
 
 export async function generateMeta({ doc }: { doc?: MetaDoc | null }): Promise<Metadata> {
   const settings = await getSiteSettings()
-  const brandName = settings?.brandName || 'TimeBite'
-  const description =
-    doc?.meta?.description ||
-    settings?.productDescription ||
-    'TimeBite keeps your notes, calendar, goals, and reflections in one shared memory, so the things you care about stop slipping through the week.'
+  const brandName = settings?.brandName || PRODUCT_NAME
+  const description = doc?.meta?.description || settings?.productDescription || PRODUCT_DESCRIPTION
   const title = doc?.meta?.title || fallbackTitle(doc, brandName)
   const path = doc?.slug && doc.slug !== 'home' ? `/${doc.slug}` : '/'
   const url = `${getURL()}${path}`

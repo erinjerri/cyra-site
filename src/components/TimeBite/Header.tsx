@@ -2,7 +2,9 @@ import Link from 'next/link'
 
 import type { Header as HeaderData } from '@/payload-types'
 
+import { CtaLink } from './CtaLink'
 import { MobileNavToggle } from './MobileNavToggle'
+import { ThemeToggle } from './ThemeToggle'
 
 export function Header({ data }: { data: HeaderData | null }) {
   const navLinks = data?.navLinks || []
@@ -22,11 +24,8 @@ export function Header({ data }: { data: HeaderData | null }) {
           ))}
         </nav>
         <div className="tb-header-actions">
-          {data?.cta?.label ? (
-            <a className="tb-button tb-button-compact" href={data.cta.url || '#'}>
-              {data.cta.label}
-            </a>
-          ) : null}
+          <ThemeToggle />
+          <CtaLink compact cta={data?.cta ?? undefined} />
           <MobileNavToggle navLinks={navLinks} cta={data?.cta} />
         </div>
       </div>

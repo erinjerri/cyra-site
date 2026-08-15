@@ -3,9 +3,10 @@ export const headerData = {
   logoTag: 'by Creating Your Reality',
   navLinks: [
     { label: 'How it Works', url: '/#how-it-works' },
-    { label: 'Philosophy', url: '/philosophy' },
+    { label: 'Demo', url: '/#demo' },
+    { label: 'Features', url: '/#features' },
+    { label: 'Agents', url: '/#agents' },
     { label: 'Pricing', url: '/#pricing' },
-    { label: 'FAQ', url: '/#faq' },
   ],
   cta: { label: 'Join Beta', url: '/#beta' },
 }
@@ -19,35 +20,36 @@ export const footerData = {
       { label: 'Philosophy', url: '/philosophy' },
       { label: 'Manifesto', comingSoon: true },
       { label: 'Blog', comingSoon: true },
-      { label: 'Roadmap', url: '/#roadmap' },
+      { label: 'Agents', url: '/#agents' },
     ],
   },
   product: {
     title: 'Product',
     links: [
-      { label: 'TimeBite', url: '/' },
+      { label: 'TimeBite for macOS', url: '/' },
+      { label: 'Demo', url: '/#demo' },
       { label: 'Features', url: '/#features' },
+      { label: 'Workspace', url: '/#workspace' },
       { label: 'Pricing', url: '/#pricing' },
-      { label: 'Platforms', url: '/#platforms' },
       { label: 'Beta', url: '/#beta' },
     ],
   },
   comingSoon: {
     title: 'In the works',
     links: [
-      { label: 'Studio', comingSoon: true },
+      { label: 'Goal Agent', url: '/#agents' },
+      { label: 'iPhone', url: '/#platforms' },
       { label: 'Paper Planner', url: '/#planner' },
-      { label: 'Vision Pro', comingSoon: true },
-      { label: 'Apple Watch', comingSoon: true },
+      { label: 'Apple Watch', url: '/#platforms' },
     ],
   },
   learn: {
     title: 'Learn',
     links: [
       { label: 'Intentional Living', url: '/philosophy' },
-      { label: 'AI', comingSoon: true },
-      { label: 'Spatial Computing', comingSoon: true },
-      { label: 'Apple', url: '/#platforms' },
+      { label: 'Planning and Review', url: '/#how-it-works' },
+      { label: 'Habits', url: '/#features' },
+      { label: 'Apple Platforms', url: '/#platforms' },
     ],
   },
   company: {

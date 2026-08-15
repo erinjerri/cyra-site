@@ -17,9 +17,32 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
+/**
+ * Applies the stored theme before first paint.
+ *
+ * This has to be a blocking inline script: if the class were applied in an
+ * effect, the browser would paint the default theme first and every visitor who
+ * chose light mode would get a black flash on load. `suppressHydrationWarning`
+ * on <html> is required because this script mutates the element before React
+ * hydrates, which React would otherwise report as a mismatch.
+ */
+const themeScript = `
+(function () {
+  try {
+    var stored = localStorage.getItem('tb-theme');
+    if (stored === 'light' || stored === 'dark') {
+      document.documentElement.setAttribute('data-theme', stored);
+    }
+  } catch (e) {}
+})();
+`
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${displayFont.variable} ${bodyFont.variable}`}>
+    <html lang="en" className={`${displayFont.variable} ${bodyFont.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body>
         <JsonLd />
         {children}
