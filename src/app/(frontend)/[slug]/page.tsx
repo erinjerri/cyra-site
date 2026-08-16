@@ -30,5 +30,17 @@ export default async function Page({ params }: Args) {
 
   if (!page) notFound()
 
-  return <FrontendShell blocks={(page.layout || []) as unknown as TimeBiteBlock[]} />
+  /*
+   * Every page needs exactly one h1. The homepage gets one from its hero, but
+   * CMS pages are just a stack of blocks whose headings all start at h2 — so
+   * /about was shipping with no h1 at all and a heading order of h2, h2, h2,
+   * h3. The page title supplies it, visually hidden because these pages open
+   * on a quote or a section header rather than a title banner.
+   *
+   * This route never serves 'home' (see the guard above), so it cannot
+   * introduce a second h1 there.
+   */
+  return (
+    <FrontendShell blocks={(page.layout || []) as unknown as TimeBiteBlock[]} pageTitle={page.title} />
+  )
 }

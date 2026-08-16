@@ -2,21 +2,26 @@ import type { Footer as FooterData } from '@/payload-types'
 import { ORGANIZATION_NAME } from '@/utilities/brand'
 import { getSiteSettings } from '@/utilities/getSiteSettings'
 
-type LinkGroup = FooterData['explore']
+import { SOCIAL_LABELS, SocialIcon, type SocialPlatform } from './SocialIcon'
 
-function FooterColumn({ group }: { group?: LinkGroup | null }) {
-  if (!group?.title) return null
+type Column = NonNullable<FooterData['columns']>[number]
+
+function FooterColumn({ column }: { column: Column }) {
+  if (!column?.title) return null
 
   return (
-    <div className="tb-footer-column">
-      <h3>{group.title}</h3>
+    <div
+      className="tb-footer-column"
+      style={{ '--tb-footer-accent': `var(--tb-${column.accent || 'blue'})` } as React.CSSProperties}
+    >
+      <h3>{column.title}</h3>
       <ul>
-        {(group.links || []).map((link, index) => (
-          <li key={index}>
-            {link.comingSoon ? (
+        {(column.links || []).map((link, linkIndex) => (
+          <li key={linkIndex}>
+            {link.comingSoon || !link.url ? (
               <span className="tb-footer-link-disabled">{link.label}</span>
             ) : (
-              <a href={link.url || '#'}>{link.label}</a>
+              <a href={link.url}>{link.label}</a>
             )}
           </li>
         ))}
@@ -26,10 +31,13 @@ function FooterColumn({ group }: { group?: LinkGroup | null }) {
 }
 
 export async function Footer({ data }: { data: FooterData | null }) {
-  // The organisation name comes from site-settings rather than being typed
-  // here — it is the one piece of footer text that was still in code.
   const settings = await getSiteSettings()
   const organizationName = settings?.organizationName || ORGANIZATION_NAME
+
+  const columns = data?.columns || []
+  const connect = data?.connect
+  const socials = (connect?.links || []).filter((link) => link.platform)
+  const legalLinks = data?.legalLinks || []
 
   return (
     <footer className="tb-footer">
@@ -39,16 +47,63 @@ export async function Footer({ data }: { data: FooterData | null }) {
           {data?.brandStatement ? <p>{data.brandStatement}</p> : null}
         </div>
         <div className="tb-footer-columns">
-          <FooterColumn group={data?.explore} />
-          <FooterColumn group={data?.product} />
-          <FooterColumn group={data?.comingSoon} />
-          <FooterColumn group={data?.learn} />
-          <FooterColumn group={data?.company} />
-          <FooterColumn group={data?.social} />
+          {columns.map((column, index) => (
+            <FooterColumn column={column} key={index} />
+          ))}
         </div>
       </div>
+
+      {socials.length > 0 ? (
+        <div className="tb-shell tb-footer-connect">
+          {connect?.title ? <p className="tb-footer-connect-title">{connect.title}</p> : null}
+          <ul className="tb-social-row">
+            {socials.map((link, index) => {
+              const platform = link.platform as SocialPlatform
+              const label = SOCIAL_LABELS[platform] || platform
+
+              return (
+                <li key={index}>
+                  {link.url ? (
+                    <a
+                      aria-label={label}
+                      className="tb-social-link"
+                      data-analytics-event={`social_${platform}`}
+                      href={link.url}
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      <SocialIcon platform={platform} />
+                    </a>
+                  ) : (
+                    // No URL yet: shown, dimmed, and not focusable — a link to
+                    // nowhere is worse than a placeholder that admits it.
+                    <span aria-label={`${label} — coming soon`} className="tb-social-link is-empty" role="img">
+                      <SocialIcon platform={platform} />
+                    </span>
+                  )}
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+      ) : null}
+
       <div className="tb-shell tb-footer-legal">
-        <p>{data?.legalNote || `© ${new Date().getFullYear()} Creating Your Reality. All rights reserved.`}</p>
+        <p>{data?.legalNote || `© ${new Date().getFullYear()} ${organizationName}. All rights reserved.`}</p>
+        {legalLinks.length > 0 ? (
+          <ul className="tb-footer-legal-links">
+            {legalLinks.map((link, index) => (
+              <li key={index}>
+                {link.comingSoon || !link.url ? (
+                  <span className="tb-footer-link-disabled">{link.label}</span>
+                ) : (
+                  <a href={link.url}>{link.label}</a>
+                )}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        {data?.colophon ? <p className="tb-footer-colophon">{data.colophon}</p> : null}
       </div>
     </footer>
   )

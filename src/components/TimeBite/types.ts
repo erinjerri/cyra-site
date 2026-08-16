@@ -181,6 +181,17 @@ export type TimeBiteBlock = MediaContent & {
   footnote?: string
   /** Optional second device standing in front of the hero desktop shot. */
   phone?: MediaContent & { enabled?: boolean | null }
+  /** Feature groups — one per product layer. See FeatureGrid. */
+  groups?: FeatureGroup[]
+  flow?: string
+}
+
+export type FeatureGroup = {
+  label?: string
+  brand?: string
+  body?: string
+  accent?: 'blue' | 'teal' | 'gold' | 'green' | 'pink' | 'lavender'
+  items?: TimeBiteItem[]
 }
 
 export type WorkspaceBlockType = Omit<TimeBiteBlock, 'items'> & {
@@ -202,6 +213,10 @@ export type DualLoopTab = {
 
 export type DualLoopBlockType = Omit<TimeBiteBlock, 'items'> & {
   tabs?: DualLoopTab[]
+}
+
+export type ValuesBlockType = Omit<TimeBiteBlock, 'items'> & {
+  values?: { title?: string; body?: string }[]
 }
 
 export type FAQBlockType = Omit<TimeBiteBlock, 'items'> & {

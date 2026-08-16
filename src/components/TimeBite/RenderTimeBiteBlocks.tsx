@@ -21,6 +21,7 @@ import type {
   TestimonialsBlockType,
   TimeBiteBlock,
   TimeBiteItem,
+  ValuesBlockType,
   WorkspaceBlockType,
 } from './types'
 
@@ -42,18 +43,6 @@ function SectionHeader({ block, align = 'center' }: { block: HeaderContent; alig
 // CMS-controlled. Nothing in this file contains a URL.
 const Button = CtaLink
 
-function Card({ item, index }: { item: TimeBiteItem; index?: number }) {
-  return (
-    <article className="tb-card">
-      {typeof index === 'number' ? <span className="tb-card-index">{String(index + 1).padStart(2, '0')}</span> : null}
-      {item.eyebrow ? <p className="tb-card-eyebrow">{item.eyebrow}</p> : null}
-      {item.title ? <h3>{item.title}</h3> : null}
-      {item.body ? <p>{item.body}</p> : null}
-      {item.status ? <StatusBadge size="sm" status={item.status} /> : null}
-    </article>
-  )
-}
-
 /**
  * Copy is centred and narrow; the product shot underneath runs the full width
  * of the shell. On a 13" MacBook that is roughly 1120px of screenshot, which
@@ -74,6 +63,35 @@ function Hero({ block }: { block: TimeBiteBlock }) {
       </div>
       <div className="tb-shell tb-hero-media">
         <ProductShowcase desktop={block} phone={block.phone} />
+      </div>
+    </section>
+  )
+}
+
+/**
+ * Numbered values in wide cards. Three across on desktop so six values make two
+ * clean rows, and the number is the visual anchor rather than an icon.
+ */
+function Values({ block }: { block: ValuesBlockType }) {
+  const values = block.values || []
+
+  if (values.length === 0) return null
+
+  return (
+    <section className="tb-section tb-values" id="values">
+      <div className="tb-shell">
+        <SectionHeader block={block} />
+        <ol className="tb-values-grid">
+          {values.map((value, index) => (
+            <li className="tb-value" key={index}>
+              <span aria-hidden="true" className="tb-value-index">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <h3>{value.title}</h3>
+              {value.body ? <p>{value.body}</p> : null}
+            </li>
+          ))}
+        </ol>
       </div>
     </section>
   )
@@ -172,20 +190,81 @@ function FrameworkSection({ block }: { block: TimeBiteBlock }) {
   )
 }
 
+/**
+ * Intro stacked above a full-width grid, deliberately not `tb-section-layout`.
+ *
+ * That shared two-column layout gives the content side 1.2fr of the shell minus
+ * a 76px gap — about 626px at desktop. Three cards inside that are ~199px wide,
+ * leaving ~151px of text, which wraps a normal sentence over seven or more
+ * lines and turns every card into a tall portrait sliver. Stacking the header
+ * gives each card ~364px instead, so a sentence takes two or three lines.
+ */
 function FeatureGrid({ block }: { block: TimeBiteBlock }) {
-  const items = (block.items || []).filter((item) => item.enabled !== false)
+  const groups = (block.groups || []).filter((group) => (group.items || []).length > 0)
+  const flatItems = (block.items || []).filter((item) => item.enabled !== false)
 
   return (
-    <section className="tb-section" id="features">
-      <div className="tb-shell tb-section-layout">
+    <section className="tb-section tb-features" id="features">
+      <div className="tb-shell">
         <SectionHeader block={block} />
-        <div className="tb-grid tb-feature-grid">
-          {items.map((item, index) => (
-            <Card item={item} key={index} />
-          ))}
-        </div>
+
+        {/* The arc between the two layers, stated once and then left alone. */}
+        {block.flow ? (
+          <p className="tb-feature-flow">
+            {block.flow.split('→').map((step, index) => (
+              <span key={index}>
+                {index > 0 ? <span aria-hidden="true">→</span> : null}
+                {step.trim()}
+              </span>
+            ))}
+          </p>
+        ) : null}
+
+        {groups.length > 0
+          ? groups.map((group, index) => (
+              <div
+                className="tb-feature-group"
+                key={index}
+                style={{ '--tb-group-accent': `var(--tb-chip-${group.accent || 'lavender'})` } as React.CSSProperties}
+              >
+                <div className="tb-feature-group-head">
+                  <p className="tb-feature-group-label">{group.label}</p>
+                  {group.brand ? <p className="tb-feature-group-brand">{group.brand}</p> : null}
+                  {group.body ? <p className="tb-feature-group-body">{group.body}</p> : null}
+                </div>
+                <div className="tb-feature-grid">
+                  {(group.items || [])
+                    .filter((item) => item.enabled !== false)
+                    .map((item, itemIndex) => (
+                      <FeatureCard item={item} key={itemIndex} />
+                    ))}
+                </div>
+              </div>
+            ))
+          : // Legacy flat list, for pages that have not moved to groups.
+            flatItems.length > 0 && (
+              <div className="tb-feature-grid">
+                {flatItems.map((item, index) => (
+                  <FeatureCard item={item} key={index} />
+                ))}
+              </div>
+            )}
       </div>
     </section>
+  )
+}
+
+/**
+ * Title first and strongest, description second, status last and quiet — the
+ * badge is metadata, not a competing headline.
+ */
+function FeatureCard({ item }: { item: TimeBiteItem }) {
+  return (
+    <article className="tb-card tb-feature-card">
+      <h3>{item.title}</h3>
+      {item.body ? <p>{item.body}</p> : null}
+      {item.status ? <StatusBadge size="sm" status={item.status} /> : null}
+    </article>
   )
 }
 
@@ -352,6 +431,8 @@ export function RenderTimeBiteBlocks({ blocks }: { blocks: TimeBiteBlock[] }) {
             return <Quote block={block} key={index} />
           case 'timelineBlock':
             return <Timeline block={block} key={index} />
+          case 'valuesBlock':
+            return <Values block={block as ValuesBlockType} key={index} />
           case 'dualLoopBlock':
             return <DualLoop block={block as DualLoopBlockType} key={index} />
           case 'productDemoBlock':

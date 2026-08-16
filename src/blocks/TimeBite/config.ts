@@ -157,11 +157,68 @@ export const FeatureGridBlock: Block = {
   fields: [
     ...headingFields,
     {
+      name: 'flow',
+      type: 'text',
+      label: 'Flow line',
+      admin: {
+        description:
+          'The one-line arc shown between the two groups, e.g. "Vision → Goals → Actions → Calendar → Time → Progress". Leave blank to hide it.',
+      },
+    },
+    {
+      name: 'groups',
+      type: 'array',
+      maxRows: 3,
+      labels: { singular: 'Group', plural: 'Groups' },
+      admin: {
+        description:
+          'One group per product layer: Creating Your Reality (direction) and TimeBite (execution). Each group heads its own grid.',
+      },
+      fields: [
+        { name: 'label', type: 'text', required: true, admin: { description: 'e.g. CREATE YOUR DIRECTION' } },
+        { name: 'brand', type: 'text', admin: { description: 'Which product this group belongs to.' } },
+        { name: 'body', type: 'textarea', label: 'Short intro' },
+        {
+          name: 'accent',
+          type: 'select',
+          defaultValue: 'lavender',
+          options: [
+            { label: 'Lavender', value: 'lavender' },
+            { label: 'Blue', value: 'blue' },
+            { label: 'Teal', value: 'teal' },
+            { label: 'Gold', value: 'gold' },
+            { label: 'Green', value: 'green' },
+            { label: 'Pink', value: 'pink' },
+          ],
+        },
+        {
+          name: 'items',
+          type: 'array',
+          minRows: 1,
+          labels: { singular: 'Feature', plural: 'Features' },
+          admin: { description: 'Drag to reorder. One sentence each, roughly 10–20 words.' },
+          fields: [
+            { name: 'title', type: 'text', required: true },
+            { name: 'body', type: 'textarea', label: 'Short description' },
+            statusField('Check this against the app build, not against what this page used to say.'),
+            {
+              name: 'enabled',
+              type: 'checkbox',
+              label: 'Show this feature',
+              defaultValue: true,
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: 'items',
       type: 'array',
-      minRows: 1,
-      labels: { singular: 'Feature', plural: 'Features' },
-      admin: { description: 'Drag to reorder — the order here is the order on the page.' },
+      labels: { singular: 'Feature (ungrouped)', plural: 'Features (ungrouped)' },
+      admin: {
+        description:
+          'Legacy flat list, kept so older pages still render. Prefer Groups above for anything new.',
+      },
       fields: [
         // itemTextFields + mediaFields, never itemFields + mediaFields — the
         // two both define `image`, and Payload rejects duplicate field names.
@@ -215,6 +272,35 @@ export const ProductGridBlock: Block = {
       name: 'footnote',
       type: 'textarea',
       admin: { description: 'Small print under the grid, e.g. that nothing is charged yet.' },
+    },
+  ],
+}
+
+/**
+ * Numbered values, in wide editorial cards.
+ *
+ * A separate block rather than a featureGrid group: values are numbered, carry
+ * no status badge, and read as a manifesto rather than a capability list. The
+ * numbering is the visual hook, so it belongs in the markup rather than being
+ * typed into each title.
+ */
+export const ValuesBlock: Block = {
+  slug: 'valuesBlock',
+  interfaceName: 'ValuesBlock',
+  labels: { singular: 'Values', plural: 'Values Blocks' },
+  fields: [
+    ...headingFields,
+    {
+      name: 'values',
+      type: 'array',
+      minRows: 1,
+      maxRows: 8,
+      labels: { singular: 'Value', plural: 'Values' },
+      admin: { description: 'Numbered automatically in order. One to three sentences each.' },
+      fields: [
+        { name: 'title', type: 'text', required: true },
+        { name: 'body', type: 'textarea', required: true },
+      ],
     },
   ],
 }
@@ -726,6 +812,7 @@ export const timeBiteBlocks = [
   QuoteBlock,
   TimelineBlock,
   DualLoopBlock,
+  ValuesBlock,
   ProductDemoBlock,
   ScaleStoryBlock,
   AboutBlock,

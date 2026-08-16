@@ -145,6 +145,7 @@ export interface Page {
     | QuoteBlock
     | TimelineBlock
     | DualLoopBlock
+    | ValuesBlock
     | ProductDemoBlock
     | ScaleStoryBlock
     | AboutBlock
@@ -383,6 +384,28 @@ export interface DualLoopBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ValuesBlock".
+ */
+export interface ValuesBlock {
+  eyebrow?: string | null;
+  headline: string;
+  body?: string | null;
+  /**
+   * Numbered automatically in order. One to three sentences each.
+   */
+  values?:
+    | {
+        title: string;
+        body: string;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'valuesBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ProductDemoBlock".
  */
 export interface ProductDemoBlock {
@@ -520,7 +543,44 @@ export interface FeatureGridBlock {
   headline: string;
   body?: string | null;
   /**
-   * Drag to reorder — the order here is the order on the page.
+   * The one-line arc shown between the two groups, e.g. "Vision → Goals → Actions → Calendar → Time → Progress". Leave blank to hide it.
+   */
+  flow?: string | null;
+  /**
+   * One group per product layer: Creating Your Reality (direction) and TimeBite (execution). Each group heads its own grid.
+   */
+  groups?:
+    | {
+        /**
+         * e.g. CREATE YOUR DIRECTION
+         */
+        label: string;
+        /**
+         * Which product this group belongs to.
+         */
+        brand?: string | null;
+        body?: string | null;
+        accent?: ('lavender' | 'blue' | 'teal' | 'gold' | 'green' | 'pink') | null;
+        /**
+         * Drag to reorder. One sentence each, roughly 10–20 words.
+         */
+        items?:
+          | {
+              title: string;
+              body?: string | null;
+              /**
+               * Check this against the app build, not against what this page used to say. Available now = shipped. Beta = usable, in the private beta. In development = being built. Planned = committed, not started. Exploring = we are looking at it and nothing more.
+               */
+              status?: ('available' | 'beta' | 'in-development' | 'planned' | 'exploring') | null;
+              enabled?: boolean | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Legacy flat list, kept so older pages still render. Prefer Groups above for anything new.
    */
   items?:
     | {
@@ -1398,6 +1458,7 @@ export interface PagesSelect<T extends boolean = true> {
         quoteBlock?: T | QuoteBlockSelect<T>;
         timelineBlock?: T | TimelineBlockSelect<T>;
         dualLoopBlock?: T | DualLoopBlockSelect<T>;
+        valuesBlock?: T | ValuesBlockSelect<T>;
         productDemoBlock?: T | ProductDemoBlockSelect<T>;
         scaleStoryBlock?: T | ScaleStoryBlockSelect<T>;
         aboutBlock?: T | AboutBlockSelect<T>;
@@ -1536,6 +1597,24 @@ export interface DualLoopBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ValuesBlock_select".
+ */
+export interface ValuesBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  headline?: T;
+  body?: T;
+  values?:
+    | T
+    | {
+        title?: T;
+        body?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ProductDemoBlock_select".
  */
 export interface ProductDemoBlockSelect<T extends boolean = true> {
@@ -1628,6 +1707,25 @@ export interface FeatureGridBlockSelect<T extends boolean = true> {
   eyebrow?: T;
   headline?: T;
   body?: T;
+  flow?: T;
+  groups?:
+    | T
+    | {
+        label?: T;
+        brand?: T;
+        body?: T;
+        accent?: T;
+        items?:
+          | T
+          | {
+              title?: T;
+              body?: T;
+              status?: T;
+              enabled?: T;
+              id?: T;
+            };
+        id?: T;
+      };
   items?:
     | T
     | {
@@ -2190,94 +2288,74 @@ export interface Header {
 export interface Footer {
   id: string;
   brandStatement?: string | null;
-  explore: {
-    title: string;
+  /**
+   * Drag to reorder. Each column gets its own accent colour in order.
+   */
+  columns?:
+    | {
+        title: string;
+        accent?: ('blue' | 'teal' | 'gold' | 'green' | 'pink' | 'lavender') | null;
+        links?:
+          | {
+              label: string;
+              url?: string | null;
+              /**
+               * Renders as a disabled label instead of a link when no page exists yet.
+               */
+              comingSoon?: boolean | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Social icons centred above the legal line.
+   */
+  connect?: {
+    title?: string | null;
     links?:
       | {
-          label: string;
-          url?: string | null;
           /**
-           * Renders as a disabled label instead of a link when no page exists yet.
+           * Picks the icon. Only these have artwork.
            */
-          comingSoon?: boolean | null;
+          platform:
+            | 'github'
+            | 'linkedin'
+            | 'substack'
+            | 'youtube'
+            | 'instagram'
+            | 'x'
+            | 'tiktok'
+            | 'pinterest'
+            | 'discord';
+          /**
+           * Leave blank and the icon renders dimmed and unclickable.
+           */
+          url?: string | null;
           id?: string | null;
         }[]
       | null;
   };
-  product: {
-    title: string;
-    links?:
-      | {
-          label: string;
-          url?: string | null;
-          /**
-           * Renders as a disabled label instead of a link when no page exists yet.
-           */
-          comingSoon?: boolean | null;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  comingSoon: {
-    title: string;
-    links?:
-      | {
-          label: string;
-          url?: string | null;
-          /**
-           * Renders as a disabled label instead of a link when no page exists yet.
-           */
-          comingSoon?: boolean | null;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  learn: {
-    title: string;
-    links?:
-      | {
-          label: string;
-          url?: string | null;
-          /**
-           * Renders as a disabled label instead of a link when no page exists yet.
-           */
-          comingSoon?: boolean | null;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  company: {
-    title: string;
-    links?:
-      | {
-          label: string;
-          url?: string | null;
-          /**
-           * Renders as a disabled label instead of a link when no page exists yet.
-           */
-          comingSoon?: boolean | null;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  social: {
-    title: string;
-    links?:
-      | {
-          label: string;
-          url?: string | null;
-          /**
-           * Renders as a disabled label instead of a link when no page exists yet.
-           */
-          comingSoon?: boolean | null;
-          id?: string | null;
-        }[]
-      | null;
-  };
+  legalLinks?:
+    | {
+        label: string;
+        url?: string | null;
+        /**
+         * Renders as a disabled label instead of a link when no page exists yet.
+         */
+        comingSoon?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
   /**
    * e.g. "© Creating Your Reality. All rights reserved."
    */
   legalNote?: string | null;
+  /**
+   * Small credit line, e.g. "Made with Payload CMS".
+   */
+  colophon?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2355,85 +2433,43 @@ export interface HeaderSelect<T extends boolean = true> {
  */
 export interface FooterSelect<T extends boolean = true> {
   brandStatement?: T;
-  explore?:
+  columns?:
     | T
     | {
         title?: T;
+        accent?: T;
         links?:
           | T
           | {
               label?: T;
               url?: T;
               comingSoon?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  connect?:
+    | T
+    | {
+        title?: T;
+        links?:
+          | T
+          | {
+              platform?: T;
+              url?: T;
               id?: T;
             };
       };
-  product?:
+  legalLinks?:
     | T
     | {
-        title?: T;
-        links?:
-          | T
-          | {
-              label?: T;
-              url?: T;
-              comingSoon?: T;
-              id?: T;
-            };
-      };
-  comingSoon?:
-    | T
-    | {
-        title?: T;
-        links?:
-          | T
-          | {
-              label?: T;
-              url?: T;
-              comingSoon?: T;
-              id?: T;
-            };
-      };
-  learn?:
-    | T
-    | {
-        title?: T;
-        links?:
-          | T
-          | {
-              label?: T;
-              url?: T;
-              comingSoon?: T;
-              id?: T;
-            };
-      };
-  company?:
-    | T
-    | {
-        title?: T;
-        links?:
-          | T
-          | {
-              label?: T;
-              url?: T;
-              comingSoon?: T;
-              id?: T;
-            };
-      };
-  social?:
-    | T
-    | {
-        title?: T;
-        links?:
-          | T
-          | {
-              label?: T;
-              url?: T;
-              comingSoon?: T;
-              id?: T;
-            };
+        label?: T;
+        url?: T;
+        comingSoon?: T;
+        id?: T;
       };
   legalNote?: T;
+  colophon?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

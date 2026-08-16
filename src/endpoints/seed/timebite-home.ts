@@ -24,7 +24,7 @@ export const timeBiteHome = {
       blockType: 'heroBlock',
       eyebrow: 'TimeBite',
       headline: "Make time for the life you're actually trying to create.",
-      body: 'TimeBite brings your goals, tasks, time and progress into one place—so you can decide what matters, act on it, and see where your time actually goes.',
+      body: 'TimeBite brings your goals, tasks, time and progress into one place—so you can decide what matters, act on it, and see where your time actually goes. It bridges what is actually happening in your physical world with the digital, so the goals you set are the ones you meet.',
       // The Substack URL lives here in content, never in a component. Change it
       // in /admin and every beta button that inherits it follows.
       cta: {
@@ -172,67 +172,129 @@ export const timeBiteHome = {
     {
       // Each feature can carry its own screenshot or clip — the fields are
       // there on every row. They render as schematics until media is uploaded.
+      /*
+       * Every status below was checked against timebite-macos/RootView.swift,
+       * not against what this page previously claimed. Anything routed to
+       * PlaceholderView or ContentUnavailableView is NOT "available now":
+       *   Actions, Goals            -> PlaceholderView
+       *   Kanban                    -> ContentUnavailableView("Kanban is next")
+       *   Eisenhower                -> no source in the repo at all
+       *   Create, Journal, Library  -> PlaceholderView
+       * Built and shipping: Now (AM/PM), Plan > Calendar with real
+       * drag-and-drop, Plan > Timeline, Track (daily/weekly/monthly/annual/
+       * habits), Dashboard, activity rings, Discover (Ikigai + Boards).
+       */
       blockType: 'featureGridBlock',
-      eyebrow: 'What is in it',
-      headline: 'It is not eight features. It is one system.',
-      body: 'Planning, execution and measurement in one place, so nothing has to be copied between them.',
-      items: [
+      eyebrow: "What's inside",
+      headline: 'Turn what you want into what you actually do.',
+      body: 'Creating Your Reality helps you define the direction. TimeBite turns it into actions, time, and measurable progress.',
+      flow: 'Vision → Goals → Actions → Calendar → Time → Progress',
+      groups: [
         {
-          // Goals and Actions were two cards saying half a thought each.
-          title: 'Goal setting',
-          body: 'What you are working toward, broken into milestones with a definition of done, then into actions small and specific enough to schedule. Every action keeps its link back to the goal it serves.',
-          status: 'available',
-          sketch: 'goal',
-          enabled: true,
+          label: 'Create your direction',
+          brand: 'Creating Your Reality',
+          accent: 'lavender',
+          body: 'Work backward from what you want this to become, before any of it reaches a calendar.',
+          items: [
+            {
+              title: 'Discover',
+              body: 'Explore and assemble the ideas behind a direction before committing to it.',
+              status: 'available',
+              enabled: true,
+            },
+            {
+              title: 'Ikigai',
+              body: 'Find the intersection of what matters to you, what you are good at, and what sustains you.',
+              status: 'available',
+              enabled: true,
+            },
+            {
+              title: 'Boards',
+              body: 'Collect visual inspiration and references around the life or goal you are building.',
+              status: 'available',
+              enabled: true,
+            },
+            {
+              title: 'Create',
+              body: 'Shape a loose direction into something concrete enough to act on.',
+              status: 'in-development',
+              enabled: true,
+            },
+            {
+              title: 'Journal',
+              body: 'Capture what is working, what changed, and what you learned along the way.',
+              status: 'in-development',
+              enabled: true,
+            },
+            {
+              title: 'Library',
+              body: 'Keep the references, advice, and resources you want to return to later.',
+              status: 'planned',
+              enabled: true,
+            },
+          ],
         },
         {
-          title: 'Kanban board',
-          body: 'Track your personal and professional goals and the work from every area of your life in one place — vision boards, Kanban boards, Eisenhower matrices and more — so you can move from your values and intentions to actually meeting your goals.',
-          status: 'available',
-          sketch: 'board',
-          enabled: true,
-        },
-        {
-          title: 'Eisenhower planning',
-          body: 'Sort what is urgent from what is important before you decide what gets your Tuesday.',
-          status: 'available',
-          sketch: 'matrix',
-          enabled: true,
-        },
-        {
-          title: 'Time tracking',
-          body: 'Where the hours went, recorded against the goal they belong to rather than guessed at later.',
-          status: 'available',
-          sketch: 'calendar',
-          enabled: true,
-        },
-        {
-          title: 'Activity',
-          body: 'See how your time is actually spent against how you planned it, and close the loop to get things done.',
-          status: 'available',
-          sketch: 'habits',
-          enabled: true,
-        },
-        {
-          title: 'Now, AM, PM & daily summaries',
-          body: 'A holistic snapshot of your day in real life, as it happens — not weeks later.',
-          status: 'available',
-          sketch: 'list',
-          enabled: true,
-        },
-        {
-          title: 'Progress dashboards',
-          body: 'Interactive data visualisation tracking your progress through the day and showing completion over time, so progress is a line you can read rather than a feeling.',
-          status: 'in-development',
-          sketch: 'chart',
-          enabled: true,
-        },
-        {
-          title: 'AI assistance',
-          body: 'Lost a sticky note, or forgot to track something? TimeBite syncs the information you already have to capture your day, then finds the pockets of time to optimise your workflow — or to take a rest.',
-          status: 'in-development',
-          sketch: 'workspace',
-          enabled: true,
+          label: 'Turn it into action',
+          brand: 'TimeBite',
+          accent: 'blue',
+          body: 'Translate a direction into calendar time, then measure whether it moved you anywhere.',
+          items: [
+            {
+              title: 'Now',
+              body: 'See what is in front of you this hour, and how the AM and PM are going.',
+              status: 'available',
+              enabled: true,
+            },
+            {
+              title: 'Calendar Planning',
+              body: 'Drag actions into your calendar and give important work an actual place in your day.',
+              status: 'available',
+              enabled: true,
+            },
+            {
+              title: 'Timeline',
+              body: 'Lay goals across the months and see where they overlap and compete.',
+              status: 'available',
+              enabled: true,
+            },
+            {
+              title: 'Track',
+              body: 'Record what happened daily, weekly, monthly and annually — including the habits underneath.',
+              status: 'available',
+              enabled: true,
+            },
+            {
+              title: 'Activity',
+              body: 'Compare the time you intended to spend with the time you actually did.',
+              status: 'available',
+              enabled: true,
+            },
+            {
+              title: 'Dashboard',
+              body: 'Watch progress accumulate across actions, goals and time instead of trusting memory.',
+              status: 'in-development',
+              enabled: true,
+            },
+            {
+              title: 'Goals & Actions',
+              body: 'Break a direction into milestones and actions you can schedule.',
+              status: 'in-development',
+              enabled: true,
+            },
+            {
+              title: 'Kanban',
+              body: 'Move the actions behind your goals through stages of progress.',
+              status: 'in-development',
+              enabled: true,
+            },
+            {
+              title: 'Eisenhower Matrix',
+              body: 'Sort actions by urgency and importance to decide what deserves your time now.',
+              status: 'planned',
+              enabled: true,
+            },
+          ],
         },
       ],
     },
@@ -426,8 +488,8 @@ export const timeBiteHome = {
       body: 'Creating Your Reality is the philosophy and the writing around it — the question of what kind of life you are trying to build. TimeBite is the product that answers a narrower one: what do you do next, when will you do it, and are you actually moving toward it?',
       pillars: [{ label: 'Identity' }, { label: 'Purpose' }, { label: 'Intentional Living' }, { label: 'Long-term Growth' }],
       closingStatement:
-        'The philosophy decides what is worth doing. The product is where it survives contact with a calendar.',
-      cta: { label: 'Read the philosophy', url: '/philosophy' },
+        'Create the life you imagine. See whether your time is taking you there.',
+      cta: { label: 'Read our mission', url: '/about', analyticsId: 'home_to_about' },
     },
     {
       blockType: 'platformCardsBlock',
@@ -467,51 +529,50 @@ export const timeBiteHome = {
       annualBadge: 'Best value',
       digitalPlans: [
         {
-          name: 'Free',
+          name: 'Free Trial',
           monthlyPrice: '0',
           annualPrice: '0',
-          badge: 'To begin with',
-          description: 'For beta members and anyone still deciding. Enough of the loop to find out whether it holds.',
+          badge: 'First month free',
+          description: 'A full month of the loop, free. Long enough to plan a month and see whether it held.',
           features: [
-            { text: 'Goals and milestones' },
-            { text: 'Actions and daily planning' },
-            { text: 'Habit tracking' },
+            { text: 'Everything in Starter Kit' },
             { text: 'One device' },
+            { text: 'No card required during the beta' },
           ],
           cta: { label: 'Join the TimeBite Beta', url: '#beta', analyticsId: 'join_beta_plan_free' },
         },
         {
-          name: 'Plus',
-          monthlyPrice: '12.55',
-          annualPrice: '125.55',
+          name: 'Starter Kit',
+          monthlyPrice: '35.55',
+          annualPrice: '355.50',
           annualNote: 'Two months free against paying monthly.',
           featured: true,
           badge: 'Recommended',
-          description: 'The whole loop — plan, schedule, track and review, on every device we support.',
+          description: 'The whole loop — direction, planning, calendar time and review. Add the physical planner for $75.55 a month.',
           features: [
-            { text: 'Everything in Free' },
-            { text: 'Eisenhower planning and Kanban' },
-            { text: 'Calendar and time blocking' },
-            { text: 'Weekly, monthly and annual review' },
-            { text: 'Unlimited goals and full history' },
+            { text: 'Discover, Ikigai and Boards' },
+            { text: 'Calendar planning with drag-and-drop' },
+            { text: 'Daily, weekly, monthly and annual tracking' },
+            { text: 'Habits and activity rings' },
             { text: 'Sync across your devices' },
+            { text: 'Physical planner bundle — $75.55/mo' },
           ],
-          cta: { label: 'Try TimeBite free', url: '#beta', analyticsId: 'start_free_trial_plus' },
+          cta: { label: 'Try TimeBite free', url: '#beta', analyticsId: 'start_free_trial_starter' },
         },
         {
-          name: 'Pro',
-          monthlyPrice: '25.55',
-          annualPrice: '255.55',
+          name: 'Executive',
+          monthlyPrice: '111.11',
+          annualPrice: '1111.10',
           badge: 'As it lands',
-          description: 'For the deeper end — measurement, long-range planning and assistance, arriving as each piece is built.',
+          description: 'The measurement and assistance layer, arriving as each piece is built.',
           features: [
-            { text: 'Everything in Plus' },
+            { text: 'Everything in Starter Kit' },
             { text: 'Progress dashboards and charts', status: 'in-development' },
-            { text: 'Long-range goal timeline', status: 'in-development' },
+            { text: 'Goals, Actions and Kanban', status: 'in-development' },
             { text: 'Goal Agent', status: 'in-development' },
             { text: 'Domain agents as they arrive', status: 'planned' },
           ],
-          cta: { label: 'Join the waitlist', url: '#beta', analyticsId: 'join_waitlist_pro' },
+          cta: { label: 'Join the waitlist', url: '#beta', analyticsId: 'join_waitlist_executive' },
         },
       ],
       betaPromotion: {

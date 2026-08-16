@@ -3,8 +3,8 @@ import 'dotenv/config'
 import config from '@payload-config'
 import { getPayload, type Payload } from 'payload'
 
+import { aboutPage } from '../endpoints/seed/about-page'
 import { footerData, headerData } from '../endpoints/seed/header-footer'
-import { philosophyPage } from '../endpoints/seed/philosophy-page'
 import { postsSeed } from '../endpoints/seed/posts'
 import { productsSeed } from '../endpoints/seed/products'
 import { siteSettingsData } from '../endpoints/seed/site-settings'
@@ -98,7 +98,8 @@ async function run() {
   }
 
   await upsertPage(payload, timeBiteHome as SeedPage)
-  await upsertPage(payload, philosophyPage as SeedPage)
+  await upsertPage(payload, aboutPage as SeedPage)
+
 
   console.log('Seed complete.')
   process.exit(0)
