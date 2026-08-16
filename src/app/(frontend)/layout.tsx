@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 
-import { JsonLd } from '@/components/JsonLd'
-import { generateMeta } from '@/utilities/generateMeta'
-import { getURL } from '@/utilities/getURL'
+import { JsonLd } from '../../components/JsonLd'
+import { generateMeta } from '../../utilities/generateMeta'
+import { getURL } from '../../utilities/getURL'
 
 import { bodyFont, displayFont } from './fonts'
 import './globals.css'

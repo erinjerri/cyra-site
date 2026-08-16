@@ -6,6 +6,32 @@ behaviour. Every value here exists as a CSS custom property in
 
 ---
 
+## 0. How it should feel
+
+The site should feel:
+
+- calm
+- intimate
+- editorial
+- lightly futuristic
+
+The site should not feel like:
+
+- a generic SaaS dashboard
+- a bright productivity app
+- a bubbly social product
+- a heavy chrome/brutalist interface
+
+Practically: soft surfaces with restrained pastel accents, separation through
+borders and spacing rather than shadows, motion that is subtle and purposeful,
+and hierarchy carried by typography and spacing rather than decoration.
+
+> Sections 0 and 9 are carried over from the earlier design system in PR #6.
+> Its radius scale (18px cards, 12px compact, 8px controls) is **superseded** —
+> the site is now a single 8px everywhere. See section 5.
+
+---
+
 ## 1. The idea
 
 Borrowed from the printed CYR planner: **every section owns one colour**. It
@@ -40,7 +66,7 @@ the flatness went away.
 | `--tb-bg` | `#121216` | Page ground. Warm charcoal, never pure black |
 | `--tb-surface` | `#1a1a20` | Cards, panels, media frames |
 | `--tb-surface-2` | `#212128` | Raised surfaces: window chrome, inputs, toggles |
-| `--tb-ink` | `#f4f2ee` | Primary text. Warm white, ~16:1 |
+| `--tb-ink` | `#ffffff` | Primary text. Pure white, ~18:1 |
 | `--tb-muted` | `#c6c6cc` | Body copy, nav. ~11.5:1 |
 | `--tb-faint` | `#9d9da5` | Captions, metadata. ~7:1 |
 | `--tb-line` | `rgba(244,242,238,0.12)` | Visible borders |
@@ -203,7 +229,7 @@ Create these as **variables** (not styles) so the two modes switch together.
 | `bg` | `#121216` | `#FAF7F2` |
 | `surface` | `#1A1A20` | `#FFFFFF` |
 | `surface-2` | `#212128` | `#F1ECE3` |
-| `ink` | `#F4F2EE` | `#16161C` |
+| `ink` | `#FFFFFF` | `#16161C` |
 | `muted` | `#C6C6CC` | `#45454F` |
 | `faint` | `#9D9DA5` | `#63636E` |
 | `on-accent` | `#000000` | `#FFFFFF` |
@@ -238,7 +264,7 @@ newer direction. Reconcile the file before treating it as the reference.
 Canva has no modes, so build **two brand kits**.
 
 **Brand kit — TimeBite Dark**
-Background `#121216` · Text `#F4F2EE` · Secondary `#C6C6CC`
+Background `#121216` · Text `#FFFFFF` · Secondary `#C6C6CC`
 Accents `#A9D6E5` `#B8D8C0` `#EAD9AB` `#E8BCC8` `#A5D5CF` `#C9BCE8`
 
 **Brand kit — TimeBite Light**
@@ -278,6 +304,22 @@ Non-negotiable, and all currently passing:
 - Video has visible controls, `preload="metadata"`, and never autoplays
 - Every media slot has alt text or an `aria-label`
 - Status meaning is carried by **words**, not colour alone
+
+---
+
+## 9. Keeping this file honest
+
+Carried over from PR #6, and worth keeping:
+
+- Update this file whenever a new reusable visual pattern is introduced.
+- If a token changes, change the CSS and this document **in the same commit**.
+- If a component needs a different radius, explain why in a comment.
+- If the UI starts drifting toward generic SaaS styling, simplify before adding
+  more ornament.
+
+The reason this matters: every value in section 2 is a measured contrast ratio,
+not a preference. A token changed without updating the table turns this document
+from a reference into a rumour.
 
 ---
 

@@ -32,7 +32,10 @@
   --tb-bg: #121216;
   --tb-surface: #1a1a20;
   --tb-surface-2: #212128;
-  --tb-ink: #f4f2ee;
+  /* Pure white, carried over from PR #6. Warm white (#f4f2ee) reads softer but
+     lost contrast against the lifted charcoal ground, which is exactly the
+     "white text is harder to read than expected" complaint. */
+  --tb-ink: #ffffff;
   /*
     Secondary text colours, set against the black ground by contrast ratio
     rather than by eye. The previous values (#a2a2a8 / #6f6f76) put small grey
