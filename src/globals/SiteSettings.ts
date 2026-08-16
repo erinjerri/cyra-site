@@ -1,5 +1,15 @@
 import type { GlobalConfig } from 'payload'
 
+import { ctaFields } from '@/blocks/TimeBite/shared'
+import {
+  BETA_CTA_LABEL,
+  ORGANIZATION_DESCRIPTION,
+  ORGANIZATION_NAME,
+  PRODUCT_DESCRIPTION,
+  PRODUCT_NAME,
+  PRODUCT_TAGLINE,
+} from '@/utilities/brand'
+
 export const SiteSettings: GlobalConfig = {
   slug: 'site-settings',
   access: {
@@ -9,35 +19,32 @@ export const SiteSettings: GlobalConfig = {
     {
       name: 'brandName',
       type: 'text',
-      defaultValue: 'TimeBite',
+      defaultValue: PRODUCT_NAME,
     },
     {
       name: 'organizationName',
       type: 'text',
-      defaultValue: 'Creating Your Reality',
+      defaultValue: ORGANIZATION_NAME,
     },
     {
       name: 'siteTagline',
       type: 'text',
-      defaultValue: 'a shared memory for the life you are building',
+      defaultValue: PRODUCT_TAGLINE,
     },
     {
       name: 'brandDescription',
       type: 'textarea',
-      defaultValue:
-        'Creating Your Reality is the philosophy, design methodology, and ecosystem behind TimeBite.',
+      defaultValue: ORGANIZATION_DESCRIPTION,
     },
     {
       name: 'productDescription',
       type: 'textarea',
-      defaultValue:
-        'TimeBite keeps your notes, calendar, goals, and reflections in one shared memory, so the things you care about stop slipping through the week.',
+      defaultValue: PRODUCT_DESCRIPTION,
     },
     {
       name: 'openGraphDescription',
       type: 'textarea',
-      defaultValue:
-        'TimeBite keeps your notes, calendar, goals, and reflections in one shared memory, so the things you care about stop slipping through the week.',
+      defaultValue: PRODUCT_DESCRIPTION,
     },
     {
       name: 'headerTag',
@@ -50,14 +57,26 @@ export const SiteSettings: GlobalConfig = {
       defaultValue: 'Creating Your Reality is the philosophy behind TimeBite, and everything we build next.',
     },
     {
+      name: 'betaCta',
+      type: 'group',
+      label: 'Beta call to action',
+      admin: {
+        description:
+          'The site-wide default for the beta button. Blocks that set their own button override this; blocks that leave it blank fall back to here. This is the one place to change where "Join the TimeBite Beta" points.',
+      },
+      fields: ctaFields,
+    },
+    {
       name: 'betaButtonLabel',
       type: 'text',
-      defaultValue: 'Join Beta',
+      label: 'Beta button label (legacy)',
+      defaultValue: BETA_CTA_LABEL,
+      admin: { description: 'Superseded by "Beta call to action" above. Kept so existing values are not dropped.' },
     },
     {
       name: 'substackButtonLabel',
       type: 'text',
-      defaultValue: 'Join Substack',
+      defaultValue: 'Follow on Substack',
     },
     {
       name: 'notFoundCtaLabel',

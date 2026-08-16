@@ -12,7 +12,7 @@ Copy `.env.example` to `.env` and set:
 - `NEXT_PUBLIC_BETA_SIGNUP_URL` - POST target for the beta email form.
 - `NEXT_PUBLIC_SUBSTACK_EMBED_URL` - Substack link used by the "Join Substack" button. Leave unset and the
   button simply doesn't render.
-- `R2_BUCKET`, `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_PUBLIC_URL` - Cloudflare R2
+- `USE_R2_STORAGE`, `R2_BUCKET`, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_PUBLIC_HOSTNAME` - Cloudflare R2 (`R2_ENDPOINT` optional, derived from the account ID)
   settings for uploaded media if you wire external storage.
 
 If you are deploying to Cloudflare and want uploads to persist, you also need one of:
@@ -175,7 +175,7 @@ Use this as the live setup checklist when you are wiring image storage for the f
    - `R2_ENDPOINT`
    - `R2_ACCESS_KEY_ID`
    - `R2_SECRET_ACCESS_KEY`
-   - `R2_PUBLIC_URL`
+   - `R2_PUBLIC_HOSTNAME`
 5. Wire the Payload storage adapter in code so the `media` collection writes to R2 instead of `public/media`.
 6. Start the app locally with `pnpm dev`.
 7. Open `/admin`.

@@ -2,15 +2,18 @@
 
 import { useState } from 'react'
 
-import type { DigitalPlan, PhysicalProduct, PricingBlockType } from './types'
+import { CtaLink } from './CtaLink'
+import { StatusBadge } from './StatusBadge'
+import type { DigitalPlan, PricingBlockType, PricingFeature } from './types'
 
 const cx = (...classes: Array<string | false | undefined>) => classes.filter(Boolean).join(' ')
 
 type BillingCycle = 'monthly' | 'annual'
 
 /**
- * Annual is the default view, so the price a visitor sees first is the one we
- * recommend. A plan priced '0' never says "billed annually".
+ * Falls back to the monthly figure whenever the annual one is missing, so a
+ * plan sold only monthly still shows a price on the annual view. A plan priced
+ * '0' never says "billed annually".
  */
 function planPrice(plan: DigitalPlan, cycle: BillingCycle) {
   const isAnnual = cycle === 'annual' && Boolean(plan.annualPrice)
@@ -22,13 +25,21 @@ function planPrice(plan: DigitalPlan, cycle: BillingCycle) {
   return { amount, cadence: isAnnual ? 'per year' : 'per month' }
 }
 
-function FeatureList({ items }: { items?: { text?: string }[] }) {
+/**
+ * Availability is a badge, never words inside the feature line. A line that
+ * reads "Longer-range review — in development" has to be rewritten by hand the
+ * day it ships; a line carrying a status field only has to be re-tagged.
+ */
+function FeatureList({ items }: { items?: PricingFeature[] }) {
   if (!items?.length) return null
 
   return (
     <ul className="tb-plan-features">
       {items.map((item, index) => (
-        <li key={index}>{item.text}</li>
+        <li key={index}>
+          {item.text}
+          {item.status && item.status !== 'available' ? <StatusBadge size="sm" status={item.status} /> : null}
+        </li>
       ))}
     </ul>
   )
@@ -53,54 +64,21 @@ function DigitalPlanCard({ plan, cycle }: { plan: DigitalPlan; cycle: BillingCyc
       {cycle === 'annual' && plan.annualNote ? <p className="tb-plan-note">{plan.annualNote}</p> : null}
       {plan.description ? <p>{plan.description}</p> : null}
       <FeatureList items={plan.features} />
-      {plan.cta?.label ? (
-        <a
-          className={cx('tb-button tb-button-compact', !plan.featured && 'tb-button-secondary')}
-          data-analytics-event="start_free_trial"
-          href={plan.cta.url || '#beta'}
-        >
-          {plan.cta.label}
-        </a>
-      ) : null}
-    </article>
-  )
-}
-
-function PhysicalProductCard({ product }: { product: PhysicalProduct }) {
-  const isPreorder = product.billingType !== 'one-time'
-
-  return (
-    <article className={cx('tb-card tb-plan tb-product', product.featured && 'tb-product-featured')}>
-      <p className="tb-plan-badge tb-product-tag">{isPreorder ? 'Pre-order' : 'One-time'}</p>
-      <h3>{product.name}</h3>
-      <p className="tb-plan-price">
-        <span className="tb-plan-amount">
-          <span aria-hidden="true">$</span>
-          {product.price}
-        </span>
-        <span className="tb-plan-cadence">{isPreorder ? 'one-time, charged when it ships' : 'one-time'}</span>
-      </p>
-      {product.badge ? <p className="tb-plan-note tb-product-note">{product.badge}</p> : null}
-      {product.description ? <p>{product.description}</p> : null}
-      <FeatureList items={product.includedItems} />
-      {product.cta?.label ? (
-        <a
-          className={cx('tb-button tb-button-compact', !product.featured && 'tb-button-secondary')}
-          data-analytics-event="planner_preorder_click"
-          href={product.cta.url || '#beta'}
-        >
-          {product.cta.label}
-        </a>
-      ) : null}
+      <CtaLink compact cta={plan.cta} variant={plan.featured ? 'primary' : 'secondary'} />
     </article>
   )
 }
 
 export function PricingSection({ block }: { block: PricingBlockType }) {
-  const [cycle, setCycle] = useState<BillingCycle>('annual')
+  /*
+   * Monthly first. Annual was the default so the recommended price led, but it
+   * meant a visitor's first impression of Executive was $1,111.10 rather than
+   * $111.11 — the same offer reading roughly ten times more expensive. The
+   * annual saving is still one click away, and the toggle announces it.
+   */
+  const [cycle, setCycle] = useState<BillingCycle>('monthly')
 
   const plans = block.digitalPlans || []
-  const products = (block.physicalProducts || []).filter((product) => product.enabled !== false)
   const promotion = block.betaPromotion
   const showPromotion = promotion?.enabled !== false && Boolean(promotion?.label || promotion?.body)
 
@@ -117,20 +95,8 @@ export function PricingSection({ block }: { block: PricingBlockType }) {
 
         {block.cta?.label || block.secondaryCta?.label ? (
           <div className="tb-actions tb-actions-center">
-            {block.cta?.label ? (
-              <a className="tb-button" data-analytics-event="start_free_trial" href={block.cta.url || '#beta'}>
-                {block.cta.label}
-              </a>
-            ) : null}
-            {block.secondaryCta?.label ? (
-              <a
-                className="tb-button tb-button-secondary"
-                data-analytics-event="planner_preorder_click"
-                href={block.secondaryCta.url || '#planner'}
-              >
-                {block.secondaryCta.label}
-              </a>
-            ) : null}
+            <CtaLink cta={block.cta} />
+            <CtaLink cta={block.secondaryCta} variant="secondary" />
           </div>
         ) : null}
 
@@ -178,7 +144,13 @@ export function PricingSection({ block }: { block: PricingBlockType }) {
               {promotion?.body ? <p>{promotion.body}</p> : null}
             </div>
             {promotion?.cta?.label ? (
-              <a className="tb-promo-link" data-analytics-event="beta_code_click" href={promotion.cta.url || '#beta'}>
+              <a
+                className="tb-promo-link"
+                data-analytics-event={promotion.cta.analyticsId || undefined}
+                href={promotion.cta.url || '#beta'}
+                rel={promotion.cta.newTab ? 'noopener noreferrer' : undefined}
+                target={promotion.cta.newTab ? '_blank' : undefined}
+              >
                 {promotion.cta.label}
               </a>
             ) : null}
@@ -189,24 +161,14 @@ export function PricingSection({ block }: { block: PricingBlockType }) {
           <p className="tb-platform-note">
             {block.platformNote.text}{' '}
             {block.platformNote.cta?.label ? (
-              <a href={block.platformNote.cta.url || '#platforms'}>{block.platformNote.cta.label}</a>
+              <a
+                data-analytics-event={block.platformNote.cta.analyticsId || undefined}
+                href={block.platformNote.cta.url || '#platforms'}
+              >
+                {block.platformNote.cta.label}
+              </a>
             ) : null}
           </p>
-        ) : null}
-
-        {products.length ? (
-          <div className="tb-analog" id="planner">
-            <div className="tb-lane-head">
-              <p className="tb-lane-eyebrow">{block.physicalEyebrow || 'Analog'}</p>
-            </div>
-            {block.physicalHeadline ? <h3 className="tb-analog-headline">{block.physicalHeadline}</h3> : null}
-            {block.physicalBody ? <p className="tb-analog-body">{block.physicalBody}</p> : null}
-            <div className="tb-grid tb-plan-grid">
-              {products.map((product, index) => (
-                <PhysicalProductCard key={index} product={product} />
-              ))}
-            </div>
-          </div>
         ) : null}
 
         {block.footnote ? <p className="tb-pricing-footnote">{block.footnote}</p> : null}

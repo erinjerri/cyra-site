@@ -7,7 +7,10 @@ import sharp from 'sharp'
 
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
+import { Posts } from './collections/Posts'
+import { Products } from './collections/Products'
 import { Users } from './collections/Users'
+import { PRODUCT_DESCRIPTION } from './utilities/brand'
 import { getURL } from './utilities/getURL'
 import { Footer } from './globals/Footer'
 import { Header } from './globals/Header'
@@ -18,7 +21,7 @@ export default buildConfig({
   admin: {
     user: Users.slug,
   },
-  collections: [Pages, Media, Users],
+  collections: [Pages, Posts, Products, Media, Users],
   globals: [Header, Footer, SiteSettings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'timebite-local-dev-secret',
@@ -28,12 +31,11 @@ export default buildConfig({
   }),
   plugins: [
     seoPlugin({
-      collections: ['pages'],
+      collections: ['pages', 'posts'],
       uploadsCollection: 'media',
       generateTitle: ({ doc }: { doc: { title?: string } }) =>
         doc?.title && doc.title !== 'TimeBite' ? `${doc.title} | TimeBite` : 'TimeBite',
-      generateDescription: () =>
-        'TimeBite keeps your notes, calendar, goals, and reflections in one shared memory, so the things you care about stop slipping through the week.',
+      generateDescription: () => PRODUCT_DESCRIPTION,
       generateURL: ({ doc }: { doc: { slug?: string } }) =>
         `${getURL()}${doc?.slug && doc.slug !== 'home' ? `/${doc.slug}` : ''}`,
     }),

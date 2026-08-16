@@ -1,13 +1,13 @@
 import type { Metadata } from 'next'
 
+import { OG_TITLE, PRODUCT_DESCRIPTION, PRODUCT_NAME } from './brand'
 import { getURL } from './getURL'
 
 const defaultOpenGraph: Metadata['openGraph'] = {
   type: 'website',
-  siteName: 'TimeBite',
-  title: 'TimeBite — remember what you meant to do.',
-  description:
-    'TimeBite keeps your notes, calendar, goals, and reflections in one shared memory, so the things you care about stop slipping through the week.',
+  siteName: PRODUCT_NAME,
+  title: OG_TITLE,
+  description: PRODUCT_DESCRIPTION,
   url: getURL(),
 }
 

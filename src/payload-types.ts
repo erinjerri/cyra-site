@@ -68,6 +68,8 @@ export interface Config {
   blocks: {};
   collections: {
     pages: Page;
+    posts: Post;
+    products: Product;
     media: Media;
     users: User;
     redirects: Redirect;
@@ -79,6 +81,8 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
+    products: ProductsSelect<false> | ProductsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
@@ -140,11 +144,18 @@ export interface Page {
     | HeroBlock
     | QuoteBlock
     | TimelineBlock
+    | DualLoopBlock
+    | ValuesBlock
+    | ProductDemoBlock
+    | ScaleStoryBlock
     | AboutBlock
     | FrameworkSectionBlock
     | FeatureGridBlock
     | ShowcaseBlock
+    | WorkspaceBlock
+    | AgentsBlock
     | PlatformCardsBlock
+    | ProductGridBlock
     | RoadmapBlock
     | PricingBlock
     | NewsletterBlock
@@ -174,15 +185,109 @@ export interface HeroBlock {
   body?: string | null;
   cta?: {
     label?: string | null;
+    /**
+     * Internal path (/philosophy), on-page anchor (#beta), or a full external URL (https://…).
+     */
     url?: string | null;
+    /**
+     * Turn on for links that leave the site, such as Substack. Adds rel="noopener noreferrer".
+     */
+    newTab?: boolean | null;
+    /**
+     * Optional. Rendered as data-analytics-event so this button can be tracked, e.g. join_beta_hero.
+     */
+    analyticsId?: string | null;
   };
   secondaryCta?: {
     label?: string | null;
+    /**
+     * Internal path (/philosophy), on-page anchor (#beta), or a full external URL (https://…).
+     */
     url?: string | null;
+    /**
+     * Turn on for links that leave the site, such as Substack. Adds rel="noopener noreferrer".
+     */
+    newTab?: boolean | null;
+    /**
+     * Optional. Rendered as data-analytics-event so this button can be tracked, e.g. join_beta_hero.
+     */
+    analyticsId?: string | null;
+  };
+  /**
+   * One quiet line under the buttons, e.g. "Beta on macOS • iOS, watchOS and visionOS coming soon".
+   */
+  availabilityNote?: string | null;
+  /**
+   * Screenshot. Also acts as the poster frame when a video is set.
+   */
+  image?: (string | null) | Media;
+  /**
+   * Optional public image URL used when no upload is set.
+   */
+  assetUrl?: string | null;
+  /**
+   * Describe what the screen shows, for screen readers.
+   */
+  imageAlt?: string | null;
+  /**
+   * Optional MP4/WebM. Plays with visible controls — never autoplays.
+   */
+  video?: (string | null) | Media;
+  /**
+   * Optional public video URL used when no upload is set.
+   */
+  videoUrl?: string | null;
+  /**
+   * Short line under the media.
+   */
+  mediaCaption?: string | null;
+  mediaFrame?: ('mac' | 'plain') | null;
+  /**
+   * Schematic drawn while this slot has no screenshot yet. Pick the one that matches the screen being described.
+   */
+  sketch?: ('workspace' | 'goal' | 'list' | 'matrix' | 'board' | 'calendar' | 'habits' | 'chart' | 'timeline') | null;
+  /**
+   * A second device standing in front of the desktop shot. Uncheck "Show" to render the Mac window alone — do that while the iPhone app is still unreleased rather than showing an invented screen.
+   */
+  phone?: {
+    enabled?: boolean | null;
+    /**
+     * Portrait, 1179×2556 (iPhone) or similar. App content only, no device frame.
+     */
+    image?: (string | null) | Media;
+    /**
+     * Optional public URL used when no upload is set.
+     */
+    assetUrl?: string | null;
+    imageAlt?: string | null;
+    sketch?: ('list' | 'goal' | 'habits' | 'chart') | null;
   };
   id?: string | null;
   blockName?: string | null;
   blockType: 'heroBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: string;
+  alt?: string | null;
+  /**
+   * Legacy field. Not read by anything — the storage adapter now generates public URLs automatically. Safe to leave blank; kept only so existing values are not dropped.
+   */
+  r2Url?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -236,26 +341,144 @@ export interface TimelineBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
+ * via the `definition` "DualLoopBlock".
  */
-export interface Media {
-  id: string;
-  alt?: string | null;
+export interface DualLoopBlock {
+  eyebrow?: string | null;
+  headline: string;
+  body?: string | null;
   /**
-   * Legacy field. Not read by anything — the storage adapter now generates public URLs automatically. Safe to leave blank; kept only so existing values are not dropped.
+   * One tab per brand. The first is selected by default.
    */
-  r2Url?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
+  tabs?:
+    | {
+        /**
+         * e.g. TimeBite
+         */
+        label: string;
+        /**
+         * One line under the tab bar saying what this side does.
+         */
+        tagline?: string | null;
+        /**
+         * Chip and rail colour for this tab.
+         */
+        accent?: ('blue' | 'teal' | 'gold' | 'green' | 'pink' | 'lavender') | null;
+        steps?:
+          | {
+              title: string;
+              body?: string | null;
+              /**
+               * Leave blank when the stage simply exists. Available now = shipped. Beta = usable, in the private beta. In development = being built. Planned = committed, not started. Exploring = we are looking at it and nothing more.
+               */
+              status?: ('available' | 'beta' | 'in-development' | 'planned' | 'exploring') | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'dualLoopBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ValuesBlock".
+ */
+export interface ValuesBlock {
+  eyebrow?: string | null;
+  headline: string;
+  body?: string | null;
+  /**
+   * Numbered automatically in order. One to three sentences each.
+   */
+  values?:
+    | {
+        title: string;
+        body: string;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'valuesBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductDemoBlock".
+ */
+export interface ProductDemoBlock {
+  eyebrow?: string | null;
+  headline: string;
+  body?: string | null;
+  /**
+   * Screenshot. Also acts as the poster frame when a video is set.
+   */
+  image?: (string | null) | Media;
+  /**
+   * Optional public image URL used when no upload is set.
+   */
+  assetUrl?: string | null;
+  /**
+   * Describe what the screen shows, for screen readers.
+   */
+  imageAlt?: string | null;
+  /**
+   * Optional MP4/WebM. Plays with visible controls — never autoplays.
+   */
+  video?: (string | null) | Media;
+  /**
+   * Optional public video URL used when no upload is set.
+   */
+  videoUrl?: string | null;
+  /**
+   * Short line under the media.
+   */
+  mediaCaption?: string | null;
+  mediaFrame?: ('mac' | 'plain') | null;
+  /**
+   * Schematic drawn while this slot has no screenshot yet. Pick the one that matches the screen being described.
+   */
+  sketch?: ('workspace' | 'goal' | 'list' | 'matrix' | 'board' | 'calendar' | 'habits' | 'chart' | 'timeline') | null;
+  /**
+   * Shown beside the caption, e.g. "52 seconds".
+   */
+  duration?: string | null;
+  /**
+   * Plain-text walkthrough of what the video shows. Rendered in an expandable panel under the player — the accessible equivalent for anyone who cannot or would rather not watch.
+   */
+  transcript?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'productDemoBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ScaleStoryBlock".
+ */
+export interface ScaleStoryBlock {
+  eyebrow?: string | null;
+  headline: string;
+  body?: string | null;
+  /**
+   * Ordered smallest to largest — one action, then a day, and out to a year.
+   */
+  levels?:
+    | {
+        /**
+         * e.g. ACTION, DAY, WEEK.
+         */
+        label: string;
+        title: string;
+        body?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  closingStatement?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'scaleStoryBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -294,7 +517,18 @@ export interface FrameworkSectionBlock {
   closingStatement?: string | null;
   cta?: {
     label?: string | null;
+    /**
+     * Internal path (/philosophy), on-page anchor (#beta), or a full external URL (https://…).
+     */
     url?: string | null;
+    /**
+     * Turn on for links that leave the site, such as Substack. Adds rel="noopener noreferrer".
+     */
+    newTab?: boolean | null;
+    /**
+     * Optional. Rendered as data-analytics-event so this button can be tracked, e.g. join_beta_hero.
+     */
+    analyticsId?: string | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -308,16 +542,90 @@ export interface FeatureGridBlock {
   eyebrow?: string | null;
   headline: string;
   body?: string | null;
+  /**
+   * The one-line arc shown between the two groups, e.g. "Vision → Goals → Actions → Calendar → Time → Progress". Leave blank to hide it.
+   */
+  flow?: string | null;
+  /**
+   * One group per product layer: Creating Your Reality (direction) and TimeBite (execution). Each group heads its own grid.
+   */
+  groups?:
+    | {
+        /**
+         * e.g. CREATE YOUR DIRECTION
+         */
+        label: string;
+        /**
+         * Which product this group belongs to.
+         */
+        brand?: string | null;
+        body?: string | null;
+        accent?: ('lavender' | 'blue' | 'teal' | 'gold' | 'green' | 'pink') | null;
+        /**
+         * Drag to reorder. One sentence each, roughly 10–20 words.
+         */
+        items?:
+          | {
+              title: string;
+              body?: string | null;
+              /**
+               * Check this against the app build, not against what this page used to say. Available now = shipped. Beta = usable, in the private beta. In development = being built. Planned = committed, not started. Exploring = we are looking at it and nothing more.
+               */
+              status?: ('available' | 'beta' | 'in-development' | 'planned' | 'exploring') | null;
+              enabled?: boolean | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Legacy flat list, kept so older pages still render. Prefer Groups above for anything new.
+   */
   items?:
     | {
         title: string;
         body?: string | null;
         eyebrow?: string | null;
+        /**
+         * Leave blank for a card with no badge. Anything unshipped must carry one. Available now = shipped. Beta = usable, in the private beta. In development = being built. Planned = committed, not started. Exploring = we are looking at it and nothing more.
+         */
+        status?: ('available' | 'beta' | 'in-development' | 'planned' | 'exploring') | null;
+        /**
+         * Screenshot. Also acts as the poster frame when a video is set.
+         */
         image?: (string | null) | Media;
         /**
-         * Optional public Cloudflare R2 asset URL fallback.
+         * Optional public image URL used when no upload is set.
          */
         assetUrl?: string | null;
+        /**
+         * Describe what the screen shows, for screen readers.
+         */
+        imageAlt?: string | null;
+        /**
+         * Optional MP4/WebM. Plays with visible controls — never autoplays.
+         */
+        video?: (string | null) | Media;
+        /**
+         * Optional public video URL used when no upload is set.
+         */
+        videoUrl?: string | null;
+        /**
+         * Short line under the media.
+         */
+        mediaCaption?: string | null;
+        mediaFrame?: ('mac' | 'plain') | null;
+        /**
+         * Schematic drawn while this slot has no screenshot yet. Pick the one that matches the screen being described.
+         */
+        sketch?:
+          | ('workspace' | 'goal' | 'list' | 'matrix' | 'board' | 'calendar' | 'habits' | 'chart' | 'timeline')
+          | null;
+        /**
+         * Uncheck to hide without deleting.
+         */
+        enabled?: boolean | null;
         id?: string | null;
       }[]
     | null;
@@ -333,25 +641,164 @@ export interface ShowcaseBlock {
   eyebrow?: string | null;
   headline: string;
   body?: string | null;
+  /**
+   * Number the rows — use when the rows are a sequence rather than a set.
+   */
+  numbered?: boolean | null;
   rows?:
     | {
         title: string;
         body?: string | null;
+        /**
+         * Badge on the step. Leave blank when the step is simply shipped and obvious. Available now = shipped. Beta = usable, in the private beta. In development = being built. Planned = committed, not started. Exploring = we are looking at it and nothing more.
+         */
+        status?: ('available' | 'beta' | 'in-development' | 'planned' | 'exploring') | null;
+        /**
+         * Screenshot. Also acts as the poster frame when a video is set.
+         */
         image?: (string | null) | Media;
         /**
          * Optional public image URL used when no upload is set.
          */
         assetUrl?: string | null;
         /**
-         * Describe the image for screen readers.
+         * Describe what the screen shows, for screen readers.
          */
         imageAlt?: string | null;
+        /**
+         * Optional MP4/WebM. Plays with visible controls — never autoplays.
+         */
+        video?: (string | null) | Media;
+        /**
+         * Optional public video URL used when no upload is set.
+         */
+        videoUrl?: string | null;
+        /**
+         * Short line under the media.
+         */
+        mediaCaption?: string | null;
+        mediaFrame?: ('mac' | 'plain') | null;
+        /**
+         * Schematic drawn while this slot has no screenshot yet. Pick the one that matches the screen being described.
+         */
+        sketch?:
+          | ('workspace' | 'goal' | 'list' | 'matrix' | 'board' | 'calendar' | 'habits' | 'chart' | 'timeline')
+          | null;
         id?: string | null;
       }[]
     | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'showcaseBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkspaceBlock".
+ */
+export interface WorkspaceBlock {
+  eyebrow?: string | null;
+  headline: string;
+  body?: string | null;
+  modules?:
+    | {
+        name: string;
+        description?: string | null;
+        /**
+         * Components are TimeBite surfaces — Today, Actions, Calendar. Goal areas are Creating Your Reality life domains — Career, Fitness, Finance. They are grouped separately because they are different things: one is a view, the other is a part of your life.
+         */
+        kind: 'component' | 'goal-area';
+        sketch?: ('list' | 'goal' | 'matrix' | 'board' | 'calendar' | 'habits' | 'chart' | 'timeline') | null;
+        /**
+         * Available now = shipped. Beta = usable, in the private beta. In development = being built. Planned = committed, not started. Exploring = we are looking at it and nothing more.
+         */
+        status?: ('available' | 'beta' | 'in-development' | 'planned' | 'exploring') | null;
+        /**
+         * Starts switched on in the demo workspace.
+         */
+        defaultOn?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * The sample agent suggestion. Leave the prompt blank to hide the card.
+   */
+  suggestion?: {
+    /**
+     * Which agent is speaking, e.g. "Goal Agent".
+     */
+    source?: string | null;
+    prompt?: string | null;
+    /**
+     * Name of the widget it offers to add.
+     */
+    moduleName?: string | null;
+    sketch?: ('chart' | 'timeline' | 'goal' | 'board') | null;
+    acceptLabel?: string | null;
+    dismissLabel?: string | null;
+    /**
+     * Shown after "Not now" — keep it unbothered.
+     */
+    dismissedNote?: string | null;
+  };
+  footnote?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'workspaceBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "AgentsBlock".
+ */
+export interface AgentsBlock {
+  eyebrow?: string | null;
+  headline: string;
+  body?: string | null;
+  agents?:
+    | {
+        name: string;
+        body?: string | null;
+        /**
+         * Available now = shipped. Beta = usable, in the private beta. In development = being built. Planned = committed, not started. Exploring = we are looking at it and nothing more.
+         */
+        status?: ('available' | 'beta' | 'in-development' | 'planned' | 'exploring') | null;
+        /**
+         * Outcomes, phrased as things it does for you.
+         */
+        capabilities?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        /**
+         * Scope limit shown in the card, e.g. the Finance Agent boundary.
+         */
+        disclaimer?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Points at the public roadmap and changelog. Hidden until a URL is set, so it never renders a dead button. For reference, Sunsama runs theirs on Canny at roadmap.sunsama.com — that is the obvious option if you want feedback voting alongside a changelog.
+   */
+  roadmapCta?: {
+    label?: string | null;
+    /**
+     * Internal path (/philosophy), on-page anchor (#beta), or a full external URL (https://…).
+     */
+    url?: string | null;
+    /**
+     * Turn on for links that leave the site, such as Substack. Adds rel="noopener noreferrer".
+     */
+    newTab?: boolean | null;
+    /**
+     * Optional. Rendered as data-analytics-event so this button can be tracked, e.g. join_beta_hero.
+     */
+    analyticsId?: string | null;
+  };
+  footnote?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'agentsBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -365,13 +812,134 @@ export interface PlatformCardsBlock {
     | {
         title: string;
         body?: string | null;
-        status?: ('available' | 'in-development' | 'planned') | null;
+        /**
+         * Available now = shipped. Beta = usable, in the private beta. In development = being built. Planned = committed, not started. Exploring = we are looking at it and nothing more.
+         */
+        status?: ('available' | 'beta' | 'in-development' | 'planned' | 'exploring') | null;
         id?: string | null;
       }[]
     | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'platformCardsBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductGridBlock".
+ */
+export interface ProductGridBlock {
+  eyebrow?: string | null;
+  headline: string;
+  body?: string | null;
+  /**
+   * Leave empty to show every product marked "Show on the site", ordered by its sort order. Pick products here to show only those, in the order you choose.
+   */
+  products?: (string | Product)[] | null;
+  cta?: {
+    label?: string | null;
+    /**
+     * Internal path (/philosophy), on-page anchor (#beta), or a full external URL (https://…).
+     */
+    url?: string | null;
+    /**
+     * Turn on for links that leave the site, such as Substack. Adds rel="noopener noreferrer".
+     */
+    newTab?: boolean | null;
+    /**
+     * Optional. Rendered as data-analytics-event so this button can be tracked, e.g. join_beta_hero.
+     */
+    analyticsId?: string | null;
+  };
+  /**
+   * Small print under the grid, e.g. that nothing is charged yet.
+   */
+  footnote?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'productGridBlock';
+}
+/**
+ * Planners, pads and stationery. Shown on the homepage by the "Physical Product Grid" block.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products".
+ */
+export interface Product {
+  id: string;
+  /**
+   * e.g. Planner, Task & Time, Goal Notes.
+   */
+  name: string;
+  /**
+   * Lowercase, hyphenated, unique. Used for future product pages and links, e.g. task-and-time.
+   */
+  slug: string;
+  /**
+   * One or two sentences. This is what appears on the card.
+   */
+  description?: string | null;
+  productType?: ('planner' | 'pad' | 'notes' | 'tools' | 'other') | null;
+  /**
+   * Optional line under the name, e.g. "Quarterly · Annual · Undated".
+   */
+  variantNote?: string | null;
+  /**
+   * Concept = an idea we are showing. Sample = physically prototyped. Preorder = taking orders. Available = shipping. Sold out = none left. Nothing may say "available" until it actually ships.
+   */
+  status: 'concept' | 'sample' | 'preorder' | 'available' | 'sold-out';
+  /**
+   * Uploaded through Media, so they go to Cloudflare R2 when R2 is enabled. The first image is the one shown on the card.
+   */
+  images?:
+    | {
+        image: string | Media;
+        /**
+         * Overrides the alt text set on the Media item.
+         */
+        alt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Number only, no currency symbol, e.g. 35.55. Leave blank while pricing is undecided.
+   */
+  price?: string | null;
+  /**
+   * Optional. Shown struck through beside the price.
+   */
+  compareAtPrice?: string | null;
+  /**
+   * Leave the label blank to render the card without a button.
+   */
+  cta?: {
+    label?: string | null;
+    /**
+     * Internal path (/philosophy), on-page anchor (#beta), or a full external URL (https://…).
+     */
+    url?: string | null;
+    /**
+     * Turn on for links that leave the site, such as Substack. Adds rel="noopener noreferrer".
+     */
+    newTab?: boolean | null;
+    /**
+     * Optional. Rendered as data-analytics-event so this button can be tracked, e.g. join_beta_hero.
+     */
+    analyticsId?: string | null;
+  };
+  /**
+   * Lower numbers appear first.
+   */
+  sortOrder?: number | null;
+  /**
+   * Gives the card the highlighted treatment.
+   */
+  featured?: boolean | null;
+  /**
+   * Uncheck to keep a product configured but hidden, without deleting it.
+   */
+  enabled?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -392,7 +960,18 @@ export interface RoadmapBlock {
    */
   cta?: {
     label?: string | null;
+    /**
+     * Internal path (/philosophy), on-page anchor (#beta), or a full external URL (https://…).
+     */
     url?: string | null;
+    /**
+     * Turn on for links that leave the site, such as Substack. Adds rel="noopener noreferrer".
+     */
+    newTab?: boolean | null;
+    /**
+     * Optional. Rendered as data-analytics-event so this button can be tracked, e.g. join_beta_hero.
+     */
+    analyticsId?: string | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -408,11 +987,33 @@ export interface PricingBlock {
   body?: string | null;
   cta?: {
     label?: string | null;
+    /**
+     * Internal path (/philosophy), on-page anchor (#beta), or a full external URL (https://…).
+     */
     url?: string | null;
+    /**
+     * Turn on for links that leave the site, such as Substack. Adds rel="noopener noreferrer".
+     */
+    newTab?: boolean | null;
+    /**
+     * Optional. Rendered as data-analytics-event so this button can be tracked, e.g. join_beta_hero.
+     */
+    analyticsId?: string | null;
   };
   secondaryCta?: {
     label?: string | null;
+    /**
+     * Internal path (/philosophy), on-page anchor (#beta), or a full external URL (https://…).
+     */
     url?: string | null;
+    /**
+     * Turn on for links that leave the site, such as Substack. Adds rel="noopener noreferrer".
+     */
+    newTab?: boolean | null;
+    /**
+     * Optional. Rendered as data-analytics-event so this button can be tracked, e.g. join_beta_hero.
+     */
+    analyticsId?: string | null;
   };
   /**
    * Free trial line above the plans, e.g. "Try TimeBite free for 30 days."
@@ -446,12 +1047,27 @@ export interface PricingBlock {
         features?:
           | {
               text: string;
+              /**
+               * Tags an unshipped line so availability never has to be written into the text itself. Available now = shipped. Beta = usable, in the private beta. In development = being built. Planned = committed, not started. Exploring = we are looking at it and nothing more.
+               */
+              status?: ('available' | 'beta' | 'in-development' | 'planned' | 'exploring') | null;
               id?: string | null;
             }[]
           | null;
         cta?: {
           label?: string | null;
+          /**
+           * Internal path (/philosophy), on-page anchor (#beta), or a full external URL (https://…).
+           */
           url?: string | null;
+          /**
+           * Turn on for links that leave the site, such as Substack. Adds rel="noopener noreferrer".
+           */
+          newTab?: boolean | null;
+          /**
+           * Optional. Rendered as data-analytics-event so this button can be tracked, e.g. join_beta_hero.
+           */
+          analyticsId?: string | null;
         };
         id?: string | null;
       }[]
@@ -465,7 +1081,18 @@ export interface PricingBlock {
     body?: string | null;
     cta?: {
       label?: string | null;
+      /**
+       * Internal path (/philosophy), on-page anchor (#beta), or a full external URL (https://…).
+       */
       url?: string | null;
+      /**
+       * Turn on for links that leave the site, such as Substack. Adds rel="noopener noreferrer".
+       */
+      newTab?: boolean | null;
+      /**
+       * Optional. Rendered as data-analytics-event so this button can be tracked, e.g. join_beta_hero.
+       */
+      analyticsId?: string | null;
     };
   };
   /**
@@ -475,37 +1102,20 @@ export interface PricingBlock {
     text?: string | null;
     cta?: {
       label?: string | null;
+      /**
+       * Internal path (/philosophy), on-page anchor (#beta), or a full external URL (https://…).
+       */
       url?: string | null;
+      /**
+       * Turn on for links that leave the site, such as Substack. Adds rel="noopener noreferrer".
+       */
+      newTab?: boolean | null;
+      /**
+       * Optional. Rendered as data-analytics-event so this button can be tracked, e.g. join_beta_hero.
+       */
+      analyticsId?: string | null;
     };
   };
-  physicalEyebrow?: string | null;
-  physicalHeadline?: string | null;
-  physicalBody?: string | null;
-  physicalProducts?:
-    | {
-        name: string;
-        price: string;
-        billingType?: ('preorder' | 'one-time') | null;
-        description?: string | null;
-        includedItems?:
-          | {
-              text: string;
-              id?: string | null;
-            }[]
-          | null;
-        badge?: string | null;
-        featured?: boolean | null;
-        /**
-         * Uncheck to keep an offer configured but hidden from the page.
-         */
-        enabled?: boolean | null;
-        cta?: {
-          label?: string | null;
-          url?: string | null;
-        };
-        id?: string | null;
-      }[]
-    | null;
   footnote?: string | null;
   id?: string | null;
   blockName?: string | null;
@@ -521,11 +1131,33 @@ export interface NewsletterBlock {
   body?: string | null;
   cta?: {
     label?: string | null;
+    /**
+     * Internal path (/philosophy), on-page anchor (#beta), or a full external URL (https://…).
+     */
     url?: string | null;
+    /**
+     * Turn on for links that leave the site, such as Substack. Adds rel="noopener noreferrer".
+     */
+    newTab?: boolean | null;
+    /**
+     * Optional. Rendered as data-analytics-event so this button can be tracked, e.g. join_beta_hero.
+     */
+    analyticsId?: string | null;
   };
   secondaryCta?: {
     label?: string | null;
+    /**
+     * Internal path (/philosophy), on-page anchor (#beta), or a full external URL (https://…).
+     */
     url?: string | null;
+    /**
+     * Turn on for links that leave the site, such as Substack. Adds rel="noopener noreferrer".
+     */
+    newTab?: boolean | null;
+    /**
+     * Optional. Rendered as data-analytics-event so this button can be tracked, e.g. join_beta_hero.
+     */
+    analyticsId?: string | null;
   };
   formNote?: string | null;
   id?: string | null;
@@ -561,11 +1193,33 @@ export interface CtaBlock {
   body?: string | null;
   cta?: {
     label?: string | null;
+    /**
+     * Internal path (/philosophy), on-page anchor (#beta), or a full external URL (https://…).
+     */
     url?: string | null;
+    /**
+     * Turn on for links that leave the site, such as Substack. Adds rel="noopener noreferrer".
+     */
+    newTab?: boolean | null;
+    /**
+     * Optional. Rendered as data-analytics-event so this button can be tracked, e.g. join_beta_hero.
+     */
+    analyticsId?: string | null;
   };
   secondaryCta?: {
     label?: string | null;
+    /**
+     * Internal path (/philosophy), on-page anchor (#beta), or a full external URL (https://…).
+     */
     url?: string | null;
+    /**
+     * Turn on for links that leave the site, such as Substack. Adds rel="noopener noreferrer".
+     */
+    newTab?: boolean | null;
+    /**
+     * Optional. Rendered as data-analytics-event so this button can be tracked, e.g. join_beta_hero.
+     */
+    analyticsId?: string | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -592,6 +1246,71 @@ export interface TestimonialsBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'testimonialsBlock';
+}
+/**
+ * Written posts. Shown at /blog, newest first.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: string;
+  title: string;
+  /**
+   * Lowercase and hyphenated. The URL becomes /blog/<slug>.
+   */
+  slug: string;
+  /**
+   * One or two sentences shown on the blog index and used as the SEO description when none is set.
+   */
+  excerpt?: string | null;
+  /**
+   * Shown on the card and at the top of the post. Landscape, 1600×900 or larger. Uploaded through Media, so it goes to R2.
+   */
+  heroImage?: (string | null) | Media;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  category?: ('intentional-living' | 'planning' | 'building' | 'career' | 'notes') | null;
+  /**
+   * Controls ordering on the index. Leave blank and it fills in on publish.
+   */
+  publishedAt?: string | null;
+  /**
+   * Optional. Shown beside the date. Leave blank to hide it.
+   */
+  readingMinutes?: number | null;
+  /**
+   * Link to this post on Substack. When set, the end of the post shows "Read this on Substack" automatically — you never type that line yourself. Leave blank to fall back to the site-wide Substack link.
+   */
+  substackUrl?: string | null;
+  /**
+   * Pins this post to the top of the index.
+   */
+  featured?: boolean | null;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (string | null) | Media;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -664,6 +1383,14 @@ export interface PayloadLockedDocument {
         value: string | Page;
       } | null)
     | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'products';
+        value: string | Product;
+      } | null)
+    | ({
         relationTo: 'media';
         value: string | Media;
       } | null)
@@ -730,11 +1457,18 @@ export interface PagesSelect<T extends boolean = true> {
         heroBlock?: T | HeroBlockSelect<T>;
         quoteBlock?: T | QuoteBlockSelect<T>;
         timelineBlock?: T | TimelineBlockSelect<T>;
+        dualLoopBlock?: T | DualLoopBlockSelect<T>;
+        valuesBlock?: T | ValuesBlockSelect<T>;
+        productDemoBlock?: T | ProductDemoBlockSelect<T>;
+        scaleStoryBlock?: T | ScaleStoryBlockSelect<T>;
         aboutBlock?: T | AboutBlockSelect<T>;
         frameworkSectionBlock?: T | FrameworkSectionBlockSelect<T>;
         featureGridBlock?: T | FeatureGridBlockSelect<T>;
         showcaseBlock?: T | ShowcaseBlockSelect<T>;
+        workspaceBlock?: T | WorkspaceBlockSelect<T>;
+        agentsBlock?: T | AgentsBlockSelect<T>;
         platformCardsBlock?: T | PlatformCardsBlockSelect<T>;
+        productGridBlock?: T | ProductGridBlockSelect<T>;
         roadmapBlock?: T | RoadmapBlockSelect<T>;
         pricingBlock?: T | PricingBlockSelect<T>;
         newsletterBlock?: T | NewsletterBlockSelect<T>;
@@ -766,12 +1500,34 @@ export interface HeroBlockSelect<T extends boolean = true> {
     | {
         label?: T;
         url?: T;
+        newTab?: T;
+        analyticsId?: T;
       };
   secondaryCta?:
     | T
     | {
         label?: T;
         url?: T;
+        newTab?: T;
+        analyticsId?: T;
+      };
+  availabilityNote?: T;
+  image?: T;
+  assetUrl?: T;
+  imageAlt?: T;
+  video?: T;
+  videoUrl?: T;
+  mediaCaption?: T;
+  mediaFrame?: T;
+  sketch?: T;
+  phone?:
+    | T
+    | {
+        enabled?: T;
+        image?: T;
+        assetUrl?: T;
+        imageAlt?: T;
+        sketch?: T;
       };
   id?: T;
   blockName?: T;
@@ -814,6 +1570,92 @@ export interface TimelineBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DualLoopBlock_select".
+ */
+export interface DualLoopBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  headline?: T;
+  body?: T;
+  tabs?:
+    | T
+    | {
+        label?: T;
+        tagline?: T;
+        accent?: T;
+        steps?:
+          | T
+          | {
+              title?: T;
+              body?: T;
+              status?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ValuesBlock_select".
+ */
+export interface ValuesBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  headline?: T;
+  body?: T;
+  values?:
+    | T
+    | {
+        title?: T;
+        body?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductDemoBlock_select".
+ */
+export interface ProductDemoBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  headline?: T;
+  body?: T;
+  image?: T;
+  assetUrl?: T;
+  imageAlt?: T;
+  video?: T;
+  videoUrl?: T;
+  mediaCaption?: T;
+  mediaFrame?: T;
+  sketch?: T;
+  duration?: T;
+  transcript?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ScaleStoryBlock_select".
+ */
+export interface ScaleStoryBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  headline?: T;
+  body?: T;
+  levels?:
+    | T
+    | {
+        label?: T;
+        title?: T;
+        body?: T;
+        id?: T;
+      };
+  closingStatement?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "AboutBlock_select".
  */
 export interface AboutBlockSelect<T extends boolean = true> {
@@ -851,6 +1693,8 @@ export interface FrameworkSectionBlockSelect<T extends boolean = true> {
     | {
         label?: T;
         url?: T;
+        newTab?: T;
+        analyticsId?: T;
       };
   id?: T;
   blockName?: T;
@@ -863,14 +1707,41 @@ export interface FeatureGridBlockSelect<T extends boolean = true> {
   eyebrow?: T;
   headline?: T;
   body?: T;
+  flow?: T;
+  groups?:
+    | T
+    | {
+        label?: T;
+        brand?: T;
+        body?: T;
+        accent?: T;
+        items?:
+          | T
+          | {
+              title?: T;
+              body?: T;
+              status?: T;
+              enabled?: T;
+              id?: T;
+            };
+        id?: T;
+      };
   items?:
     | T
     | {
         title?: T;
         body?: T;
         eyebrow?: T;
+        status?: T;
         image?: T;
         assetUrl?: T;
+        imageAlt?: T;
+        video?: T;
+        videoUrl?: T;
+        mediaCaption?: T;
+        mediaFrame?: T;
+        sketch?: T;
+        enabled?: T;
         id?: T;
       };
   id?: T;
@@ -884,16 +1755,92 @@ export interface ShowcaseBlockSelect<T extends boolean = true> {
   eyebrow?: T;
   headline?: T;
   body?: T;
+  numbered?: T;
   rows?:
     | T
     | {
         title?: T;
         body?: T;
+        status?: T;
         image?: T;
         assetUrl?: T;
         imageAlt?: T;
+        video?: T;
+        videoUrl?: T;
+        mediaCaption?: T;
+        mediaFrame?: T;
+        sketch?: T;
         id?: T;
       };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkspaceBlock_select".
+ */
+export interface WorkspaceBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  headline?: T;
+  body?: T;
+  modules?:
+    | T
+    | {
+        name?: T;
+        description?: T;
+        kind?: T;
+        sketch?: T;
+        status?: T;
+        defaultOn?: T;
+        id?: T;
+      };
+  suggestion?:
+    | T
+    | {
+        source?: T;
+        prompt?: T;
+        moduleName?: T;
+        sketch?: T;
+        acceptLabel?: T;
+        dismissLabel?: T;
+        dismissedNote?: T;
+      };
+  footnote?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "AgentsBlock_select".
+ */
+export interface AgentsBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  headline?: T;
+  body?: T;
+  agents?:
+    | T
+    | {
+        name?: T;
+        body?: T;
+        status?: T;
+        capabilities?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        disclaimer?: T;
+        id?: T;
+      };
+  roadmapCta?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        newTab?: T;
+        analyticsId?: T;
+      };
+  footnote?: T;
   id?: T;
   blockName?: T;
 }
@@ -918,6 +1865,27 @@ export interface PlatformCardsBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductGridBlock_select".
+ */
+export interface ProductGridBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  headline?: T;
+  body?: T;
+  products?: T;
+  cta?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        newTab?: T;
+        analyticsId?: T;
+      };
+  footnote?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "RoadmapBlock_select".
  */
 export interface RoadmapBlockSelect<T extends boolean = true> {
@@ -935,6 +1903,8 @@ export interface RoadmapBlockSelect<T extends boolean = true> {
     | {
         label?: T;
         url?: T;
+        newTab?: T;
+        analyticsId?: T;
       };
   id?: T;
   blockName?: T;
@@ -952,12 +1922,16 @@ export interface PricingBlockSelect<T extends boolean = true> {
     | {
         label?: T;
         url?: T;
+        newTab?: T;
+        analyticsId?: T;
       };
   secondaryCta?:
     | T
     | {
         label?: T;
         url?: T;
+        newTab?: T;
+        analyticsId?: T;
       };
   trialCopy?: T;
   digitalEyebrow?: T;
@@ -978,6 +1952,7 @@ export interface PricingBlockSelect<T extends boolean = true> {
           | T
           | {
               text?: T;
+              status?: T;
               id?: T;
             };
         cta?:
@@ -985,6 +1960,8 @@ export interface PricingBlockSelect<T extends boolean = true> {
           | {
               label?: T;
               url?: T;
+              newTab?: T;
+              analyticsId?: T;
             };
         id?: T;
       };
@@ -999,6 +1976,8 @@ export interface PricingBlockSelect<T extends boolean = true> {
           | {
               label?: T;
               url?: T;
+              newTab?: T;
+              analyticsId?: T;
             };
       };
   platformNote?:
@@ -1010,34 +1989,9 @@ export interface PricingBlockSelect<T extends boolean = true> {
           | {
               label?: T;
               url?: T;
+              newTab?: T;
+              analyticsId?: T;
             };
-      };
-  physicalEyebrow?: T;
-  physicalHeadline?: T;
-  physicalBody?: T;
-  physicalProducts?:
-    | T
-    | {
-        name?: T;
-        price?: T;
-        billingType?: T;
-        description?: T;
-        includedItems?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-        badge?: T;
-        featured?: T;
-        enabled?: T;
-        cta?:
-          | T
-          | {
-              label?: T;
-              url?: T;
-            };
-        id?: T;
       };
   footnote?: T;
   id?: T;
@@ -1056,12 +2010,16 @@ export interface NewsletterBlockSelect<T extends boolean = true> {
     | {
         label?: T;
         url?: T;
+        newTab?: T;
+        analyticsId?: T;
       };
   secondaryCta?:
     | T
     | {
         label?: T;
         url?: T;
+        newTab?: T;
+        analyticsId?: T;
       };
   formNote?: T;
   id?: T;
@@ -1098,12 +2056,16 @@ export interface CtaBlockSelect<T extends boolean = true> {
     | {
         label?: T;
         url?: T;
+        newTab?: T;
+        analyticsId?: T;
       };
   secondaryCta?:
     | T
     | {
         label?: T;
         url?: T;
+        newTab?: T;
+        analyticsId?: T;
       };
   id?: T;
   blockName?: T;
@@ -1128,6 +2090,66 @@ export interface TestimonialsBlockSelect<T extends boolean = true> {
       };
   id?: T;
   blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  excerpt?: T;
+  heroImage?: T;
+  content?: T;
+  category?: T;
+  publishedAt?: T;
+  readingMinutes?: T;
+  substackUrl?: T;
+  featured?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products_select".
+ */
+export interface ProductsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  description?: T;
+  productType?: T;
+  variantNote?: T;
+  status?: T;
+  images?:
+    | T
+    | {
+        image?: T;
+        alt?: T;
+        id?: T;
+      };
+  price?: T;
+  compareAtPrice?: T;
+  cta?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        newTab?: T;
+        analyticsId?: T;
+      };
+  sortOrder?: T;
+  featured?: T;
+  enabled?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1243,7 +2265,18 @@ export interface Header {
     | null;
   cta?: {
     label?: string | null;
+    /**
+     * Internal path (/philosophy), on-page anchor (#beta), or a full external URL (https://…).
+     */
     url?: string | null;
+    /**
+     * Turn on for links that leave the site, such as Substack. Adds rel="noopener noreferrer".
+     */
+    newTab?: boolean | null;
+    /**
+     * Optional. Rendered as data-analytics-event so this button can be tracked, e.g. join_beta_hero.
+     */
+    analyticsId?: string | null;
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1255,94 +2288,74 @@ export interface Header {
 export interface Footer {
   id: string;
   brandStatement?: string | null;
-  explore: {
-    title: string;
+  /**
+   * Drag to reorder. Each column gets its own accent colour in order.
+   */
+  columns?:
+    | {
+        title: string;
+        accent?: ('blue' | 'teal' | 'gold' | 'green' | 'pink' | 'lavender') | null;
+        links?:
+          | {
+              label: string;
+              url?: string | null;
+              /**
+               * Renders as a disabled label instead of a link when no page exists yet.
+               */
+              comingSoon?: boolean | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Social icons centred above the legal line.
+   */
+  connect?: {
+    title?: string | null;
     links?:
       | {
-          label: string;
-          url?: string | null;
           /**
-           * Renders as a disabled label instead of a link when no page exists yet.
+           * Picks the icon. Only these have artwork.
            */
-          comingSoon?: boolean | null;
+          platform:
+            | 'github'
+            | 'linkedin'
+            | 'substack'
+            | 'youtube'
+            | 'instagram'
+            | 'x'
+            | 'tiktok'
+            | 'pinterest'
+            | 'discord';
+          /**
+           * Leave blank and the icon renders dimmed and unclickable.
+           */
+          url?: string | null;
           id?: string | null;
         }[]
       | null;
   };
-  product: {
-    title: string;
-    links?:
-      | {
-          label: string;
-          url?: string | null;
-          /**
-           * Renders as a disabled label instead of a link when no page exists yet.
-           */
-          comingSoon?: boolean | null;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  comingSoon: {
-    title: string;
-    links?:
-      | {
-          label: string;
-          url?: string | null;
-          /**
-           * Renders as a disabled label instead of a link when no page exists yet.
-           */
-          comingSoon?: boolean | null;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  learn: {
-    title: string;
-    links?:
-      | {
-          label: string;
-          url?: string | null;
-          /**
-           * Renders as a disabled label instead of a link when no page exists yet.
-           */
-          comingSoon?: boolean | null;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  company: {
-    title: string;
-    links?:
-      | {
-          label: string;
-          url?: string | null;
-          /**
-           * Renders as a disabled label instead of a link when no page exists yet.
-           */
-          comingSoon?: boolean | null;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  social: {
-    title: string;
-    links?:
-      | {
-          label: string;
-          url?: string | null;
-          /**
-           * Renders as a disabled label instead of a link when no page exists yet.
-           */
-          comingSoon?: boolean | null;
-          id?: string | null;
-        }[]
-      | null;
-  };
+  legalLinks?:
+    | {
+        label: string;
+        url?: string | null;
+        /**
+         * Renders as a disabled label instead of a link when no page exists yet.
+         */
+        comingSoon?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
   /**
    * e.g. "© Creating Your Reality. All rights reserved."
    */
   legalNote?: string | null;
+  /**
+   * Small credit line, e.g. "Made with Payload CMS".
+   */
+  colophon?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1360,6 +2373,27 @@ export interface SiteSetting {
   openGraphDescription?: string | null;
   headerTag?: string | null;
   footerBrandStatement?: string | null;
+  /**
+   * The site-wide default for the beta button. Blocks that set their own button override this; blocks that leave it blank fall back to here. This is the one place to change where "Join the TimeBite Beta" points.
+   */
+  betaCta?: {
+    label?: string | null;
+    /**
+     * Internal path (/philosophy), on-page anchor (#beta), or a full external URL (https://…).
+     */
+    url?: string | null;
+    /**
+     * Turn on for links that leave the site, such as Substack. Adds rel="noopener noreferrer".
+     */
+    newTab?: boolean | null;
+    /**
+     * Optional. Rendered as data-analytics-event so this button can be tracked, e.g. join_beta_hero.
+     */
+    analyticsId?: string | null;
+  };
+  /**
+   * Superseded by "Beta call to action" above. Kept so existing values are not dropped.
+   */
   betaButtonLabel?: string | null;
   substackButtonLabel?: string | null;
   notFoundCtaLabel?: string | null;
@@ -1386,6 +2420,8 @@ export interface HeaderSelect<T extends boolean = true> {
     | {
         label?: T;
         url?: T;
+        newTab?: T;
+        analyticsId?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -1397,85 +2433,43 @@ export interface HeaderSelect<T extends boolean = true> {
  */
 export interface FooterSelect<T extends boolean = true> {
   brandStatement?: T;
-  explore?:
+  columns?:
     | T
     | {
         title?: T;
+        accent?: T;
         links?:
           | T
           | {
               label?: T;
               url?: T;
               comingSoon?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  connect?:
+    | T
+    | {
+        title?: T;
+        links?:
+          | T
+          | {
+              platform?: T;
+              url?: T;
               id?: T;
             };
       };
-  product?:
+  legalLinks?:
     | T
     | {
-        title?: T;
-        links?:
-          | T
-          | {
-              label?: T;
-              url?: T;
-              comingSoon?: T;
-              id?: T;
-            };
-      };
-  comingSoon?:
-    | T
-    | {
-        title?: T;
-        links?:
-          | T
-          | {
-              label?: T;
-              url?: T;
-              comingSoon?: T;
-              id?: T;
-            };
-      };
-  learn?:
-    | T
-    | {
-        title?: T;
-        links?:
-          | T
-          | {
-              label?: T;
-              url?: T;
-              comingSoon?: T;
-              id?: T;
-            };
-      };
-  company?:
-    | T
-    | {
-        title?: T;
-        links?:
-          | T
-          | {
-              label?: T;
-              url?: T;
-              comingSoon?: T;
-              id?: T;
-            };
-      };
-  social?:
-    | T
-    | {
-        title?: T;
-        links?:
-          | T
-          | {
-              label?: T;
-              url?: T;
-              comingSoon?: T;
-              id?: T;
-            };
+        label?: T;
+        url?: T;
+        comingSoon?: T;
+        id?: T;
       };
   legalNote?: T;
+  colophon?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1493,6 +2487,14 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   openGraphDescription?: T;
   headerTag?: T;
   footerBrandStatement?: T;
+  betaCta?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        newTab?: T;
+        analyticsId?: T;
+      };
   betaButtonLabel?: T;
   substackButtonLabel?: T;
   notFoundCtaLabel?: T;

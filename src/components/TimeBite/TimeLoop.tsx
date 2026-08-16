@@ -18,7 +18,7 @@ const DASH = SLOT - 20 // 20px gap between segments
 const INNER_R = 94
 const INNER_C = 2 * Math.PI * INNER_R
 
-// Matches the verb colours used across the site: Capture, Connect, Reflect, Act, Grow.
+// One segment per stage of the loop: Plan, Focus, Track, Reflect, Improve.
 const SEGMENT_COLORS = ['var(--tb-gold)', 'var(--tb-blue)', 'var(--tb-lavender)', 'var(--tb-green)', '#e8bcc8']
 
 export function TimeLoop() {
@@ -27,7 +27,7 @@ export function TimeLoop() {
       className="tb-loop-svg"
       viewBox={`0 0 ${SIZE} ${SIZE}`}
       role="img"
-      aria-label="A continuous loop divided into five segments: capture, connect, reflect, act, and grow."
+      aria-label="A continuous loop divided into five segments: plan, focus, track, reflect, and improve."
     >
       {/* clock ticks */}
       <g opacity="0.35">

@@ -1,22 +1,31 @@
+import { AdaptiveWorkspace } from './AdaptiveWorkspace'
+import { AgentRoadmap } from './AgentRoadmap'
 import { BetaSignup } from './BetaSignup'
+import { CtaLink } from './CtaLink'
+import { DualLoop } from './DualLoop'
+import { MediaFrame } from './MediaFrame'
 import { PricingSection } from './PricingSection'
+import { ProductDemo } from './ProductDemo'
+import { ProductGrid } from './ProductGrid'
+import { ProductShowcase } from './ProductShowcase'
+import { ScaleStory } from './ScaleStory'
+import { StatusBadge } from './StatusBadge'
 import { TimeLoop } from './TimeLoop'
+import { resolveMedia } from './media'
 import type {
+  AgentsBlockType,
+  DualLoopBlockType,
   FAQBlockType,
   PricingBlockType,
-  ShowcaseRow,
+  ProductGridBlockType,
   TestimonialsBlockType,
   TimeBiteBlock,
   TimeBiteItem,
+  ValuesBlockType,
+  WorkspaceBlockType,
 } from './types'
 
 const cx = (...classes: Array<string | false | undefined>) => classes.filter(Boolean).join(' ')
-
-const statusLabel: Record<string, string> = {
-  available: 'Available now',
-  'in-development': 'In development',
-  planned: 'Planned',
-}
 
 type HeaderContent = { eyebrow?: string; headline?: string; body?: string }
 
@@ -30,27 +39,15 @@ function SectionHeader({ block, align = 'center' }: { block: HeaderContent; alig
   )
 }
 
-function Button({ cta, variant = 'primary' }: { cta?: { label?: string; url?: string }; variant?: 'primary' | 'secondary' }) {
-  if (!cta?.label) return null
+// Buttons render through CtaLink so new-tab behaviour and analytics ids stay
+// CMS-controlled. Nothing in this file contains a URL.
+const Button = CtaLink
 
-  return (
-    <a className={cx('tb-button', variant === 'secondary' && 'tb-button-secondary')} href={cta.url || '#'}>
-      {cta.label}
-    </a>
-  )
-}
-
-function Card({ item, index }: { item: TimeBiteItem; index?: number }) {
-  return (
-    <article className="tb-card">
-      {typeof index === 'number' ? <span className="tb-card-index">{String(index + 1).padStart(2, '0')}</span> : null}
-      {item.eyebrow ? <p className="tb-card-eyebrow">{item.eyebrow}</p> : null}
-      {item.title ? <h3>{item.title}</h3> : null}
-      {item.body ? <p>{item.body}</p> : null}
-    </article>
-  )
-}
-
+/**
+ * Copy is centred and narrow; the product shot underneath runs the full width
+ * of the shell. On a 13" MacBook that is roughly 1120px of screenshot, which
+ * is the difference between reading the interface and squinting at it.
+ */
 function Hero({ block }: { block: TimeBiteBlock }) {
   return (
     <section className="tb-hero">
@@ -62,6 +59,39 @@ function Hero({ block }: { block: TimeBiteBlock }) {
           <Button cta={block.cta} />
           <Button cta={block.secondaryCta} variant="secondary" />
         </div>
+        {block.availabilityNote ? <p className="tb-hero-availability">{block.availabilityNote}</p> : null}
+      </div>
+      <div className="tb-shell tb-hero-media">
+        <ProductShowcase desktop={block} phone={block.phone} />
+      </div>
+    </section>
+  )
+}
+
+/**
+ * Numbered values in wide cards. Three across on desktop so six values make two
+ * clean rows, and the number is the visual anchor rather than an icon.
+ */
+function Values({ block }: { block: ValuesBlockType }) {
+  const values = block.values || []
+
+  if (values.length === 0) return null
+
+  return (
+    <section className="tb-section tb-values" id="values">
+      <div className="tb-shell">
+        <SectionHeader block={block} />
+        <ol className="tb-values-grid">
+          {values.map((value, index) => (
+            <li className="tb-value" key={index}>
+              <span aria-hidden="true" className="tb-value-index">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <h3>{value.title}</h3>
+              {value.body ? <p>{value.body}</p> : null}
+            </li>
+          ))}
+        </ol>
       </div>
     </section>
   )
@@ -82,7 +112,7 @@ function Quote({ block }: { block: TimeBiteBlock }) {
 
 function Timeline({ block }: { block: TimeBiteBlock }) {
   const steps = block.steps || []
-  const image = resolveImage(block)
+  const media = resolveMedia(block)
 
   return (
     <section className="tb-section" id="how-it-works">
@@ -90,9 +120,9 @@ function Timeline({ block }: { block: TimeBiteBlock }) {
         <SectionHeader block={block} />
         <div className="tb-loop-layout">
           <div className="tb-loop-media">
-            {image ? (
+            {media.poster ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={image.src} alt={image.alt} loading="lazy" />
+              <img src={media.poster} alt={media.alt} loading="lazy" />
             ) : (
               <TimeLoop />
             )}
@@ -160,20 +190,81 @@ function FrameworkSection({ block }: { block: TimeBiteBlock }) {
   )
 }
 
+/**
+ * Intro stacked above a full-width grid, deliberately not `tb-section-layout`.
+ *
+ * That shared two-column layout gives the content side 1.2fr of the shell minus
+ * a 76px gap — about 626px at desktop. Three cards inside that are ~199px wide,
+ * leaving ~151px of text, which wraps a normal sentence over seven or more
+ * lines and turns every card into a tall portrait sliver. Stacking the header
+ * gives each card ~364px instead, so a sentence takes two or three lines.
+ */
 function FeatureGrid({ block }: { block: TimeBiteBlock }) {
-  const items = block.items || []
+  const groups = (block.groups || []).filter((group) => (group.items || []).length > 0)
+  const flatItems = (block.items || []).filter((item) => item.enabled !== false)
 
   return (
-    <section className="tb-section" id="features">
-      <div className="tb-shell tb-section-layout">
+    <section className="tb-section tb-features" id="features">
+      <div className="tb-shell">
         <SectionHeader block={block} />
-        <div className="tb-grid tb-feature-grid">
-          {items.map((item, index) => (
-            <Card item={item} key={index} />
-          ))}
-        </div>
+
+        {/* The arc between the two layers, stated once and then left alone. */}
+        {block.flow ? (
+          <p className="tb-feature-flow">
+            {block.flow.split('→').map((step, index) => (
+              <span key={index}>
+                {index > 0 ? <span aria-hidden="true">→</span> : null}
+                {step.trim()}
+              </span>
+            ))}
+          </p>
+        ) : null}
+
+        {groups.length > 0
+          ? groups.map((group, index) => (
+              <div
+                className="tb-feature-group"
+                key={index}
+                style={{ '--tb-group-accent': `var(--tb-chip-${group.accent || 'lavender'})` } as React.CSSProperties}
+              >
+                <div className="tb-feature-group-head">
+                  <p className="tb-feature-group-label">{group.label}</p>
+                  {group.brand ? <p className="tb-feature-group-brand">{group.brand}</p> : null}
+                  {group.body ? <p className="tb-feature-group-body">{group.body}</p> : null}
+                </div>
+                <div className="tb-feature-grid">
+                  {(group.items || [])
+                    .filter((item) => item.enabled !== false)
+                    .map((item, itemIndex) => (
+                      <FeatureCard item={item} key={itemIndex} />
+                    ))}
+                </div>
+              </div>
+            ))
+          : // Legacy flat list, for pages that have not moved to groups.
+            flatItems.length > 0 && (
+              <div className="tb-feature-grid">
+                {flatItems.map((item, index) => (
+                  <FeatureCard item={item} key={index} />
+                ))}
+              </div>
+            )}
       </div>
     </section>
+  )
+}
+
+/**
+ * Title first and strongest, description second, status last and quiet — the
+ * badge is metadata, not a competing headline.
+ */
+function FeatureCard({ item }: { item: TimeBiteItem }) {
+  return (
+    <article className="tb-card tb-feature-card">
+      <h3>{item.title}</h3>
+      {item.body ? <p>{item.body}</p> : null}
+      {item.status ? <StatusBadge size="sm" status={item.status} /> : null}
+    </article>
   )
 }
 
@@ -190,7 +281,7 @@ function PlatformCards({ block }: { block: TimeBiteBlock }) {
               className={cx('tb-card', platform.status === 'available' && 'tb-platform-card-available')}
               key={index}
             >
-              {platform.status ? <p className="tb-platform-status">{statusLabel[platform.status] || platform.status}</p> : null}
+              <StatusBadge status={platform.status} />
               {platform.title ? <h3>{platform.title}</h3> : null}
               {platform.body ? <p>{platform.body}</p> : null}
             </article>
@@ -201,53 +292,36 @@ function PlatformCards({ block }: { block: TimeBiteBlock }) {
   )
 }
 
-type ImageSource = Pick<ShowcaseRow, 'image' | 'assetUrl' | 'imageAlt'>
-
-function resolveImage(source: ImageSource): { src: string; alt: string } | null {
-  const upload = source.image && typeof source.image === 'object' ? source.image : null
-  const src = upload?.url || source.assetUrl
-
-  if (!src) return null
-
-  return { src, alt: source.imageAlt || upload?.alt || '' }
-}
-
+/**
+ * The alternating tour. Rows flip sides so the eye keeps moving down the page
+ * rather than settling into a column, and every row gets media — a screenshot,
+ * a clip, or the schematic — because a tour of an interface that shows no
+ * interface is just a list.
+ */
 function Showcase({ block }: { block: TimeBiteBlock }) {
   const rows = block.rows || []
 
   if (rows.length === 0) return null
 
   return (
-    <section className="tb-section tb-showcase">
+    <section className="tb-section tb-showcase" id="tour">
       <div className="tb-shell">
         <SectionHeader block={block} />
-        <div className="tb-showcase-rows">
-          {rows.map((row, index) => {
-            const image = resolveImage(row)
-
-            return (
-              <div
-                className={cx(
-                  'tb-showcase-row',
-                  !image && 'tb-showcase-row-text-only',
-                  Boolean(image) && index % 2 === 1 && 'tb-showcase-row-reverse',
-                )}
-                key={index}
-              >
-                <div className="tb-showcase-copy">
-                  {row.title ? <h3>{row.title}</h3> : null}
-                  {row.body ? <p>{row.body}</p> : null}
-                </div>
-                {image ? (
-                  <figure className="tb-showcase-media">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={image.src} alt={image.alt} loading="lazy" />
-                  </figure>
+        <ol className="tb-showcase-rows">
+          {rows.map((row, index) => (
+            <li className={cx('tb-showcase-row', index % 2 === 1 && 'tb-showcase-row-reverse')} key={index}>
+              <div className="tb-showcase-copy">
+                {block.numbered ? (
+                  <span className="tb-showcase-index">{String(index + 1).padStart(2, '0')}</span>
                 ) : null}
+                {row.title ? <h3>{row.title}</h3> : null}
+                {row.body ? <p>{row.body}</p> : null}
+                {row.status ? <StatusBadge size="sm" status={row.status} /> : null}
               </div>
-            )
-          })}
-        </div>
+              <MediaFrame className="tb-showcase-media" source={row} title={row.title} />
+            </li>
+          ))}
+        </ol>
       </div>
     </section>
   )
@@ -357,6 +431,18 @@ export function RenderTimeBiteBlocks({ blocks }: { blocks: TimeBiteBlock[] }) {
             return <Quote block={block} key={index} />
           case 'timelineBlock':
             return <Timeline block={block} key={index} />
+          case 'valuesBlock':
+            return <Values block={block as ValuesBlockType} key={index} />
+          case 'dualLoopBlock':
+            return <DualLoop block={block as DualLoopBlockType} key={index} />
+          case 'productDemoBlock':
+            return <ProductDemo block={block} key={index} />
+          case 'scaleStoryBlock':
+            return <ScaleStory block={block} key={index} />
+          case 'workspaceBlock':
+            return <AdaptiveWorkspace block={block as WorkspaceBlockType} key={index} />
+          case 'agentsBlock':
+            return <AgentRoadmap block={block as AgentsBlockType} key={index} />
           case 'aboutBlock':
             return <About block={block} key={index} />
           case 'frameworkSectionBlock':
@@ -371,6 +457,8 @@ export function RenderTimeBiteBlocks({ blocks }: { blocks: TimeBiteBlock[] }) {
             return <Roadmap block={block} key={index} />
           case 'pricingBlock':
             return <PricingSection block={block as PricingBlockType} key={index} />
+          case 'productGridBlock':
+            return <ProductGrid block={block as ProductGridBlockType} key={index} />
           case 'newsletterBlock':
             return <Newsletter block={block} key={index} />
           case 'faqBlock':

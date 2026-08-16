@@ -11,16 +11,15 @@ The intended stack is:
 - Netlify as the app host when using the hosted runtime
 - An analytics dashboard, typically PostHog, for traffic, conversion, and launch smoke checks
 
-The current codebase is partly wired for that model:
+Current state:
 
-- MongoDB is already configured through `@payloadcms/db-mongodb` in `src/payload.config.ts`.
-- The Payload collections are `pages`, `media`, and `users`.
-- R2 environment variable placeholders exist in `.env.example`, and content fields include `assetUrl` / `r2Url` fallbacks.
-- The R2 storage adapter is not installed or configured yet. Until that is added, Payload uploads use local disk at `public/media`.
-- Analytics environment variable placeholders exist in `.env.example`, but the app does not yet initialize an analytics client or emit custom events.
-- The public home page currently renders the seeded TypeScript fixture in `src/endpoints/seed/timebite-home.ts`, not a live Payload query.
+- MongoDB is configured through `@payloadcms/db-mongodb` in `src/payload.config.ts`.
+- The Payload collections are `pages`, `products`, `media`, and `users`. Globals are `header`, `footer`, and `site-settings`.
+- **R2 is installed and wired.** `@payloadcms/storage-s3` drives it from `src/plugins/storage.ts`, opt-in via `USE_R2_STORAGE=true`. With it unset, uploads fall back to local disk at `public/media` so local dev needs no cloud credentials.
+- **Pages render live from Payload.** `src/app/(frontend)/page.tsx` queries the `pages` collection by slug. `src/endpoints/seed/*` is only the baseline that `pnpm seed` writes into the database — once seeded, `/admin` is the source of truth.
+- Analytics environment variable placeholders exist in `.env.example`. Every CTA carries an `analyticsId` rendered as `data-analytics-event`, but the app does not yet initialize an analytics client.
 
-Do not treat CMS edits or media uploads as production-persistent until MongoDB, R2 storage, and the runtime host are configured together.
+Media uploads are production-persistent as soon as `USE_R2_STORAGE=true` and the R2 credentials are set. Without them, uploaded files live on the host's disk and are lost on redeploy.
 
 ## CMS Model
 
@@ -35,12 +34,20 @@ Payload config lives in `src/payload.config.ts`.
 - `layout` is a Payload blocks field using the TimeBite block schemas in `src/blocks/TimeBite/config.ts`.
 - The schema can support multiple pages by slug, but this repo currently only has a public root route at `src/app/(frontend)/page.tsx`.
 
+`products`
+
+- Physical products: planners, task pads, goal notes, desk tools.
+- Editable fields: `name`, `slug`, `description`, `productType`, `variantNote`, `status`, `images[]`, `price`, `compareAtPrice`, `cta`, `sortOrder`, `featured`, `enabled`.
+- `status` is `concept` / `sample` / `preorder` / `available` / `sold-out`. Nothing may say "available" until it ships.
+- Rendered on the homepage by the `productGridBlock`. Leaving that block's `products` relationship empty shows every enabled product in sort order.
+- This is **not** ecommerce — no cart, no inventory, no checkout. `cta` is a link.
+
 `media`
 
 - Editors can create media records for images and videos.
 - Payload stores media metadata in MongoDB, including generated upload fields such as filename, MIME type, filesize, and any custom fields.
-- Custom editable fields are `alt` and `r2Url`.
-- File bytes are local-only today unless the R2/S3 storage adapter is added.
+- Custom editable field is `alt`. (`r2Url` is a legacy field, read by nothing — the storage adapter generates public URLs.)
+- File bytes go to Cloudflare R2 when `USE_R2_STORAGE=true`; otherwise to `public/media` on local disk. See "Media Storage" below.
 
 `users`
 
@@ -51,57 +58,60 @@ Payload config lives in `src/payload.config.ts`.
 
 The registered CMS blocks are:
 
-- `heroBlock`
-- `authorityStripBlock`
-- `problemAgitationBlock`
-- `howItWorksBlock`
-- `featureTabsBlock`
-- `productScreensBlock`
-- `aiArchitectureBlock`
-- `betaSignupBlock`
-- `founderCredibilityBlock`
-- `faqBlock`
+| Block | What it is on the page |
+|---|---|
+| `heroBlock` | Headline, both buttons, platform note, product screenshot |
+| `quoteBlock` | The problem statement |
+| `timelineBlock` | The loop: Plan → Focus → Track → Reflect → Improve |
+| `productDemoBlock` | The 45–60s demo video, poster, caption and transcript |
+| `scaleStoryBlock` | Action → Day → Week → Month → Goal → Year |
+| `featureGridBlock` | App capabilities, each with a status badge and its own media |
+| `showcaseBlock` | The alternating step-by-step tour |
+| `workspaceBlock` | Adaptive workspace modules + the agent suggestion |
+| `agentsBlock` | Goal / Career / Fitness / Finance agents |
+| `aboutBlock` | Why it is called TimeBite |
+| `frameworkSectionBlock` | The Creating Your Reality relationship |
+| `platformCardsBlock` | macOS / iPhone / iPad / Watch / Vision status |
+| `pricingBlock` | TimeBite subscription plans (digital only) |
+| `productGridBlock` | Physical products, from the `products` collection |
+| `newsletterBlock` | Beta signup |
+| `faqBlock` | Questions and answers |
+| `ctaBlock` | Closing call to action (used on `/philosophy`) |
+| `roadmapBlock` | Registered, not currently on any page |
+| `testimonialsBlock` | Registered, renders nothing until quotes are added |
 
-Most TimeBite blocks share these editable section fields:
+Most blocks share `eyebrow`, `headline`, `body`. Buttons share `label`, `url`, `newTab` and `analyticsId`.
+Media slots share `image`, `assetUrl`, `imageAlt`, `video`, `videoUrl`, `mediaCaption`, `mediaFrame`, `sketch`.
 
-- `eyebrow`
-- `headline`
-- `body`
-- `cta.label`
-- `cta.url`
-- `media`
-- `assetUrl`
-
-Repeatable item-style blocks expose arrays such as `items`, `stats`, `steps`, `tabs`, or `screens`. Items can include:
-
-- `title`
-- `body`
-- `eyebrow`
-- `image`
-- `assetUrl`
-
-`heroBlock` also exposes `secondaryCta` and `stats`.
-
-`betaSignupBlock` also exposes `formNote`.
-
-`faqBlock` exposes repeatable `question` / `answer` items.
+Full field-by-field reference: `docs/CMSContentModel.md`. Screenshot slots and sizes: `docs/MediaSlots.md`.
 
 ### Globals
 
-There are no Payload globals configured in this repository yet. Header, footer, nav labels, legal links, and several product-display details are hard-coded in React.
+`header` — logo text and tag, nav links, primary CTA.
+
+`footer` — brand statement, six link groups (each link can be marked `comingSoon`), legal note.
+
+`site-settings` — brand and organisation names, tagline, product/OG descriptions, header tag, footer brand
+statement, **Beta call to action** (the site-wide default destination for every beta button), Substack
+button label, 404 CTA label, legal note.
 
 ### Hard-Coded Or Environment-Driven Content
 
-The following are not currently editor-editable in Payload:
+The following are not editor-editable in Payload:
 
-- The public root route itself: `src/app/(frontend)/page.tsx`
-- The currently rendered homepage data: `src/endpoints/seed/timebite-home.ts`
-- Header/nav structure and footer links in `src/components/TimeBite/RenderTimeBiteBlocks.tsx`
-- The Cycle Matrix demo rows in `RenderTimeBiteBlocks.tsx`
-- The pricing section: `pricingBlock` is rendered by React and appears in the seed fixture, but it is not registered in `src/blocks/TimeBite/config.ts`, so editors cannot add or edit it in the CMS yet.
-- Signup integration URLs, which are environment-driven through `NEXT_PUBLIC_BETA_SIGNUP_URL` and `NEXT_PUBLIC_SUBSTACK_EMBED_URL`
-- Public canonical site URL, which should be set through `NEXT_PUBLIC_SERVER_URL`
+- Route files themselves (`src/app/(frontend)/page.tsx`, `[slug]/page.tsx`)
 - Visual styling in `src/app/(frontend)/globals.css`
+- Fallback positioning strings in `src/utilities/brand.ts` (overridden by `site-settings` when set)
+- The beta form's POST target, via `NEXT_PUBLIC_BETA_SIGNUP_URL`. When unset, the beta section renders a
+  link to the CMS-managed beta URL instead of an email form — a form with nowhere to post silently loses
+  addresses.
+- Public canonical site URL, via `NEXT_PUBLIC_SERVER_URL`
+
+`src/endpoints/seed/*` is a **content baseline**, not the live content. It is what `pnpm seed` writes into
+the database; after that, `/admin` is the source of truth and re-seeding overwrites edits.
+
+**No component contains a URL.** The Substack beta link lives in content (`site-settings` → Beta call to
+action, or an individual block's button), so it can be changed in `/admin` without a deploy.
 
 ## Installfest
 
@@ -172,7 +182,7 @@ Required after R2 storage is wired:
 | `R2_ENDPOINT` | R2 S3 API endpoint, used for uploads. Format: `https://<account-id>.r2.cloudflarestorage.com`. |
 | `R2_ACCESS_KEY_ID` | R2 token access key with object read/write permission for the bucket. |
 | `R2_SECRET_ACCESS_KEY` | R2 token secret access key. |
-| `R2_PUBLIC_URL` | Public URL used to serve files, either an R2 public development URL or a custom media domain such as `https://media.cyra.ai`. |
+| `R2_PUBLIC_HOSTNAME` | Hostname that serves the bucket publicly, e.g. `media.creatingyourreality.co`. No `https://`, no trailing slash. Leave unset until the custom domain shows **Active** in R2 — see step 2D. (`R2_PUBLIC_URL` is accepted as a legacy alias.) |
 
 Optional:
 
@@ -234,19 +244,110 @@ MongoDB stores Payload documents, drafts, users, and media metadata. It does not
 
 ### 2. Set Up Cloudflare R2
 
-R2 must be ready before production editors upload assets.
+The code side is already done: `@payloadcms/storage-s3` is installed and wired in
+`src/plugins/storage.ts`. Everything below is dashboard clicking. Do it in this order —
+step D fails if C isn't finished.
 
-1. Create an R2 bucket, for example `cyra-site-media`.
-2. Create an R2 API token with object read/write permission scoped to that bucket.
-3. Copy the S3 API endpoint into `R2_ENDPOINT`.
-4. Set `R2_BUCKET`, `R2_ACCESS_KEY_ID`, and `R2_SECRET_ACCESS_KEY`.
-5. Configure a public bucket URL or custom media domain.
-6. Set that public URL as `R2_PUBLIC_URL`.
-7. Wire Payload to R2 with `@payloadcms/storage-s3` before relying on uploads in production.
+Where things live: **MongoDB stores the content** (pages, blocks, products, users, and the
+media *record*). **R2 stores the file bytes** (the actual .png / .jpg / .mp4). Every upload
+writes to both. They are not alternatives.
 
-For a Netlify/Node runtime, Payload's S3 storage adapter is the correct R2 path because R2 exposes an S3-compatible API. The Cloudflare Workers-only R2 adapter is not the right adapter for this deployment model.
+#### A. Make the bucket
 
-Current repo gap: `@payloadcms/storage-s3` is not in `package.json`, and `payload.config.ts` does not yet include an R2 storage plugin. Until that is implemented, uploaded files are written to `public/media` and can disappear across fresh clones, clean builds, or redeploys.
+1. Go to <https://dash.cloudflare.com> and sign in.
+2. Left sidebar → click **R2**.
+3. Click **Create bucket**.
+4. Type a bucket name, e.g. `creatingyourreality`. Write it down.
+5. Leave **Location** on *Automatic*.
+6. Click **Create bucket**.
+
+→ Put the name in `R2_BUCKET`.
+
+#### B. Get the account ID
+
+1. Still in **R2**, click **Overview** in the left sidebar.
+2. On the right-hand side find **Account details → Account ID**.
+3. Click the copy icon next to it. It's a 32-character string.
+
+→ Put it in `R2_ACCOUNT_ID`.
+
+#### C. Make an API token
+
+1. **R2** → **Overview** → click **Manage API tokens** (top right).
+2. Click **Create API token**.
+3. **Token name**: anything, e.g. `cyra-site-media`.
+4. **Permissions**: select **Object Read & Write**. *(Not Admin. Not Read only.)*
+5. **Specify bucket(s)**: choose **Apply to specific buckets only**, then tick your bucket.
+6. **TTL**: leave as *Forever* unless you plan to rotate it.
+7. Click **Create API Token**.
+8. The next screen shows **Access Key ID** and **Secret Access Key**.
+   **Copy both now — the secret is shown exactly once.**
+
+→ Access Key ID goes in `R2_ACCESS_KEY_ID`, Secret Access Key in `R2_SECRET_ACCESS_KEY`.
+
+At this point uploads will work. The remaining step only changes *how files are served*.
+
+#### D. Connect the public domain (optional, do it before real traffic)
+
+Without this, images still work — they are streamed through the Next.js server instead of
+straight from Cloudflare's edge. That is slower and uses your host's bandwidth.
+
+1. Cloudflare → **DNS → Records**. If a record already exists for the subdomain you want
+   (e.g. `media`), **delete it**. A leftover proxied record here is the usual cause of a
+   `522` error later.
+2. Cloudflare → **R2** → click your bucket → **Settings** tab.
+3. Scroll to **Public access → Custom Domains** → click **Connect Domain**.
+4. Enter the full subdomain, e.g. `media.creatingyourreality.co`.
+5. Click **Continue**, then **Connect Domain**. Cloudflare creates the DNS record itself.
+6. Wait until the status shows **Active** (usually under a minute).
+
+→ Put the hostname (no `https://`) in `R2_PUBLIC_HOSTNAME`.
+
+Check it worked:
+
+```bash
+curl -sI https://media.creatingyourreality.co/anything | head -1
+```
+
+- `HTTP/2 404` → correct. The bucket was reached; that key just doesn't exist.
+- `HTTP/2 522` → **not** connected. The DNS record exists but isn't bound to the bucket.
+  Redo steps D1–D6.
+
+If you are not ready to do step D, **leave `R2_PUBLIC_HOSTNAME` unset**. Setting it to a
+domain that isn't connected is worse than leaving it blank: uploads succeed and every image
+on the site 404s.
+
+#### E. Set the variables
+
+Locally in `.env`, and on your host under environment variables:
+
+```bash
+USE_R2_STORAGE=true
+R2_BUCKET=creatingyourreality
+R2_ACCOUNT_ID=<from step B>
+R2_ACCESS_KEY_ID=<from step C>
+R2_SECRET_ACCESS_KEY=<from step C>
+R2_PUBLIC_HOSTNAME=media.creatingyourreality.co   # omit entirely until step D is Active
+```
+
+`R2_ENDPOINT` is optional — it is derived from `R2_ACCOUNT_ID`. Only set it if you need to
+override the default.
+
+#### F. Regenerate the import map
+
+**Required whenever you switch `USE_R2_STORAGE` on.** The storage plugin registers an admin
+component (`S3ClientUploadHandler`) that only exists when R2 is active. Without this the
+admin panel throws *"PayloadComponent not found in importMap"*.
+
+```bash
+rm src/app/\(payload\)/admin/importMap.js && pnpm generate:importmap
+```
+
+Delete the file first — running `generate:importmap` on its own often reports
+"No new imports found" and skips the write.
+
+`R2_PUBLIC_HOSTNAME` is read at **build** time by `next.config.js` (for `next/image`), so
+changing it requires a rebuild, not just a restart.
 
 ### 3. Set Up The Analytics Dashboard
 
@@ -289,22 +390,31 @@ If the runtime host is not Netlify, use an app host that supports Next.js server
 
 Run this after MongoDB and R2 are configured.
 
-1. Start the app locally with `DATABASE_URI` pointing at the intended non-production test database and all `R2_*` variables set.
-2. Open Payload admin.
-3. Upload one small image to `Media`.
-4. Confirm the media record appears in Payload with a filename, MIME type, filesize, and `alt` text.
-5. Confirm the actual object appears in the Cloudflare R2 bucket.
-6. Use the media record in a page block's `media` field, or paste its public R2 URL into `assetUrl` if the frontend image rendering is still using URL fallbacks.
-7. Confirm the image renders at `http://localhost:3000`.
-8. Stop and restart the app.
-9. Confirm the same image still renders without relying on `public/media`.
+1. `pnpm dev`, then open <http://localhost:3000/admin> and log in.
+2. Left sidebar → **Media** → **Create New** → drag in a small image → fill `alt` → **Save**.
+3. Confirm the record shows a filename, MIME type and filesize.
+4. **The key check:**
+
+   ```bash
+   ls public/media/
+   ```
+
+   **Empty is the pass.** If the file is sitting there, R2 is off and you are writing to
+   local disk — those files vanish on the next deploy.
+5. Confirm the object appears in Cloudflare → **R2** → your bucket → **Objects**.
+6. Attach it: **Pages → TimeBite → Hero block → `image`** → pick the upload → **Save**.
+7. Reload `http://localhost:3000` — the hero schematic is replaced by your image.
+8. Restart the app and reload. The image still renders, because it never lived on disk.
+
+If the image record saves but the picture is broken, and `R2_PUBLIC_HOSTNAME` is set, the
+custom domain is not connected — see step 2D.
 
 ### 7. Run The Live Media Smoke Test
 
 1. Push and deploy the same code and environment model.
 2. Open the live site and Payload admin on the hosted URL.
 3. Confirm the test media record is visible in the CMS.
-4. Confirm the image URL points at `R2_PUBLIC_URL` or the configured public media domain.
+4. Confirm the image URL points at `R2_PUBLIC_HOSTNAME`. If it points at `/api/media/...` instead, the hostname is unset and files are proxying through the app — functional, just slower.
 5. Redeploy the app without changing the media record.
 6. Confirm the image still renders live after redeploy.
 
@@ -352,7 +462,7 @@ Metadata includes the media document, alt text, filename, MIME type, filesize, a
 
 Without R2, this repo's `media` collection writes uploads to `public/media`. That is acceptable for short local tests, but not for production. App hosts such as Netlify build and redeploy from source; local upload directories are not durable content storage.
 
-With R2 configured through Payload's S3 storage adapter, uploads should be written to the R2 bucket and served from `R2_PUBLIC_URL`. A redeploy should not affect existing media.
+With R2 configured through Payload's S3 storage adapter, uploads are written to the R2 bucket and served from `R2_PUBLIC_HOSTNAME`. A redeploy does not affect existing media.
 
 ## Domain And Hosting Notes
 
@@ -360,7 +470,7 @@ With R2 configured through Payload's S3 storage adapter, uploads should be writt
 - Configure DNS records in Cloudflare so the domain points to that host.
 - Configure the media domain separately if using a custom R2 public domain such as `media.cyra.ai`.
 - Set `NEXT_PUBLIC_SERVER_URL` to the canonical public app URL, not the R2 media URL.
-- Set `R2_PUBLIC_URL` to the public media URL, not the app URL.
+- Set `R2_PUBLIC_HOSTNAME` to the media hostname, not the app URL, and without a scheme.
 - Keep analytics dashboard filters aligned with the final production hostname.
 - After changing any public URL, redeploy and rerun the public page, sitemap, media, and analytics smoke tests.
 

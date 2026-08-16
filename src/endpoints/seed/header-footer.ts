@@ -2,10 +2,9 @@ export const headerData = {
   logoText: 'TimeBite',
   logoTag: 'by Creating Your Reality',
   navLinks: [
-    { label: 'How it Works', url: '/#how-it-works' },
-    { label: 'Philosophy', url: '/philosophy' },
-    { label: 'Pricing', url: '/#pricing' },
-    { label: 'FAQ', url: '/#faq' },
+    { label: 'About', url: '/about' },
+    // Download points at the hero, where the beta CTA lives.
+    { label: 'Download', url: '/#top' },
   ],
   cta: { label: 'Join Beta', url: '/#beta' },
 }
@@ -13,60 +12,67 @@ export const headerData = {
 export const footerData = {
   brandStatement:
     'Creating Your Reality is the philosophy behind TimeBite, and everything we build next.',
-  explore: {
-    title: 'Explore',
+  columns: [
+    {
+      title: 'Digital',
+      accent: 'blue',
+      links: [
+        { label: 'macOS', url: '/#platforms' },
+        { label: 'iOS', url: '/#platforms' },
+        { label: 'watchOS', url: '/#platforms' },
+        { label: 'visionOS', url: '/#platforms' },
+        { label: 'AI Glasses', comingSoon: true },
+      ],
+    },
+    {
+      title: 'Physical',
+      accent: 'pink',
+      links: [
+        { label: 'Rest', url: '/#planner' },
+        { label: 'Nourish', url: '/#planner' },
+        { label: 'Work', url: '/#planner' },
+        { label: 'Play', url: '/#planner' },
+      ],
+    },
+    {
+      title: 'Features',
+      accent: 'teal',
+      links: [
+        { label: 'Intentional Living', url: '/about' },
+        { label: 'Sustainable Productivity', url: '/#features' },
+        { label: 'Kanban', url: '/#features' },
+        { label: 'Ikigai', url: '/#features' },
+        { label: 'AI Agents', url: '/#agents' },
+      ],
+    },
+    {
+      title: 'Company',
+      accent: 'gold',
+      links: [
+        { label: 'About', url: '/about' },
+        { label: 'Our Mission', url: '/about' },
+        { label: 'Blog', url: '/blog' },
+        { label: 'FAQ', url: '/#faq' },
+      ],
+    },
+  ],
+  connect: {
+    title: 'Connect',
+    // A blank url renders the icon dimmed rather than linking nowhere.
     links: [
-      { label: 'Philosophy', url: '/philosophy' },
-      { label: 'Manifesto', comingSoon: true },
-      { label: 'Blog', comingSoon: true },
-      { label: 'Roadmap', url: '/#roadmap' },
+      { platform: 'github', url: 'https://github.com/erinjerri' },
+      { platform: 'linkedin', url: '' },
+      { platform: 'substack', url: 'https://erinjerri.substack.com/' },
+      { platform: 'youtube', url: '' },
+      { platform: 'instagram', url: '' },
+      { platform: 'x', url: '' },
+      { platform: 'tiktok', url: '' },
+      { platform: 'pinterest', url: '' },
     ],
   },
-  product: {
-    title: 'Product',
-    links: [
-      { label: 'TimeBite', url: '/' },
-      { label: 'Features', url: '/#features' },
-      { label: 'Pricing', url: '/#pricing' },
-      { label: 'Platforms', url: '/#platforms' },
-      { label: 'Beta', url: '/#beta' },
-    ],
-  },
-  comingSoon: {
-    title: 'In the works',
-    links: [
-      { label: 'Studio', comingSoon: true },
-      { label: 'Paper Planner', url: '/#planner' },
-      { label: 'Vision Pro', comingSoon: true },
-      { label: 'Apple Watch', comingSoon: true },
-    ],
-  },
-  learn: {
-    title: 'Learn',
-    links: [
-      { label: 'Intentional Living', url: '/philosophy' },
-      { label: 'AI', comingSoon: true },
-      { label: 'Spatial Computing', comingSoon: true },
-      { label: 'Apple', url: '/#platforms' },
-    ],
-  },
-  company: {
-    title: 'Company',
-    links: [
-      { label: 'About', comingSoon: true },
-      { label: 'Speaking', comingSoon: true },
-      { label: 'Press', comingSoon: true },
-      { label: 'Contact', comingSoon: true },
-    ],
-  },
-  social: {
-    title: 'Social',
-    links: [
-      { label: 'LinkedIn', comingSoon: true },
-      { label: 'GitHub', comingSoon: true },
-      { label: 'YouTube', comingSoon: true },
-      { label: 'Substack', comingSoon: true },
-    ],
-  },
+  // No URLs yet, so these render as plain text rather than links to a 404.
+  // Add a url in /admin the moment the pages exist and they become links.
+  legalLinks: [{ label: 'Privacy Policy' }, { label: 'Terms of Use' }],
   legalNote: `© ${new Date().getFullYear()} Creating Your Reality. All rights reserved.`,
+  colophon: 'Made with Payload CMS.',
 }

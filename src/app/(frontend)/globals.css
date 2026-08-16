@@ -4,30 +4,225 @@
 
 /*
   Creating Your Reality / TimeBite
-  Solid black ground, soft pastel accents, light type weights.
-  Deliberately no background grids, no gradient glows, no offset "brutalist"
-  shadows — the brand reads soft and inviting, not bold-productivity.
+
+  Warm charcoal ground, one accent colour per section, a single 8px corner
+  radius. Deliberately no background grids, no gradients, no glows, no offset
+  "brutalist" shadows — the brand reads calm and deliberate, not
+  bold-productivity.
+
+  The organising idea is borrowed from the printed CYR planner: every section
+  owns a colour, announces itself with a solid chip, and washes that colour
+  faintly through its cards. Colour arrives in bands, never as confetti.
+
+  Type is light in display sizes and normal weight in body copy. Small grey
+  text is the thing this design most easily gets wrong, so secondary colours
+  are chosen by contrast ratio and nothing sits below 0.72rem.
+
+  Dark is the default. Light is a deliberate choice via the header toggle.
 */
 
 :root {
-  --tb-bg: #000000;
-  --tb-surface: #0b0b0d;
-  --tb-surface-2: #101012;
+  /*
+    Not pure black. A #000 page with #0b0b0d cards is a 4% difference, which
+    the eye reads as one flat sheet no matter how bright the text is — that
+    was the "drab and grey" problem. The ground lifts to a warm charcoal and
+    surfaces sit clearly above it, so depth comes from elevation rather than
+    from hairline borders.
+  */
+  --tb-bg: #121216;
+  --tb-surface: #1a1a20;
+  --tb-surface-2: #212128;
+  /* Pure white, carried over from PR #6. Warm white (#f4f2ee) reads softer but
+     lost contrast against the lifted charcoal ground, which is exactly the
+     "white text is harder to read than expected" complaint. */
   --tb-ink: #ffffff;
-  --tb-muted: #a2a2a8;
-  --tb-faint: #6f6f76;
-  --tb-line: rgba(244, 242, 238, 0.1);
-  --tb-line-soft: rgba(244, 242, 238, 0.06);
+  /*
+    Secondary text colours, set against the black ground by contrast ratio
+    rather than by eye. The previous values (#a2a2a8 / #6f6f76) put small grey
+    type at roughly 8:1 and 4.1:1 — the faint one failed WCAG AA for normal
+    text outright, and at 0.7rem in a 300 weight it was genuinely hard to read.
+  */
+  --tb-muted: #c6c6cc;   /* ~11.5:1 on the charcoal ground */
+  --tb-faint: #9d9da5;   /* ~7:1 — was 4.1:1 */
+  --tb-line: rgba(244, 242, 238, 0.12);
+  --tb-line-soft: rgba(244, 242, 238, 0.07);
 
-  /* Pastel accents — used sparingly, never more than one per section. */
+  /*
+    Two accent families, because one colour cannot do both jobs.
+
+    `--tb-{hue}` is the TEXT accent: it must stay readable as type, so it
+    darkens in light mode.
+
+    `--tb-chip-{hue}` is the FILL accent for solid chips. It stays pastel in
+    both themes, always paired with dark ink — that is the printed-planner
+    look from the CYR reference, a soft chip with dark text, on white or on
+    charcoal. Flipping this one with the theme is what made the chip text
+    unreadable.
+  */
   --tb-blue: #a9d6e5;
   --tb-green: #b8d8c0;
   --tb-gold: #ead9ab;
+  --tb-pink: #e8bcc8;
+  --tb-teal: #a5d5cf;
   --tb-lavender: #c9bce8;
 
-  --tb-radius: 18px;
-  --tb-radius-sm: 12px;
+  --tb-chip-blue: #a9d6e5;
+  --tb-chip-green: #b8d8c0;
+  --tb-chip-gold: #ead9ab;
+  --tb-chip-pink: #e8bcc8;
+  --tb-chip-teal: #a5d5cf;
+  --tb-chip-lavender: #c9bce8;
+
+  /* Ink used on any pastel chip, in both themes. ~13:1 on every chip colour. */
+  --tb-on-chip: #16161c;
+
+  /* Text colour that sits ON an accent-filled surface (buttons, badges). */
+  --tb-on-accent: #000000;
+
+  /*
+    One radius, 8px, everywhere. Pills (999px) are gone — buttons, badges,
+    toggles and inputs are all squared to the same corner so the page reads as
+    one system rather than soft chips floating over hard cards.
+    Genuine circles (status dots, window-chrome dots, list bullets) keep 50%;
+    an 8px radius on a 6px dot would just be a lumpy square.
+  */
+  --tb-radius: 8px;
+  --tb-radius-sm: 8px;
+  --tb-radius-pill: 8px;
+
+  /* Status system — one colour per maturity, reused on every surface. */
+  --tb-status-available: var(--tb-green);
+  --tb-status-beta: var(--tb-gold);
+  --tb-status-in-development: var(--tb-blue);
+  --tb-status-planned: var(--tb-lavender);
+  --tb-status-exploring: var(--tb-faint);
+
+  /*
+    How much of a section's accent washes into its card surfaces. This is what
+    stops the page reading as a field of identical grey boxes: each section
+    carries one colour, and its cards are that colour at low strength over the
+    surface. Higher in light mode, where a 9% wash on white is invisible.
+  */
+  --tb-card-tint: 9%;
 }
+
+/* ---------------------------------------------------------------------------
+   Section colour
+
+   Each section owns one accent. Its cards carry that accent as a low-strength
+   wash, and its eyebrow renders as a solid printed chip — the same device as
+   the phase labels in the Creating Your Reality planner. This is what keeps
+   the page from reading as a field of identical grey boxes.
+
+   `:root` prefix on the card rule is load-bearing: the base
+   `.tb-card { background: var(--tb-surface) }` is defined further down this
+   file and would win the cascade at equal specificity.
+   --------------------------------------------------------------------------- */
+
+:root .tb-card,
+:root .tb-workspace-tile,
+:root .tb-faq-list details,
+:root .tb-signup-form,
+:root .tb-word-part,
+:root .tb-media-sketch {
+  background: color-mix(
+    in srgb,
+    var(--tb-section-accent, var(--tb-blue)) var(--tb-card-tint),
+    var(--tb-surface)
+  );
+}
+
+/* `:root` prefix is load-bearing, same reason as the card rule above: the
+   shared `.tb-eyebrow` metrics block lower in this file would otherwise win at
+   equal specificity and repaint this text. */
+:root .tb-eyebrow {
+  display: inline-block;
+  padding: 5px 10px;
+  /* Chips are a heavier mark than the plain uppercase label they replaced, so
+     they need more air beneath them before the headline starts. */
+  margin: 0 0 28px;
+  border-radius: var(--tb-radius-sm);
+  background: var(--tb-section-chip, var(--tb-chip-gold));
+  color: var(--tb-on-chip);
+  font-weight: 500;
+}
+
+/*
+ * One accent per section, so colour arrives in bands rather than speckles.
+ *
+ * Each section sets two: `--tb-section-accent` drives the card wash and any
+ * accent text, and follows the theme. `--tb-section-chip` fills the eyebrow
+ * chip and stays pastel in both themes.
+ */
+#how-it-works { --tb-section-accent: var(--tb-gold); --tb-section-chip: var(--tb-chip-gold); }
+/* The dual loop centres its own tab bar, so its header centres too. */
+.tb-dual-loop .tb-section-header { margin-bottom: 32px; }
+.tb-dual-loop > .tb-shell { display: flex; flex-direction: column; align-items: center; }
+.tb-dual-loop > .tb-shell > * { width: 100%; }
+.tb-dual-loop .tb-loop-tabs { width: auto; }
+#demo { --tb-section-accent: var(--tb-blue); --tb-section-chip: var(--tb-chip-blue); }
+#scale { --tb-section-accent: var(--tb-teal); --tb-section-chip: var(--tb-chip-teal); }
+#features { --tb-section-accent: var(--tb-green); --tb-section-chip: var(--tb-chip-green); }
+#tour { --tb-section-accent: var(--tb-blue); --tb-section-chip: var(--tb-chip-blue); }
+#about { --tb-section-accent: var(--tb-lavender); --tb-section-chip: var(--tb-chip-lavender); }
+#workspace { --tb-section-accent: var(--tb-pink); --tb-section-chip: var(--tb-chip-pink); }
+#agents { --tb-section-accent: var(--tb-teal); --tb-section-chip: var(--tb-chip-teal); }
+#platforms { --tb-section-accent: var(--tb-gold); --tb-section-chip: var(--tb-chip-gold); }
+#pricing { --tb-section-accent: var(--tb-blue); --tb-section-chip: var(--tb-chip-blue); }
+#planner { --tb-section-accent: var(--tb-pink); --tb-section-chip: var(--tb-chip-pink); }
+#beta { --tb-section-accent: var(--tb-green); --tb-section-chip: var(--tb-chip-green); }
+#faq { --tb-section-accent: var(--tb-gold); --tb-section-chip: var(--tb-chip-gold); }
+#roadmap { --tb-section-accent: var(--tb-lavender); --tb-section-chip: var(--tb-chip-lavender); }
+
+/* ---------------------------------------------------------------------------
+   Light mode
+
+   Warm paper rather than pure white, with the accents re-cut for a light
+   ground. The dark palette's pastels are decorative there; here they would be
+   unreadable as text, so each one gets a deeper sibling at the same hue. Every
+   value below is a token override — no component knows which theme is active.
+
+   Reached only through the header toggle, and persisted after that. See the
+   note below on why there is no `prefers-color-scheme` block.
+   --------------------------------------------------------------------------- */
+
+:root[data-theme='light'] {
+  --tb-bg: #faf7f2;
+  --tb-surface: #ffffff;
+  --tb-surface-2: #f1ece3;
+  --tb-ink: #16161c;
+  --tb-muted: #45454f;   /* ~9.7:1 on the light ground */
+  --tb-faint: #63636e;   /* ~6.2:1 */
+  --tb-line: rgba(22, 22, 28, 0.16);
+  --tb-line-soft: rgba(22, 22, 28, 0.1);
+
+  /* A 9% wash disappears on white, so light mode tints harder. */
+  --tb-card-tint: 14%;
+
+  /* Same hues, darkened until they pass as text on paper. */
+  --tb-blue: #1f7396;
+  --tb-green: #2f7a52;
+  --tb-gold: #8a6d1f;
+  --tb-pink: #b34a72;
+  --tb-teal: #1c7f79;
+  --tb-lavender: #5d4c9a;
+
+  --tb-on-accent: #ffffff;
+}
+
+/*
+ * Deliberately NO `prefers-color-scheme` block.
+ *
+ * TimeBite is a dark product with a light option, not a product with two equal
+ * faces. The brand, the Figma file and every app screenshot are dark, so a
+ * visitor whose OS is set to Light Appearance would otherwise land on a white
+ * page and never see the identity the marketing assets are built around.
+ *
+ * Light mode is reached deliberately, through the header toggle, and persists
+ * from then on. If that trade is ever revisited, the whole change is adding a
+ * `@media (prefers-color-scheme: light) { :root:not([data-theme]) { ... } }`
+ * block that repeats the token overrides above.
+ */
 
 * { box-sizing: border-box; }
 
@@ -38,7 +233,12 @@ body {
   background: var(--tb-bg);
   color: var(--tb-ink);
   font-family: var(--font-body), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-weight: 300;
+  /*
+    400, not 300. Light weights look elegant in a large heading and turn to
+    grey mush at 0.7rem on black — especially with antialiasing thinning the
+    strokes further. Headings keep 300; body copy gets a readable weight.
+  */
+  font-weight: 400;
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
 }
@@ -69,9 +269,9 @@ a { color: inherit; text-decoration: none; }
   left: 12px;
   z-index: 100;
   background: var(--tb-blue);
-  color: #000;
+  color: var(--tb-on-accent);
   padding: 10px 18px;
-  border-radius: 8px;
+  border-radius: var(--tb-radius-pill);
   font-weight: 500;
   transition: top 0.15s ease;
 }
@@ -93,7 +293,7 @@ a { color: inherit; text-decoration: none; }
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(0, 0, 0, 0.78);
+  background: color-mix(in srgb, var(--tb-bg) 82%, transparent);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--tb-line-soft);
@@ -116,13 +316,31 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: 0.01em;
 }
 
-.tb-logo-tag { font-size: 0.7rem; color: var(--tb-faint); letter-spacing: 0.04em; }
+.tb-logo-tag { font-size: 0.78rem; color: var(--tb-faint); letter-spacing: 0.04em; }
 
-.tb-nav { display: flex; gap: 32px; font-size: 0.9rem; }
+.tb-nav { display: flex; gap: 32px; font-size: 0.93rem; }
 .tb-nav a { color: var(--tb-muted); transition: color 0.15s ease; }
 .tb-nav a:hover { color: var(--tb-ink); }
 
 .tb-header-actions { display: flex; align-items: center; gap: 12px; }
+
+.tb-theme-toggle {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--tb-line);
+  border-radius: var(--tb-radius-sm);
+  background: transparent;
+  color: var(--tb-muted);
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.tb-theme-toggle:hover { color: var(--tb-ink); border-color: var(--tb-blue); }
+.tb-theme-toggle-icon { display: block; width: 18px; height: 18px; }
+.tb-theme-toggle-icon svg { display: block; width: 100%; height: 100%; }
 
 .tb-mobile-nav { display: none; position: relative; }
 
@@ -178,15 +396,20 @@ a { color: inherit; text-decoration: none; }
 
 /* ---------- Type + buttons ---------- */
 
+/* Shared metrics only. Colour for `.tb-eyebrow` is set by the section-chip
+   rule near the top of this file — do not add a `color` here, it would win the
+   cascade over that rule and repaint the chip text in its own background. */
 .tb-eyebrow,
 .tb-card-eyebrow {
   margin: 0 0 18px;
-  color: var(--tb-gold);
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   font-weight: 400;
   letter-spacing: 0.2em;
   text-transform: uppercase;
 }
+
+/* Card eyebrows are plain text, not chips, so they still need a colour. */
+.tb-card-eyebrow { color: var(--tb-gold); }
 
 .tb-button,
 .tb-signup-form button {
@@ -196,9 +419,9 @@ a { color: inherit; text-decoration: none; }
   justify-content: center;
   padding: 0 26px;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--tb-radius-pill);
   background: var(--tb-blue);
-  color: #000;
+  color: var(--tb-on-accent);
   font-family: var(--font-body), sans-serif;
   font-size: 0.95rem;
   font-weight: 500;
@@ -217,7 +440,7 @@ a { color: inherit; text-decoration: none; }
 
 .tb-button-secondary:hover { border-color: var(--tb-blue); opacity: 1; }
 
-.tb-button-compact { min-height: 40px; padding: 0 20px; font-size: 0.85rem; }
+.tb-button-compact { min-height: 40px; padding: 0 20px; font-size: 0.89rem; }
 
 .tb-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 36px; }
 .tb-actions-center { justify-content: center; }
@@ -248,6 +471,458 @@ a { color: inherit; text-decoration: none; }
   font-size: clamp(1rem, 1.5vw, 1.15rem);
   line-height: 1.8;
   white-space: pre-line;
+}
+
+.tb-hero-availability {
+  margin: 22px 0 0;
+  color: var(--tb-faint);
+  font-size: 0.87rem;
+  letter-spacing: 0.06em;
+}
+
+/* The product shot runs the full shell — a Mac screenshot squeezed into half a
+   column is unreadable, which defeats the point of showing it. */
+.tb-hero-media { margin-top: clamp(48px, 6vw, 76px); }
+
+/* ---------- Status system ---------- */
+
+.tb-status {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 12px;
+  border: 1px solid var(--tb-line);
+  border-radius: var(--tb-radius-pill);
+  color: var(--tb-muted);
+  font-size: 0.76rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  line-height: 1.5;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tb-status::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.9;
+}
+
+.tb-status-available { color: var(--tb-status-available); border-color: color-mix(in srgb, var(--tb-status-available) 34%, transparent); }
+.tb-status-beta { color: var(--tb-status-beta); border-color: color-mix(in srgb, var(--tb-status-beta) 34%, transparent); }
+.tb-status-in-development { color: var(--tb-status-in-development); border-color: color-mix(in srgb, var(--tb-status-in-development) 34%, transparent); }
+.tb-status-planned { color: var(--tb-status-planned); border-color: color-mix(in srgb, var(--tb-status-planned) 30%, transparent); }
+.tb-status-exploring { color: var(--tb-status-exploring); border-color: var(--tb-line-soft); }
+.tb-status-exploring::before { opacity: 0.6; }
+
+.tb-status-sm {
+  padding: 2px 9px;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+}
+
+/* Cards lead with the badge; grid cards that carry one at the end push it down. */
+.tb-card > .tb-status { margin-bottom: 16px; }
+.tb-card > .tb-status-sm:last-child { margin: 16px 0 0; }
+
+/* ---------- Media frames (screenshots, clips, schematics) ---------- */
+
+.tb-media {
+  margin: 0;
+  border: 1px solid var(--tb-line-soft);
+  border-radius: var(--tb-radius);
+  background: var(--tb-surface);
+  overflow: hidden;
+}
+
+.tb-media-chrome {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--tb-line-soft);
+  background: var(--tb-surface-2);
+}
+
+.tb-media-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--tb-ink);
+  opacity: 0.14;
+}
+
+.tb-media-title {
+  margin-left: 10px;
+  color: var(--tb-faint);
+  font-size: 0.79rem;
+  letter-spacing: 0.04em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tb-media-stage {
+  position: relative;
+  width: 100%;
+  background: var(--tb-bg);
+}
+
+.tb-media-stage > img,
+.tb-media-stage > video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.tb-media-sketch {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: clamp(16px, 3vw, 34px);
+  /* Flat surface — no gradient wash. */
+  background: var(--tb-surface);
+}
+
+.tb-sketch {
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  color: var(--tb-ink);
+}
+
+.tb-media-caption {
+  padding: 14px 18px;
+  border-top: 1px solid var(--tb-line-soft);
+  color: var(--tb-faint);
+  font-size: 0.87rem;
+  line-height: 1.6;
+}
+
+/* ---------- Product demo ---------- */
+
+.tb-demo-stage { max-width: 960px; margin: 0 auto; }
+
+.tb-demo-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  align-items: baseline;
+  justify-content: center;
+  max-width: 960px;
+  margin: 22px auto 0;
+}
+
+.tb-demo-duration {
+  margin: 0;
+  color: var(--tb-faint);
+  font-size: 0.86rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.tb-demo-transcript summary {
+  color: var(--tb-muted);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.tb-demo-transcript summary:hover { color: var(--tb-ink); }
+
+.tb-demo-transcript p {
+  max-width: 720px;
+  margin: 14px 0 0;
+  color: var(--tb-muted);
+  font-size: 0.93rem;
+  line-height: 1.8;
+}
+
+.tb-demo-pending {
+  max-width: 620px;
+  margin: 24px auto 0;
+  color: var(--tb-faint);
+  font-size: 0.89rem;
+  text-align: center;
+}
+
+/* ---------- Scale story (ACTION → YEAR) ---------- */
+
+.tb-scale {
+  display: grid;
+  gap: 0;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+  counter-reset: scale;
+}
+
+.tb-scale-level {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 8px 28px;
+  padding: 26px 0;
+  border-bottom: 1px solid var(--tb-line-soft);
+}
+
+.tb-scale-level:last-child { border-bottom: 0; }
+
+.tb-scale-label {
+  margin: 0;
+  padding-top: 22px;
+  color: var(--tb-faint);
+  font-size: 0.78rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.tb-scale-body > h3 { margin: 0 0 6px; font-size: clamp(1.05rem, 1.9vw, 1.3rem); font-weight: 400; }
+.tb-scale-body > p { margin: 0; color: var(--tb-muted); font-size: 0.94rem; line-height: 1.75; max-width: 60ch; }
+
+/* The rail is the argument: it widens as the horizon does. */
+.tb-scale-rail {
+  position: relative;
+  height: 4px;
+  margin-bottom: 18px;
+  border-radius: 2px;
+  background: var(--tb-line-soft);
+}
+
+/* Solid, not a gradient. Each level gets one flat brand colour, stepping through
+   the palette as the horizon widens. The bar length carries the meaning; the
+   gradient just made every bar look like the same washed-out smear. */
+.tb-scale-level:nth-child(1) { --tb-scale-color: var(--tb-gold); }
+.tb-scale-level:nth-child(2) { --tb-scale-color: var(--tb-green); }
+.tb-scale-level:nth-child(3) { --tb-scale-color: var(--tb-blue); }
+.tb-scale-level:nth-child(4) { --tb-scale-color: var(--tb-lavender); }
+.tb-scale-level:nth-child(5) { --tb-scale-color: var(--tb-gold); }
+.tb-scale-level:nth-child(6) { --tb-scale-color: var(--tb-blue); }
+
+.tb-scale-fill {
+  display: block;
+  width: var(--tb-scale-fill, 20%);
+  height: 100%;
+  border-radius: 2px;
+  background: var(--tb-scale-color, var(--tb-blue));
+  opacity: 1;
+}
+
+.tb-scale-fill::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: var(--tb-scale-fill, 20%);
+  width: 7px;
+  height: 7px;
+  margin-left: -3.5px;
+  border-radius: 50%;
+  background: var(--tb-scale-color, var(--tb-blue));
+  transform: translateY(-50%);
+}
+
+.tb-scale-closing {
+  max-width: 680px;
+  margin: 48px auto 0;
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(1.15rem, 2.1vw, 1.5rem);
+  font-weight: 300;
+  line-height: 1.5;
+  text-align: center;
+  text-wrap: balance;
+}
+
+/* ---------- Adaptive workspace ---------- */
+
+.tb-workspace-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.62fr) minmax(0, 1.38fr);
+  gap: clamp(28px, 4vw, 56px);
+  align-items: start;
+}
+
+.tb-workspace-picker-label {
+  margin: 0 0 14px;
+  color: var(--tb-faint);
+  font-size: 0.78rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.tb-module-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+
+/* Components and goal areas are separate groups — see AdaptiveWorkspace. */
+.tb-module-group + .tb-module-group { margin-top: 26px; }
+
+.tb-module {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  padding: 13px 16px;
+  border: 1px solid var(--tb-line-soft);
+  border-radius: var(--tb-radius-sm);
+  background: var(--tb-surface);
+  color: var(--tb-muted);
+  font-family: var(--font-body), sans-serif;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.tb-module:hover { border-color: var(--tb-line); color: var(--tb-ink); }
+
+.tb-module-on {
+  border-color: rgba(169, 214, 229, 0.4);
+  background: rgba(169, 214, 229, 0.06);
+  color: var(--tb-ink);
+}
+
+.tb-module-name { font-size: 0.94rem; }
+
+.tb-module-on .tb-module-name::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 9px;
+  border-radius: 50%;
+  background: var(--tb-blue);
+  vertical-align: middle;
+}
+
+.tb-module-description { color: var(--tb-faint); font-size: 0.84rem; line-height: 1.5; }
+.tb-module .tb-status { margin-top: 4px; }
+
+.tb-workspace-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+  min-height: 340px;
+  padding: clamp(14px, 2vw, 22px);
+  background: var(--tb-bg);
+  align-content: start;
+}
+
+.tb-workspace-empty {
+  grid-column: 1 / -1;
+  align-self: center;
+  margin: 0;
+  padding: 40px 20px;
+  color: var(--tb-faint);
+  font-size: 0.93rem;
+  text-align: center;
+}
+
+.tb-workspace-tile {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--tb-line-soft);
+  border-radius: var(--tb-radius-sm);
+  background: var(--tb-surface);
+}
+
+.tb-workspace-tile-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.tb-workspace-tile h3 { margin: 0; font-size: 0.89rem; font-weight: 400; }
+.tb-workspace-tile .tb-sketch { height: 78px; opacity: 0.9; }
+.tb-workspace-tile-new { border-color: rgba(201, 188, 232, 0.42); }
+
+.tb-suggestion {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 28px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 22px;
+  padding: 22px 26px;
+  border: 1px solid rgba(201, 188, 232, 0.24);
+  border-radius: var(--tb-radius);
+  background: rgba(201, 188, 232, 0.04);
+}
+
+.tb-suggestion-copy { max-width: 60ch; }
+.tb-suggestion-source {
+  margin: 0 0 6px;
+  color: var(--tb-lavender);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.tb-suggestion-prompt { margin: 0; color: var(--tb-ink); font-size: 0.98rem; line-height: 1.65; }
+.tb-suggestion-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.tb-suggestion-resolved { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: baseline; }
+.tb-suggestion-resolved p { margin: 0; color: var(--tb-muted); font-size: 0.94rem; }
+
+.tb-text-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--tb-faint);
+  font-family: var(--font-body), sans-serif;
+  font-size: 0.88rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.tb-text-button:hover { color: var(--tb-muted); }
+
+.tb-workspace-footnote,
+.tb-agents-footnote {
+  max-width: 720px;
+  margin: 28px 0 0;
+  color: var(--tb-faint);
+  font-size: 0.88rem;
+  line-height: 1.75;
+}
+
+/* ---------- Agents ---------- */
+
+.tb-agent-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+.tb-agent { display: flex; flex-direction: column; align-items: flex-start; }
+.tb-agent h3 { margin: 0 0 10px; }
+
+.tb-agent-capabilities {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--tb-muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.tb-agent-capabilities li { position: relative; padding-left: 18px; }
+
+.tb-agent-capabilities li::before {
+  content: "";
+  position: absolute;
+  top: 0.62em;
+  left: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--tb-line);
+}
+
+.tb-agent-disclaimer {
+  margin: 18px 0 0 !important;
+  padding-top: 14px;
+  border-top: 1px solid var(--tb-line-soft);
+  color: var(--tb-faint) !important;
+  font-size: 0.86rem !important;
+  line-height: 1.65 !important;
 }
 
 /* ---------- Sections ---------- */
@@ -296,8 +971,103 @@ a { color: inherit; text-decoration: none; }
   gap: 14px;
 }
 
-.tb-feature-grid,
 .tb-platform-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+/* ---------- Features ----------
+   Full shell width, three across. Not nested inside `tb-section-layout`,
+   which would leave each card around 199px wide. See the FeatureGrid
+   component note. */
+
+.tb-features .tb-section-header { max-width: 660px; margin: 0 auto 34px; }
+
+/* The arc, stated once between the two layers. Wraps rather than scrolls. */
+.tb-feature-flow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 12px;
+  max-width: 720px;
+  margin: 0 auto 56px;
+  color: var(--tb-faint);
+  font-size: 0.82rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.tb-feature-flow > span { display: inline-flex; gap: 12px; align-items: center; }
+.tb-feature-flow span[aria-hidden] { color: var(--tb-line); }
+
+/* Each product layer heads its own grid. */
+.tb-feature-group + .tb-feature-group { margin-top: clamp(52px, 6vw, 80px); }
+
+.tb-feature-group-head {
+  max-width: 640px;
+  margin: 0 0 26px;
+  padding-left: 16px;
+  border-left: 3px solid var(--tb-group-accent, var(--tb-chip-lavender));
+}
+
+.tb-feature-group-label {
+  margin: 0;
+  color: var(--tb-ink);
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(1.3rem, 2.2vw, 1.7rem);
+  font-weight: 400;
+  line-height: 1.25;
+}
+
+.tb-feature-group-brand {
+  margin: 4px 0 0;
+  color: var(--tb-faint);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.tb-feature-group-body {
+  margin: 12px 0 0;
+  color: var(--tb-muted);
+  font-size: 0.98rem;
+  line-height: 1.7;
+}
+
+.tb-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+/* Landscape, not portrait: less vertical padding than a general card, and the
+   height is still content-driven — no min-height anywhere. */
+.tb-feature-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: clamp(22px, 2.2vw, 28px) clamp(22px, 2.4vw, 30px);
+}
+
+.tb-feature-card h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  /* Stops a two-word name breaking after the first word. */
+  text-wrap: balance;
+}
+
+.tb-feature-card p {
+  margin: 0;
+  color: var(--tb-muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  /* Keeps the last line from stranding a single word. */
+  text-wrap: pretty;
+}
+
+/* Metadata, not a second headline: pushed to the bottom and left quiet. */
+.tb-feature-card .tb-status { margin-top: 6px; opacity: 0.9; }
 
 .tb-card {
   border: 1px solid var(--tb-line-soft);
@@ -317,17 +1087,17 @@ a { color: inherit; text-decoration: none; }
 }
 
 .tb-card p,
-.tb-faq-list p { margin: 0; color: var(--tb-muted); font-size: 0.92rem; line-height: 1.75; }
+.tb-faq-list p { margin: 0; color: var(--tb-muted); font-size: 0.94rem; line-height: 1.75; }
 
 .tb-card-index {
   display: block;
   margin-bottom: 14px;
   color: var(--tb-faint);
-  font-size: 0.72rem;
+  font-size: 0.79rem;
   letter-spacing: 0.14em;
 }
 
-.tb-testimonial-byline { margin-top: 18px !important; color: var(--tb-ink) !important; font-size: 0.85rem !important; }
+.tb-testimonial-byline { margin-top: 18px !important; color: var(--tb-ink) !important; font-size: 0.89rem !important; }
 
 /* ---------- Quote ---------- */
 
@@ -345,7 +1115,7 @@ a { color: inherit; text-decoration: none; }
   text-wrap: balance;
 }
 
-.tb-quote-attribution { margin: 22px 0 0; color: var(--tb-gold); font-size: 0.78rem; letter-spacing: 0.16em; text-transform: uppercase; }
+.tb-quote-attribution { margin: 22px 0 0; color: var(--tb-gold); font-size: 0.84rem; letter-spacing: 0.16em; text-transform: uppercase; }
 
 /* ---------- Timeline (Capture → Grow: a real sequence, so it's numbered) ---------- */
 
@@ -384,9 +1154,9 @@ a { color: inherit; text-decoration: none; }
 
 .tb-timeline-step:last-child { border-bottom: 0; }
 
-.tb-timeline-index { color: var(--tb-faint); font-size: 0.72rem; letter-spacing: 0.14em; padding-top: 5px; }
+.tb-timeline-index { color: var(--tb-faint); font-size: 0.79rem; letter-spacing: 0.14em; padding-top: 5px; }
 .tb-timeline-step h3 { margin: 0 0 6px; font-size: 1.05rem; font-weight: 400; }
-.tb-timeline-step p { margin: 0; color: var(--tb-muted); font-size: 0.9rem; line-height: 1.7; }
+.tb-timeline-step p { margin: 0; color: var(--tb-muted); font-size: 0.93rem; line-height: 1.7; }
 
 /* ---------- About the name ---------- */
 
@@ -418,7 +1188,7 @@ a { color: inherit; text-decoration: none; }
 .tb-word-part:nth-child(2) dt { color: var(--tb-gold); }
 .tb-word-part:nth-child(3) dt { color: var(--tb-lavender); }
 
-.tb-word-part dd { margin: 0; color: var(--tb-muted); font-size: 0.92rem; line-height: 1.75; }
+.tb-word-part dd { margin: 0; color: var(--tb-muted); font-size: 0.94rem; line-height: 1.75; }
 
 .tb-about-closing {
   max-width: 660px;
@@ -445,9 +1215,9 @@ a { color: inherit; text-decoration: none; }
 .tb-pillars li {
   padding: 9px 20px;
   border: 1px solid rgba(201, 188, 232, 0.32);
-  border-radius: 8px;
+  border-radius: var(--tb-radius-pill);
   color: var(--tb-lavender);
-  font-size: 0.85rem;
+  font-size: 0.89rem;
 }
 
 .tb-framework-closing {
@@ -462,20 +1232,8 @@ a { color: inherit; text-decoration: none; }
 
 /* ---------- Platforms ---------- */
 
-.tb-platform-status {
-  display: inline-flex;
-  width: fit-content;
-  margin: 0 0 16px;
-  padding: 4px 12px;
-  border: 1px solid var(--tb-line);
-  border-radius: 8px;
-  color: var(--tb-muted);
-  font-size: 0.66rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.tb-platform-card-available .tb-platform-status { color: var(--tb-green); border-color: rgba(184, 216, 192, 0.34); }
+/* Platform status uses the shared .tb-status badge — see the status system above. */
+.tb-platform-card-available { border-color: rgba(184, 216, 192, 0.24); }
 
 /* ---------- Pricing ---------- */
 
@@ -504,7 +1262,7 @@ a { color: inherit; text-decoration: none; }
 .tb-lane-eyebrow {
   margin: 0;
   color: var(--tb-faint);
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
 }
@@ -514,7 +1272,7 @@ a { color: inherit; text-decoration: none; }
   gap: 4px;
   padding: 4px;
   border: 1px solid var(--tb-line-soft);
-  border-radius: 999px;
+  border-radius: var(--tb-radius-pill);
 }
 
 .tb-billing-option {
@@ -524,11 +1282,11 @@ a { color: inherit; text-decoration: none; }
   min-height: 36px;
   padding: 0 18px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--tb-radius-pill);
   background: transparent;
   color: var(--tb-muted);
   font-family: var(--font-body), sans-serif;
-  font-size: 0.85rem;
+  font-size: 0.89rem;
   font-weight: 300;
   cursor: pointer;
   transition: color 0.15s ease, background 0.15s ease;
@@ -538,12 +1296,12 @@ a { color: inherit; text-decoration: none; }
 
 .tb-billing-option-active {
   background: var(--tb-blue);
-  color: #000;
+  color: var(--tb-on-accent);
   font-weight: 500;
 }
 
 .tb-billing-badge {
-  font-size: 0.66rem;
+  font-size: 0.76rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -560,16 +1318,28 @@ a { color: inherit; text-decoration: none; }
 
 .tb-plan-featured { border-color: rgba(169, 214, 229, 0.3); }
 
-.tb-plan-badge {
+/* Uppercase at 0.14em tracking pushes the last letter hard against the right
+   border, so the horizontal padding is asymmetric — the extra 2px on the right
+   compensates for the trailing letter-space that CSS adds after the final
+   character. More vertical padding and more room beneath, so the badge stops
+   crowding the plan name under it. */
+/* `p.tb-plan-badge`, not `.tb-plan-badge`: the badge is a <p> inside a card, and
+   `.tb-card p { margin: 0 }` further up wins at (0,1,1) against a bare class,
+   which silently zeroed the gap under every badge. */
+p.tb-plan-badge {
   display: inline-flex;
-  margin: 0 0 14px;
-  padding: 4px 12px;
+  align-items: center;
+  margin: 0 0 20px;
+  padding: 6px 13px 6px 15px;
   border: 1px solid var(--tb-line);
-  border-radius: 999px;
+  border-radius: var(--tb-radius-pill);
   color: var(--tb-muted);
-  font-size: 0.66rem;
-  letter-spacing: 0.12em;
+  font-size: 0.76rem;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .tb-plan-featured .tb-plan-badge { color: var(--tb-blue); border-color: rgba(169, 214, 229, 0.34); }
@@ -587,7 +1357,11 @@ a { color: inherit; text-decoration: none; }
   font-size: clamp(2.1rem, 3.4vw, 2.7rem);
   font-weight: 300;
   line-height: 1;
-  letter-spacing: -0.02em;
+  /* Tighter kerning, and tabular figures so 35.55 / 75.55 / 111.11 line up
+     across the three cards instead of drifting by digit width. */
+  letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
   color: var(--tb-ink);
 }
 
@@ -597,12 +1371,12 @@ a { color: inherit; text-decoration: none; }
   color: var(--tb-faint);
 }
 
-.tb-plan-cadence { color: var(--tb-faint); font-size: 0.82rem; }
+.tb-plan-cadence { color: var(--tb-faint); font-size: 0.87rem; }
 
 .tb-plan-note {
   margin: 10px 0 0 !important;
   color: var(--tb-blue) !important;
-  font-size: 0.82rem !important;
+  font-size: 0.87rem !important;
 }
 
 .tb-plan > p { margin-top: 18px !important; }
@@ -617,11 +1391,13 @@ a { color: inherit; text-decoration: none; }
   padding: 0;
   list-style: none;
   color: var(--tb-muted);
-  font-size: 0.88rem;
+  font-size: 0.92rem;
   line-height: 1.6;
 }
 
 .tb-plan-features li { position: relative; padding-left: 18px; }
+
+.tb-plan-features li .tb-status { margin-left: 8px; vertical-align: middle; }
 
 .tb-plan-features li::before {
   content: '';
@@ -646,12 +1422,12 @@ a { color: inherit; text-decoration: none; }
   border-radius: var(--tb-radius);
 }
 
-.tb-promo p { margin: 0; color: var(--tb-muted); font-size: 0.9rem; line-height: 1.7; }
+.tb-promo p { margin: 0; color: var(--tb-muted); font-size: 0.93rem; line-height: 1.7; }
 .tb-promo-label { margin-bottom: 4px !important; color: var(--tb-lavender) !important; }
 
 .tb-promo-link {
   color: var(--tb-lavender);
-  font-size: 0.88rem;
+  font-size: 0.92rem;
   border-bottom: 1px solid rgba(201, 188, 232, 0.4);
   padding-bottom: 2px;
 }
@@ -659,7 +1435,7 @@ a { color: inherit; text-decoration: none; }
 .tb-platform-note {
   margin: 22px 0 0;
   color: var(--tb-faint);
-  font-size: 0.88rem;
+  font-size: 0.92rem;
 }
 
 .tb-platform-note a { color: var(--tb-muted); border-bottom: 1px solid var(--tb-line); }
@@ -678,46 +1454,100 @@ a { color: inherit; text-decoration: none; }
   line-height: 1.8;
 }
 
-.tb-product-tag { color: var(--tb-gold) !important; border-color: rgba(234, 217, 171, 0.3) !important; }
+/* ---------- Physical products (secondary to the subscription, and styled to
+   read that way: gold rather than the product blue, and further down the page) ---------- */
+
 .tb-product-featured { border-color: rgba(234, 217, 171, 0.3); }
 .tb-product-note { color: var(--tb-gold) !important; }
-
 .tb-product-featured .tb-button:not(.tb-button-secondary) { background: var(--tb-gold); }
+
+.tb-products .tb-product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+.tb-product { display: flex; flex-direction: column; align-items: flex-start; }
+.tb-product h3 { margin: 0 0 6px; }
+
+.tb-product-media {
+  width: 100%;
+  margin: 0 0 18px;
+  border-radius: var(--tb-radius-sm);
+  overflow: hidden;
+  background: var(--tb-surface-2);
+  aspect-ratio: 4 / 3;
+}
+
+.tb-product-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+.tb-product-status {
+  display: inline-flex;
+  width: fit-content;
+  margin: 0 0 14px;
+  padding: 4px 12px;
+  border: 1px solid var(--tb-line);
+  border-radius: var(--tb-radius-pill);
+  color: var(--tb-muted);
+  font-size: 0.76rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Concept and sample are the honest defaults, so they read quietest. */
+.tb-product-status-concept,
+.tb-product-status-sample { color: var(--tb-faint); border-color: var(--tb-line-soft); }
+.tb-product-status-preorder { color: var(--tb-gold); border-color: rgba(234, 217, 171, 0.34); }
+.tb-product-status-available { color: var(--tb-green); border-color: rgba(184, 216, 192, 0.34); }
+.tb-product-status-sold-out { color: var(--tb-faint); border-color: var(--tb-line-soft); text-decoration: line-through; }
+
+.tb-product-variants {
+  margin: 0 0 12px !important;
+  color: var(--tb-faint) !important;
+  font-size: 0.84rem !important;
+  letter-spacing: 0.04em;
+}
+
+.tb-product .tb-plan-price { margin: 14px 0 0 !important; }
+.tb-product-compare { color: var(--tb-faint); font-size: 0.93rem; }
+.tb-product .tb-button { margin-top: 20px; }
 
 .tb-pricing-footnote {
   max-width: 760px;
   margin: 36px 0 0;
   color: var(--tb-faint);
-  font-size: 0.82rem;
+  font-size: 0.87rem;
   line-height: 1.75;
 }
 
-/* ---------- Showcase (planner photography + app screenshots) ---------- */
+/* ---------- Showcase (the step-by-step tour) ---------- */
 
-.tb-showcase-rows { display: grid; gap: clamp(40px, 6vw, 88px); margin-top: 56px; }
+.tb-showcase-rows {
+  display: grid;
+  gap: clamp(48px, 6vw, 96px);
+  margin: 56px 0 0;
+  padding: 0;
+  list-style: none;
+}
 
+/* Media gets the wider column: these are dense Mac screens, and the copy beside
+   them is two sentences. A 50/50 split would starve the one that needs room. */
 .tb-showcase-row {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(28px, 4vw, 64px);
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: clamp(28px, 4vw, 60px);
   align-items: center;
 }
 
 .tb-showcase-row-reverse .tb-showcase-media { order: -1; }
-.tb-showcase-row-text-only { grid-template-columns: minmax(0, 1fr); max-width: 660px; }
 
-.tb-showcase-media { margin: 0; }
-
-.tb-showcase-media img {
+.tb-showcase-index {
   display: block;
-  width: 100%;
-  height: auto;
-  border-radius: var(--tb-radius);
-  border: 1px solid var(--tb-line-soft);
+  margin-bottom: 14px;
+  color: var(--tb-faint);
+  font-size: 0.79rem;
+  letter-spacing: 0.14em;
 }
 
-.tb-showcase-copy h3 { margin: 0 0 12px; font-size: clamp(1.3rem, 2.2vw, 1.9rem); font-weight: 300; }
+.tb-showcase-copy h3 { margin: 0 0 12px; font-size: clamp(1.3rem, 2.2vw, 1.85rem); font-weight: 300; }
 .tb-showcase-copy p { margin: 0; color: var(--tb-muted); line-height: 1.8; }
+.tb-showcase-copy .tb-status { margin-top: 18px; }
 
 /* ---------- Roadmap (slim teaser — the full board lives in an external tool) ---------- */
 
@@ -736,9 +1566,9 @@ a { color: inherit; text-decoration: none; }
 .tb-roadmap-highlights li {
   padding: 9px 20px;
   border: 1px solid var(--tb-line);
-  border-radius: 8px;
+  border-radius: var(--tb-radius-pill);
   color: var(--tb-muted);
-  font-size: 0.85rem;
+  font-size: 0.89rem;
 }
 
 /* ---------- Newsletter / beta ---------- */
@@ -766,14 +1596,14 @@ a { color: inherit; text-decoration: none; }
   width: 100%;
   padding: 0 20px;
   border: 1px solid var(--tb-line);
-  border-radius: 8px;
+  border-radius: var(--tb-radius-pill);
   background: var(--tb-surface-2);
   color: var(--tb-ink);
   font: inherit;
 }
 
 .tb-signup-form input::placeholder { color: var(--tb-faint); }
-.tb-signup-form p { margin: 0; color: var(--tb-faint); font-size: 0.82rem; }
+.tb-signup-form p { margin: 0; color: var(--tb-faint); font-size: 0.87rem; }
 .tb-substack-link { justify-self: start; }
 
 /* ---------- CTA banner ---------- */
@@ -794,36 +1624,480 @@ a { color: inherit; text-decoration: none; }
 .tb-faq-list summary { cursor: pointer; font-size: 1rem; font-weight: 400; }
 .tb-faq-list p { margin-top: 14px; }
 
-/* ---------- Footer ---------- */
+/* ----------
+   Footer
+
+   Everything here is full-strength ink rather than grey. A footer set in
+   secondary greys reads as a disclaimer; these are real destinations, so they
+   get real contrast (~18:1) and colour arrives on hover instead of being
+   spent on the resting state.
+
+   Hover cycles the four brand accents by column — blue, gold, green,
+   lavender — so the palette shows up somewhere other than the buttons.
+   ---------- */
 
 .tb-footer { border-top: 1px solid var(--tb-line-soft); padding: 72px 0 0; }
 
 .tb-footer-inner { display: grid; grid-template-columns: 1.3fr 2.7fr; gap: 48px; }
 
-.tb-footer-brand p { margin: 16px 0 0; color: var(--tb-faint); font-size: 0.86rem; line-height: 1.75; max-width: 300px; }
+.tb-footer-brand p {
+  margin: 16px 0 0;
+  color: var(--tb-ink);
+  font-size: 0.9rem;
+  line-height: 1.75;
+  max-width: 300px;
+}
 
-.tb-footer-columns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px 24px; }
+.tb-footer-columns { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 40px 28px; }
+
+/*
+ * Each footer column is colour-coded by what it contains, matching the section
+ * palette used up the page. The heading carries the colour; links stay ink and
+ * take the column's colour on hover, so the colour marks the group rather than
+ * competing with the links for attention.
+ */
+/* Accent now comes from the column's own CMS field, set inline by the
+   component, so adding or reordering columns needs no CSS change. */
+.tb-footer-column { --tb-footer-accent: var(--tb-blue); }
 
 .tb-footer-column h3 {
   margin: 0 0 16px;
-  font-size: 0.68rem;
-  font-weight: 400;
+  font-size: 0.78rem;
+  font-weight: 500;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--tb-faint);
+  color: var(--tb-footer-accent);
 }
 
 .tb-footer-column ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 11px; }
-.tb-footer-column a { font-size: 0.88rem; color: var(--tb-muted); transition: color 0.15s ease; }
-.tb-footer-column a:hover { color: var(--tb-blue); }
-.tb-footer-link-disabled { display: inline-block; font-size: 0.88rem; color: rgba(244, 242, 238, 0.22); cursor: default; }
+
+.tb-footer-column a {
+  font-size: 0.92rem;
+  color: var(--tb-ink);
+  transition: color 0.15s ease;
+}
+
+.tb-footer-column a:hover,
+.tb-footer-column a:focus-visible {
+  color: var(--tb-footer-accent);
+  /* A tinted block behind the text, so the hover is a highlight rather than a
+     colour change you have to squint at. */
+  background: color-mix(in srgb, var(--tb-footer-accent) 16%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--tb-footer-accent) 16%, transparent);
+  border-radius: 2px;
+}
+
+/* "Coming soon" labels read the same white as everything else. What separates
+   them from real links is behaviour, not colour: they never take the hover
+   accent and the cursor stays default, so the page has no grey tier at all. */
+.tb-footer-link-disabled {
+  display: inline-block;
+  font-size: 0.92rem;
+  color: var(--tb-ink);
+  cursor: default;
+}
+
+/* ---------- Connect row ---------- */
+
+.tb-footer-connect {
+  margin-top: clamp(48px, 6vw, 72px);
+  text-align: center;
+}
+
+.tb-footer-connect-title {
+  margin: 0 0 18px;
+  color: var(--tb-ink);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.tb-social-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Outlined circles, following the accent — the Lavendaire treatment. */
+.tb-social-link {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid color-mix(in srgb, var(--tb-blue) 45%, transparent);
+  border-radius: 50%;
+  color: var(--tb-blue);
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.tb-social-link svg { width: 18px; height: 18px; display: block; }
+
+.tb-social-link:hover,
+.tb-social-link:focus-visible {
+  background: var(--tb-blue);
+  border-color: var(--tb-blue);
+  color: var(--tb-on-chip);
+}
+
+/* No URL yet — visibly present, clearly not clickable. */
+.tb-social-link.is-empty {
+  color: var(--tb-faint);
+  border-color: var(--tb-line-soft);
+  cursor: default;
+}
+
+.tb-social-link.is-empty:hover { background: transparent; border-color: var(--tb-line-soft); color: var(--tb-faint); }
 
 .tb-footer-legal {
-  margin-top: 56px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 44px;
   padding: 22px 0 36px;
   border-top: 1px solid var(--tb-line-soft);
+  color: var(--tb-ink);
+  font-size: 0.84rem;
+  text-align: center;
+}
+
+.tb-footer-legal p { margin: 0; }
+
+.tb-footer-legal-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tb-footer-legal-links a { color: var(--tb-ink); transition: color 0.15s ease; }
+.tb-footer-legal-links a:hover { color: var(--tb-blue); }
+.tb-footer-colophon { color: var(--tb-faint) !important; }
+
+/* ---------- Values (numbered, editorial, wide) ---------- */
+
+.tb-values .tb-section-header { max-width: 660px; margin: 0 auto 52px; }
+
+.tb-values-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Wide and short: the number sits above a short title and two or three lines,
+   so six values read as two calm rows rather than six tall columns. */
+.tb-value {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: clamp(24px, 2.4vw, 30px);
+  border: 1px solid var(--tb-line-soft);
+  border-radius: var(--tb-radius);
+  background: color-mix(in srgb, var(--tb-lavender) var(--tb-card-tint), var(--tb-surface));
+}
+
+.tb-value-index {
   color: var(--tb-faint);
-  font-size: 0.78rem;
+  font-size: 0.79rem;
+  letter-spacing: 0.16em;
+}
+
+.tb-value h3 {
+  margin: 0;
+  font-size: 1.12rem;
+  font-weight: 500;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+
+.tb-value p {
+  margin: 0;
+  color: var(--tb-muted);
+  font-size: 0.95rem;
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+
+@media (max-width: 1024px) {
+  .tb-values-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 700px) {
+  .tb-values-grid { grid-template-columns: 1fr; }
+}
+
+/* Long-form editorial copy on the About page: a real measure, no card. */
+.tb-prose { max-width: 68ch; }
+.tb-prose p { color: var(--tb-muted); font-size: 1.02rem; line-height: 1.8; }
+
+/* ---------- Dual loop (tabbed, mirrors the macOS app's top-level nav) ---------- */
+
+.tb-loop-tabs {
+  display: inline-flex;
+  gap: 4px;
+  margin: 0 auto 8px;
+  padding: 4px;
+  border: 1px solid var(--tb-line-soft);
+  border-radius: var(--tb-radius);
+  background: var(--tb-surface-2);
+}
+
+.tb-dual-loop .tb-loop-tabs { display: flex; width: fit-content; }
+
+.tb-loop-tab {
+  min-height: 38px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: var(--tb-radius-sm);
+  background: transparent;
+  color: var(--tb-muted);
+  font-family: var(--font-body), sans-serif;
+  font-size: 0.93rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.tb-loop-tab:hover { color: var(--tb-ink); }
+
+.tb-loop-tab.is-active {
+  background: var(--tb-tab-accent, var(--tb-chip-blue));
+  color: var(--tb-on-chip);
+}
+
+.tb-loop-tagline {
+  max-width: 62ch;
+  margin: 22px auto 0;
+  color: var(--tb-muted);
+  font-size: 1rem;
+  line-height: 1.75;
+  text-align: center;
+}
+
+.tb-loop-stages {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+  max-width: 1000px;
+  margin: 40px auto 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tb-loop-stage {
+  display: grid;
+  gap: 10px;
+  padding: 22px;
+  border: 1px solid var(--tb-line-soft);
+  border-radius: var(--tb-radius);
+  background: var(--tb-surface);
+  /* A short rail in the tab's colour, so each panel reads as one family. */
+  border-top: 3px solid var(--tb-tab-accent, var(--tb-chip-blue));
+}
+
+.tb-loop-stage-index { color: var(--tb-faint); font-size: 0.76rem; letter-spacing: 0.14em; }
+.tb-loop-stage-body h3 { margin: 0 0 8px; font-size: 1.05rem; font-weight: 400; }
+.tb-loop-stage-body p { margin: 0; color: var(--tb-muted); font-size: 0.92rem; line-height: 1.7; }
+.tb-loop-stage-body .tb-status { margin-top: 12px; }
+
+@media (max-width: 620px) {
+  .tb-loop-tabs { width: 100%; }
+  .tb-loop-tab { flex: 1; padding: 0 12px; }
+}
+
+/* ---------- Hero product composition (Mac + optional phone) ---------- */
+
+.tb-showcase-stage { position: relative; }
+
+/* The phone overlaps the desktop shot's bottom-left corner, the way the
+   reference sites stand a device in front of the screen. It is absolutely
+   positioned so it can overhang without adding page height, and drops to a
+   plain stacked layout on small screens where the overlap would collide. */
+.tb-showcase-stage-with-phone { padding-bottom: 40px; }
+
+.tb-showcase-phone {
+  position: absolute;
+  left: 4%;
+  bottom: -40px;
+  width: clamp(110px, 13vw, 168px);
+  z-index: 2;
+}
+
+.tb-phone-frame {
+  position: relative;
+  padding: 7px;
+  border: 1px solid var(--tb-line);
+  border-radius: 22px;
+  background: var(--tb-surface-2);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+}
+
+.tb-phone-notch {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  width: 34%;
+  height: 8px;
+  border-radius: 5px;
+  background: var(--tb-bg);
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+.tb-phone-screen {
+  position: relative;
+  aspect-ratio: 9 / 19.5;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--tb-bg);
+}
+
+.tb-phone-screen img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+.tb-phone-sketch { display: grid; place-items: center; width: 100%; height: 100%; padding: 14px; }
+.tb-phone-sketch .tb-sketch { width: 100%; height: auto; }
+
+@media (max-width: 720px) {
+  /* Overlapping a 375px-wide screenshot just hides the product. */
+  .tb-showcase-stage-with-phone { padding-bottom: 0; }
+  .tb-showcase-phone {
+    position: static;
+    width: 132px;
+    margin: 18px auto 0;
+  }
+}
+
+/* ---------- Blog ---------- */
+
+.tb-blog-head { border-top: 0; padding-bottom: 0; }
+.tb-blog-head h1 { margin: 0; font-size: clamp(2.1rem, 4.4vw, 3.4rem); line-height: 1.12; }
+.tb-blog-list { border-top: 0; padding-top: clamp(40px, 5vw, 64px); }
+
+.tb-blog-empty {
+  max-width: 560px;
+  margin: 0 auto;
+  color: var(--tb-muted);
+  text-align: center;
+}
+
+.tb-post-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(20px, 2.6vw, 32px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tb-post-card {
+  height: 100%;
+  border: 1px solid var(--tb-line-soft);
+  border-radius: var(--tb-radius);
+  background: var(--tb-surface);
+  overflow: hidden;
+  transition: border-color 0.18s ease, transform 0.18s ease;
+}
+
+.tb-post-card:hover { border-color: var(--tb-line); transform: translateY(-2px); }
+.tb-post-card-link { display: flex; flex-direction: column; height: 100%; }
+
+.tb-post-card-media { aspect-ratio: 16 / 10; background: var(--tb-surface-2); overflow: hidden; }
+.tb-post-card-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.tb-post-card-placeholder { width: 100%; height: 100%; }
+
+.tb-post-card-body { display: flex; flex-direction: column; gap: 10px; padding: clamp(18px, 2vw, 24px); }
+
+.tb-post-card-chip {
+  align-self: flex-start;
+  padding: 4px 9px;
+  border-radius: var(--tb-radius-sm);
+  color: var(--tb-on-chip);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.tb-post-card h2 { margin: 0; font-size: 1.15rem; font-weight: 400; line-height: 1.35; }
+.tb-post-card p { margin: 0; color: var(--tb-muted); font-size: 0.92rem; line-height: 1.7; }
+.tb-post-card-meta { margin-top: auto !important; color: var(--tb-faint) !important; font-size: 0.84rem !important; }
+
+/* ---------- Post ---------- */
+
+.tb-post-shell { width: min(720px, calc(100% - 40px)); }
+.tb-post-head { border-top: 0; padding-bottom: clamp(28px, 4vw, 44px); }
+
+/* `block`, not `inline-block`: the category chip below is also inline-block, so
+   the two sat on the same line with the chip jammed against "All writing". */
+.tb-post-back {
+  display: block;
+  width: fit-content;
+  margin-bottom: 30px;
+  color: var(--tb-muted);
+  font-size: 0.89rem;
+  transition: color 0.15s ease;
+}
+
+.tb-post-back:hover { color: var(--tb-blue); }
+.tb-post-head h1 { margin: 0; font-size: clamp(2rem, 4.2vw, 3.1rem); line-height: 1.14; }
+.tb-post-excerpt { margin: 20px 0 0; color: var(--tb-muted); font-size: 1.08rem; line-height: 1.8; }
+.tb-post-meta { margin: 22px 0 0; color: var(--tb-faint); font-size: 0.87rem; }
+.tb-post-cover { margin-bottom: clamp(32px, 4vw, 52px); }
+
+/* Long-form body copy: wider line height and real spacing between blocks. */
+.tb-post-body { padding-bottom: clamp(40px, 5vw, 64px); font-size: 1.05rem; line-height: 1.85; }
+.tb-post-body > * { margin: 0 0 1.35em; }
+.tb-post-body h2 { margin: 2em 0 0.6em; font-size: clamp(1.4rem, 2.4vw, 1.9rem); }
+.tb-post-body h3 { margin: 1.6em 0 0.5em; font-size: clamp(1.15rem, 1.9vw, 1.4rem); }
+.tb-post-body p { color: var(--tb-muted); }
+.tb-post-body a { color: var(--tb-blue); border-bottom: 1px solid var(--tb-line); }
+.tb-post-body ul, .tb-post-body ol { padding-left: 1.3em; color: var(--tb-muted); }
+.tb-post-body li { margin-bottom: 0.5em; }
+.tb-post-body img { max-width: 100%; height: auto; border-radius: var(--tb-radius); }
+
+.tb-post-body blockquote {
+  margin: 1.8em 0;
+  padding: 4px 0 4px 22px;
+  border-left: 2px solid var(--tb-chip-lavender);
+  color: var(--tb-ink);
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.2rem;
+  line-height: 1.55;
+}
+
+/* The automatic Substack call to action at the end of every post. */
+.tb-post-substack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px 28px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: clamp(56px, 7vw, 96px);
+  padding: clamp(24px, 3vw, 32px);
+  border: 1px solid var(--tb-line-soft);
+  border-radius: var(--tb-radius);
+  background: color-mix(in srgb, var(--tb-chip-lavender) var(--tb-card-tint), var(--tb-surface));
+}
+
+.tb-post-substack-lead { margin: 0; max-width: 40ch; color: var(--tb-ink); font-size: 0.98rem; line-height: 1.6; }
+
+@media (max-width: 1024px) {
+  .tb-post-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 700px) {
+  .tb-post-grid { grid-template-columns: 1fr; }
+  .tb-post-substack { flex-direction: column; align-items: flex-start; }
 }
 
 /* ---------- 404 ---------- */
@@ -840,22 +2114,75 @@ a { color: inherit; text-decoration: none; }
   * { transition-duration: 0.01ms !important; }
 }
 
+/* Laptop — 13-16" MacBooks land here. The three-up grids stay three-up; only
+   the sticky offset and shell padding need easing. */
+@media (max-width: 1180px) {
+  .tb-shell { width: min(1120px, calc(100% - 32px)); }
+}
+
+/* Tablet. The old sheet jumped 3 columns straight to 1 at 920px, which left
+   iPad portrait rendering a single 700px-wide column of cards. */
+@media (max-width: 1024px) {
+  .tb-feature-grid,
+  .tb-platform-grid,
+  .tb-plan-grid,
+  .tb-products .tb-product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tb-workspace-layout { grid-template-columns: minmax(180px, 0.7fr) minmax(0, 1.3fr); }
+  .tb-workspace-tiles { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); min-height: 280px; }
+}
+
+/* Features drop to one column only at phone width. Must come AFTER the 1024px
+   rule above, or that rule wins at equal specificity and phones get two
+   columns. */
+@media (max-width: 700px) {
+  .tb-feature-grid { grid-template-columns: 1fr; }
+}
+
 @media (max-width: 920px) {
   .tb-section-layout,
   .tb-framework-inner,
   .tb-beta-grid,
   .tb-grid,
-  .tb-feature-grid,
   .tb-platform-grid,
   .tb-plan-grid,
+  .tb-agent-grid,
   .tb-loop-layout,
+  .tb-workspace-layout,
+  .tb-products .tb-product-grid,
   .tb-showcase-row {
     grid-template-columns: 1fr;
   }
 
   .tb-section-layout .tb-section-header { position: static; max-width: none; }
-  .tb-showcase-row-reverse .tb-showcase-media { order: 0; }
+
+  /* Media above copy on every row once stacked — reading a description of a
+     screen you have not seen yet is backwards. */
+  .tb-showcase-media,
+  .tb-showcase-row-reverse .tb-showcase-media { order: -1; }
+
   .tb-section { padding: 64px 0; }
   .tb-footer-inner { grid-template-columns: 1fr; }
   .tb-footer-columns { grid-template-columns: repeat(2, 1fr); }
+
+  .tb-module-list {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-auto-flow: row;
+    display: grid;
+  }
+}
+
+@media (max-width: 620px) {
+  .tb-scale-level { grid-template-columns: 1fr; gap: 4px; padding: 22px 0; }
+  .tb-scale-label { padding-top: 0; }
+  .tb-scale-rail { margin: 12px 0 16px; }
+  .tb-media-chrome { padding: 9px 13px; }
+  .tb-media-title { display: none; }
+  .tb-suggestion { padding: 20px; }
+  .tb-suggestion-actions { width: 100%; }
+  .tb-suggestion-actions .tb-button { flex: 1; }
+  .tb-workspace-tiles { grid-template-columns: 1fr; min-height: 0; }
+  .tb-footer-columns { grid-template-columns: 1fr; }
 }
