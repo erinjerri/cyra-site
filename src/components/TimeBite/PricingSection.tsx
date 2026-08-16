@@ -11,8 +11,9 @@ const cx = (...classes: Array<string | false | undefined>) => classes.filter(Boo
 type BillingCycle = 'monthly' | 'annual'
 
 /**
- * Annual is the default view, so the price a visitor sees first is the one we
- * recommend. A plan priced '0' never says "billed annually".
+ * Falls back to the monthly figure whenever the annual one is missing, so a
+ * plan sold only monthly still shows a price on the annual view. A plan priced
+ * '0' never says "billed annually".
  */
 function planPrice(plan: DigitalPlan, cycle: BillingCycle) {
   const isAnnual = cycle === 'annual' && Boolean(plan.annualPrice)
@@ -69,7 +70,13 @@ function DigitalPlanCard({ plan, cycle }: { plan: DigitalPlan; cycle: BillingCyc
 }
 
 export function PricingSection({ block }: { block: PricingBlockType }) {
-  const [cycle, setCycle] = useState<BillingCycle>('annual')
+  /*
+   * Monthly first. Annual was the default so the recommended price led, but it
+   * meant a visitor's first impression of Executive was $1,111.10 rather than
+   * $111.11 — the same offer reading roughly ten times more expensive. The
+   * annual saving is still one click away, and the toggle announces it.
+   */
+  const [cycle, setCycle] = useState<BillingCycle>('monthly')
 
   const plans = block.digitalPlans || []
   const promotion = block.betaPromotion
