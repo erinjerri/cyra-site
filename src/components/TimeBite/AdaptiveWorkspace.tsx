@@ -56,21 +56,41 @@ export function AdaptiveWorkspace({ block }: { block: WorkspaceBlockType }) {
         </div>
 
         <div className="tb-workspace-layout">
+          {/* Components and goal areas are listed separately: one is a TimeBite
+              surface, the other is a Creating Your Reality life domain, and
+              mixing them implies they are the same kind of thing. */}
           <div className="tb-workspace-picker">
-            <p className="tb-workspace-picker-label" id="tb-workspace-modules">
-              Modules
-            </p>
-            <ul className="tb-module-list" aria-labelledby="tb-workspace-modules">
-              {modules.map((module, index) => (
-                <li key={index}>
-                  <ModuleToggle
-                    module={module}
-                    on={Boolean(module.name && enabled.includes(module.name))}
-                    onToggle={() => module.name && toggle(module.name)}
-                  />
-                </li>
-              ))}
-            </ul>
+            {(
+              [
+                { kind: 'component', label: 'TimeBite components', id: 'tb-workspace-components' },
+                { kind: 'goal-area', label: 'Goal areas', id: 'tb-workspace-goal-areas' },
+              ] as const
+            ).map((group) => {
+              const groupModules = modules.filter((module) =>
+                group.kind === 'component' ? module.kind !== 'goal-area' : module.kind === 'goal-area',
+              )
+
+              if (groupModules.length === 0) return null
+
+              return (
+                <div className="tb-module-group" key={group.kind}>
+                  <p className="tb-workspace-picker-label" id={group.id}>
+                    {group.label}
+                  </p>
+                  <ul className="tb-module-list" aria-labelledby={group.id}>
+                    {groupModules.map((module, index) => (
+                      <li key={index}>
+                        <ModuleToggle
+                          module={module}
+                          on={Boolean(module.name && enabled.includes(module.name))}
+                          onToggle={() => module.name && toggle(module.name)}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )
+            })}
           </div>
 
           <div className="tb-workspace-canvas">

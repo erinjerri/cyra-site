@@ -1,3 +1,4 @@
+import { CtaLink } from './CtaLink'
 import { StatusBadge } from './StatusBadge'
 import type { AgentsBlockType } from './types'
 
@@ -42,6 +43,13 @@ export function AgentRoadmap({ block }: { block: AgentsBlockType }) {
             </article>
           ))}
         </div>
+
+        {/* Hidden until a URL exists, so it never renders a dead button. */}
+        {block.roadmapCta?.label && block.roadmapCta?.url ? (
+          <div className="tb-actions tb-actions-center">
+            <CtaLink cta={block.roadmapCta} variant="secondary" />
+          </div>
+        ) : null}
 
         {block.footnote ? <p className="tb-agents-footnote">{block.footnote}</p> : null}
       </div>

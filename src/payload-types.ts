@@ -68,6 +68,7 @@ export interface Config {
   blocks: {};
   collections: {
     pages: Page;
+    posts: Post;
     products: Product;
     media: Media;
     users: User;
@@ -80,6 +81,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -142,6 +144,7 @@ export interface Page {
     | HeroBlock
     | QuoteBlock
     | TimelineBlock
+    | DualLoopBlock
     | ProductDemoBlock
     | ScaleStoryBlock
     | AboutBlock
@@ -210,7 +213,7 @@ export interface HeroBlock {
     analyticsId?: string | null;
   };
   /**
-   * One quiet line under the buttons, e.g. "macOS first • iPhone, Apple Watch & Apple Vision Pro coming next".
+   * One quiet line under the buttons, e.g. "Beta on macOS • iOS, watchOS and visionOS coming soon".
    */
   availabilityNote?: string | null;
   /**
@@ -242,6 +245,22 @@ export interface HeroBlock {
    * Schematic drawn while this slot has no screenshot yet. Pick the one that matches the screen being described.
    */
   sketch?: ('workspace' | 'goal' | 'list' | 'matrix' | 'board' | 'calendar' | 'habits' | 'chart' | 'timeline') | null;
+  /**
+   * A second device standing in front of the desktop shot. Uncheck "Show" to render the Mac window alone — do that while the iPhone app is still unreleased rather than showing an invented screen.
+   */
+  phone?: {
+    enabled?: boolean | null;
+    /**
+     * Portrait, 1179×2556 (iPhone) or similar. App content only, no device frame.
+     */
+    image?: (string | null) | Media;
+    /**
+     * Optional public URL used when no upload is set.
+     */
+    assetUrl?: string | null;
+    imageAlt?: string | null;
+    sketch?: ('list' | 'goal' | 'habits' | 'chart') | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'heroBlock';
@@ -318,6 +337,49 @@ export interface TimelineBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'timelineBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DualLoopBlock".
+ */
+export interface DualLoopBlock {
+  eyebrow?: string | null;
+  headline: string;
+  body?: string | null;
+  /**
+   * One tab per brand. The first is selected by default.
+   */
+  tabs?:
+    | {
+        /**
+         * e.g. TimeBite
+         */
+        label: string;
+        /**
+         * One line under the tab bar saying what this side does.
+         */
+        tagline?: string | null;
+        /**
+         * Chip and rail colour for this tab.
+         */
+        accent?: ('blue' | 'teal' | 'gold' | 'green' | 'pink' | 'lavender') | null;
+        steps?:
+          | {
+              title: string;
+              body?: string | null;
+              /**
+               * Leave blank when the stage simply exists. Available now = shipped. Beta = usable, in the private beta. In development = being built. Planned = committed, not started. Exploring = we are looking at it and nothing more.
+               */
+              status?: ('available' | 'beta' | 'in-development' | 'planned' | 'exploring') | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'dualLoopBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -581,6 +643,10 @@ export interface WorkspaceBlock {
     | {
         name: string;
         description?: string | null;
+        /**
+         * Components are TimeBite surfaces — Today, Actions, Calendar. Goal areas are Creating Your Reality life domains — Career, Fitness, Finance. They are grouped separately because they are different things: one is a view, the other is a part of your life.
+         */
+        kind: 'component' | 'goal-area';
         sketch?: ('list' | 'goal' | 'matrix' | 'board' | 'calendar' | 'habits' | 'chart' | 'timeline') | null;
         /**
          * Available now = shipped. Beta = usable, in the private beta. In development = being built. Planned = committed, not started. Exploring = we are looking at it and nothing more.
@@ -651,6 +717,24 @@ export interface AgentsBlock {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Points at the public roadmap and changelog. Hidden until a URL is set, so it never renders a dead button. For reference, Sunsama runs theirs on Canny at roadmap.sunsama.com — that is the obvious option if you want feedback voting alongside a changelog.
+   */
+  roadmapCta?: {
+    label?: string | null;
+    /**
+     * Internal path (/philosophy), on-page anchor (#beta), or a full external URL (https://…).
+     */
+    url?: string | null;
+    /**
+     * Turn on for links that leave the site, such as Substack. Adds rel="noopener noreferrer".
+     */
+    newTab?: boolean | null;
+    /**
+     * Optional. Rendered as data-analytics-event so this button can be tracked, e.g. join_beta_hero.
+     */
+    analyticsId?: string | null;
+  };
   footnote?: string | null;
   id?: string | null;
   blockName?: string | null;
@@ -1104,6 +1188,71 @@ export interface TestimonialsBlock {
   blockType: 'testimonialsBlock';
 }
 /**
+ * Written posts. Shown at /blog, newest first.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: string;
+  title: string;
+  /**
+   * Lowercase and hyphenated. The URL becomes /blog/<slug>.
+   */
+  slug: string;
+  /**
+   * One or two sentences shown on the blog index and used as the SEO description when none is set.
+   */
+  excerpt?: string | null;
+  /**
+   * Shown on the card and at the top of the post. Landscape, 1600×900 or larger. Uploaded through Media, so it goes to R2.
+   */
+  heroImage?: (string | null) | Media;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  category?: ('intentional-living' | 'planning' | 'building' | 'career' | 'notes') | null;
+  /**
+   * Controls ordering on the index. Leave blank and it fills in on publish.
+   */
+  publishedAt?: string | null;
+  /**
+   * Optional. Shown beside the date. Leave blank to hide it.
+   */
+  readingMinutes?: number | null;
+  /**
+   * Link to this post on Substack. When set, the end of the post shows "Read this on Substack" automatically — you never type that line yourself. Leave blank to fall back to the site-wide Substack link.
+   */
+  substackUrl?: string | null;
+  /**
+   * Pins this post to the top of the index.
+   */
+  featured?: boolean | null;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (string | null) | Media;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
@@ -1172,6 +1321,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'pages';
         value: string | Page;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
       } | null)
     | ({
         relationTo: 'products';
@@ -1244,6 +1397,7 @@ export interface PagesSelect<T extends boolean = true> {
         heroBlock?: T | HeroBlockSelect<T>;
         quoteBlock?: T | QuoteBlockSelect<T>;
         timelineBlock?: T | TimelineBlockSelect<T>;
+        dualLoopBlock?: T | DualLoopBlockSelect<T>;
         productDemoBlock?: T | ProductDemoBlockSelect<T>;
         scaleStoryBlock?: T | ScaleStoryBlockSelect<T>;
         aboutBlock?: T | AboutBlockSelect<T>;
@@ -1305,6 +1459,15 @@ export interface HeroBlockSelect<T extends boolean = true> {
   mediaCaption?: T;
   mediaFrame?: T;
   sketch?: T;
+  phone?:
+    | T
+    | {
+        enabled?: T;
+        image?: T;
+        assetUrl?: T;
+        imageAlt?: T;
+        sketch?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1341,6 +1504,33 @@ export interface TimelineBlockSelect<T extends boolean = true> {
   image?: T;
   assetUrl?: T;
   imageAlt?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DualLoopBlock_select".
+ */
+export interface DualLoopBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  headline?: T;
+  body?: T;
+  tabs?:
+    | T
+    | {
+        label?: T;
+        tagline?: T;
+        accent?: T;
+        steps?:
+          | T
+          | {
+              title?: T;
+              body?: T;
+              status?: T;
+              id?: T;
+            };
+        id?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1500,6 +1690,7 @@ export interface WorkspaceBlockSelect<T extends boolean = true> {
     | {
         name?: T;
         description?: T;
+        kind?: T;
         sketch?: T;
         status?: T;
         defaultOn?: T;
@@ -1542,6 +1733,14 @@ export interface AgentsBlockSelect<T extends boolean = true> {
             };
         disclaimer?: T;
         id?: T;
+      };
+  roadmapCta?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        newTab?: T;
+        analyticsId?: T;
       };
   footnote?: T;
   id?: T;
@@ -1793,6 +1992,32 @@ export interface TestimonialsBlockSelect<T extends boolean = true> {
       };
   id?: T;
   blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  excerpt?: T;
+  heroImage?: T;
+  content?: T;
+  category?: T;
+  publishedAt?: T;
+  readingMinutes?: T;
+  substackUrl?: T;
+  featured?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

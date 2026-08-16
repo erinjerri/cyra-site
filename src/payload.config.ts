@@ -7,6 +7,7 @@ import sharp from 'sharp'
 
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
+import { Posts } from './collections/Posts'
 import { Products } from './collections/Products'
 import { Users } from './collections/Users'
 import { PRODUCT_DESCRIPTION } from './utilities/brand'
@@ -20,7 +21,7 @@ export default buildConfig({
   admin: {
     user: Users.slug,
   },
-  collections: [Pages, Products, Media, Users],
+  collections: [Pages, Posts, Products, Media, Users],
   globals: [Header, Footer, SiteSettings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'timebite-local-dev-secret',
@@ -30,7 +31,7 @@ export default buildConfig({
   }),
   plugins: [
     seoPlugin({
-      collections: ['pages'],
+      collections: ['pages', 'posts'],
       uploadsCollection: 'media',
       generateTitle: ({ doc }: { doc: { title?: string } }) =>
         doc?.title && doc.title !== 'TimeBite' ? `${doc.title} | TimeBite` : 'TimeBite',

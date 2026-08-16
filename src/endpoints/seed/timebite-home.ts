@@ -38,7 +38,7 @@ export const timeBiteHome = {
         url: '#how-it-works',
         analyticsId: 'see_how_it_works_hero',
       },
-      availabilityNote: 'macOS first • iPhone, Apple Watch & Apple Vision Pro coming next',
+      availabilityNote: 'Beta on macOS • iOS, watchOS and visionOS coming soon',
       // Upload the hero capture to this block's `image` field in /admin.
       // Until then the schematic renders. See docs/MediaSlots.md.
       sketch: 'workspace',
@@ -54,33 +54,64 @@ export const timeBiteHome = {
       emphasis: 'Nothing was checking whether the week moved you anywhere.',
     },
     {
-      blockType: 'timelineBlock',
+      // Two loops behind a tab bar, matching the macOS app's top-level
+      // navigation: Now / Plan / Track / Dashboard on the TimeBite side,
+      // Discover on the Creating Your Reality side.
+      blockType: 'dualLoopBlock',
       eyebrow: 'How it works',
       headline: 'One system for turning intention into action.',
-      body: 'Five stages, running continuously. Most tools give you one or two of them and leave you to carry the rest in your head.',
-      steps: [
+      body: 'Two halves of the same practice. Creating Your Reality decides what is worth doing; TimeBite is where that meets a calendar.',
+      tabs: [
         {
-          title: 'Plan',
-          body: 'Name the goal, break it into milestones, and turn those into actions small enough to start on a Tuesday.',
+          label: 'TimeBite',
+          accent: 'blue',
+          tagline: 'Planning, execution and measurement — the same four surfaces you get in the macOS app.',
+          steps: [
+            {
+              title: 'Now',
+              body: 'What is in front of you this hour, and nothing else. Start a focus session without leaving the view.',
+              status: 'available',
+            },
+            {
+              title: 'Plan',
+              body: 'Goals into milestones into actions, then onto the calendar as real blocks of time you can defend.',
+              status: 'available',
+            },
+            {
+              title: 'Track',
+              body: 'Time, completion and habits recorded as you go — daily, monthly and annual, not reconstructed from memory.',
+              status: 'available',
+            },
+            {
+              title: 'Dashboard',
+              body: 'Planned against actual, per goal, over time. The gap between the two is the useful number.',
+              status: 'in-development',
+            },
+          ],
         },
         {
-          title: 'Focus',
-          body: 'Decide what actually matters this week, and give it real hours on the calendar instead of a place on a list.',
-        },
-        {
-          title: 'Track',
-          body: 'Time, completion and habits recorded as you go — not reconstructed on Friday from memory.',
-        },
-        {
-          title: 'Reflect',
-          body: 'Look at the day, the week, the month: where the hours went, and whether they went where you meant them to.',
-        },
-        {
-          title: 'Improve',
-          body: 'Use what that shows to change next week. The plan bends to the evidence, not the other way round.',
+          label: 'Creating Your Reality',
+          accent: 'lavender',
+          tagline: 'The philosophy side: what kind of life you are trying to build, before any of it reaches a calendar.',
+          steps: [
+            {
+              title: 'Discover',
+              body: 'Identity, purpose and the long-term picture — vision work, values, and the questions underneath the goals.',
+              status: 'in-development',
+            },
+            {
+              title: 'Define',
+              body: 'Turn that picture into goal areas you can actually name: career, fitness, finance, and the rest of a life.',
+              status: 'planned',
+            },
+            {
+              title: 'Practise',
+              body: 'The paper planner and the written framework, for the parts of this that work better away from a screen.',
+              status: 'planned',
+            },
+          ],
         },
       ],
-      imageAlt: 'The TimeBite loop: plan, focus, track, reflect, improve.',
     },
     {
       // The 45–60s Screen Studio cut. Poster + MP4 go on this block in /admin;
@@ -143,21 +174,22 @@ export const timeBiteHome = {
       // there on every row. They render as schematics until media is uploaded.
       blockType: 'featureGridBlock',
       eyebrow: 'What is in it',
-      headline: 'It is not nine features. It is one system.',
+      headline: 'It is not eight features. It is one system.',
       body: 'Planning, execution and measurement in one place, so nothing has to be copied between them.',
       items: [
         {
-          title: 'Goals',
-          body: 'What you are working toward, broken into milestones with a definition of done.',
+          // Goals and Actions were two cards saying half a thought each.
+          title: 'Goal setting',
+          body: 'What you are working toward, broken into milestones with a definition of done, then into actions small and specific enough to schedule. Every action keeps its link back to the goal it serves.',
           status: 'available',
           sketch: 'goal',
           enabled: true,
         },
         {
-          title: 'Actions',
-          body: 'The unit of work. Small, specific, and always attached to the milestone it serves.',
+          title: 'Kanban board',
+          body: 'Track your personal and professional goals and the work from every area of your life in one place — vision boards, Kanban boards, Eisenhower matrices and more — so you can move from your values and intentions to actually meeting your goals.',
           status: 'available',
-          sketch: 'list',
+          sketch: 'board',
           enabled: true,
         },
         {
@@ -168,13 +200,6 @@ export const timeBiteHome = {
           enabled: true,
         },
         {
-          title: 'Kanban board',
-          body: 'Move work through the states it actually passes through, and see what is stuck.',
-          status: 'available',
-          sketch: 'board',
-          enabled: true,
-        },
-        {
           title: 'Time tracking',
           body: 'Where the hours went, recorded against the goal they belong to rather than guessed at later.',
           status: 'available',
@@ -182,29 +207,29 @@ export const timeBiteHome = {
           enabled: true,
         },
         {
-          title: 'Daily activity rings',
-          body: 'The day at a glance: planned against actual, closing as the work gets done.',
+          title: 'Activity',
+          body: 'See how your time is actually spent against how you planned it, and close the loop to get things done.',
           status: 'available',
           sketch: 'habits',
           enabled: true,
         },
         {
           title: 'Now, AM, PM & daily summaries',
-          body: 'What is in front of you right now, how the morning went, and what the whole day added up to.',
+          body: 'A holistic snapshot of your day in real life, as it happens — not weeks later.',
           status: 'available',
           sketch: 'list',
           enabled: true,
         },
         {
           title: 'Progress dashboards',
-          body: 'Completion over time, plan against actual, per goal — so progress is a line rather than a feeling.',
+          body: 'Interactive data visualisation tracking your progress through the day and showing completion over time, so progress is a line you can read rather than a feeling.',
           status: 'in-development',
           sketch: 'chart',
           enabled: true,
         },
         {
-          title: 'AI-assisted recommendations',
-          body: 'Help breaking a goal down and a nudge when something you committed to has gone quiet.',
+          title: 'AI assistance',
+          body: 'Lost a sticky note, or forgot to track something? TimeBite syncs the information you already have to capture your day, then finds the pockets of time to optimise your workflow — or to take a rest.',
           status: 'in-development',
           sketch: 'workspace',
           enabled: true,
@@ -292,18 +317,20 @@ export const timeBiteHome = {
       blockType: 'workspaceBlock',
       eyebrow: 'Adaptive workspace',
       headline: 'A system that learns how you work.',
-      body: 'TimeBite is being designed to help you customize your workspace around your goals—from the widgets you use to the agents that help you stay on track. Your life doesn’t fit into someone else’s dashboard.',
+      body: 'TimeBite is being designed to help you customize your workspace around your goals—from the widgets you use to the agents that help you stay on track. Your life doesn’t fit into someone else’s dashboard. Components are TimeBite surfaces; goal areas are the parts of your life Creating Your Reality asks you to name.',
       modules: [
-        { name: 'Today', description: 'What is on, right now', sketch: 'list', status: 'available', defaultOn: true },
-        { name: 'Actions', description: 'Everything queued', sketch: 'matrix', status: 'available', defaultOn: true },
-        { name: 'Calendar', description: 'The week in hours', sketch: 'calendar', status: 'available', defaultOn: true },
-        { name: 'Goals', description: 'Outcomes and milestones', sketch: 'goal', status: 'available', defaultOn: true },
-        { name: 'Habits', description: 'The repeated work', sketch: 'habits', status: 'available' },
-        { name: 'Progress', description: 'Plan against actual', sketch: 'chart', status: 'in-development' },
-        { name: 'Journal', description: 'What happened, in your words', sketch: 'list', status: 'in-development' },
-        { name: 'Career', description: 'Longer-range professional goals', sketch: 'timeline', status: 'planned' },
-        { name: 'Fitness', description: 'Training and consistency', sketch: 'habits', status: 'planned' },
-        { name: 'Finance', description: 'Savings and money goals', sketch: 'chart', status: 'exploring' },
+        // Components: TimeBite surfaces.
+        { name: 'Today', kind: 'component', description: 'What is on, right now', sketch: 'list', status: 'available', defaultOn: true },
+        { name: 'Actions', kind: 'component', description: 'Everything queued', sketch: 'matrix', status: 'available', defaultOn: true },
+        { name: 'Calendar', kind: 'component', description: 'The week in hours', sketch: 'calendar', status: 'available', defaultOn: true },
+        { name: 'Goals', kind: 'component', description: 'Outcomes and milestones', sketch: 'goal', status: 'available', defaultOn: true },
+        { name: 'Habits', kind: 'component', description: 'The repeated work', sketch: 'habits', status: 'available' },
+        { name: 'Progress', kind: 'component', description: 'Plan against actual', sketch: 'chart', status: 'in-development' },
+        { name: 'Journal', kind: 'component', description: 'What happened, in your words', sketch: 'list', status: 'in-development' },
+        // Goal areas: Creating Your Reality life domains.
+        { name: 'Career', kind: 'goal-area', description: 'Longer-range professional goals', sketch: 'timeline', status: 'planned' },
+        { name: 'Fitness', kind: 'goal-area', description: 'Training and consistency', sketch: 'habits', status: 'planned' },
+        { name: 'Finance', kind: 'goal-area', description: 'Savings and money goals', sketch: 'chart', status: 'exploring' },
       ],
       suggestion: {
         source: 'Goal Agent',
@@ -364,6 +391,11 @@ export const timeBiteHome = {
             'Goal tracking, savings progress, budgeting and general education only. TimeBite does not give investment advice and does not recommend securities.',
         },
       ],
+      // Set the URL in /admin once the public board exists — the button stays
+      // hidden until then rather than rendering a dead link. Sunsama runs
+      // theirs on Canny (roadmap.sunsama.com), which is the obvious option if
+      // you want feedback voting alongside the changelog.
+      roadmapCta: { label: 'Our roadmap & changelog', analyticsId: 'view_roadmap' },
       footnote:
         'Nothing here is available today. Each card says where it stands, and the status changes on this page the day it changes in the product.',
     },
@@ -528,7 +560,7 @@ export const timeBiteHome = {
         {
           question: 'Which devices can I use it on?',
           answer:
-            'macOS first — that is where the full product lives and where the beta is running. iPhone is in development, with iPad and Apple Watch planned after it. Vision Pro is something we are exploring, not building.',
+            'The beta runs on macOS, where the full product lives. iOS, watchOS and visionOS are coming — iPhone is in development, with iPad and Apple Watch planned after it, and Vision Pro further out.',
         },
         {
           question: 'Is this a task manager or a goal app?',

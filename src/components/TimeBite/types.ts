@@ -94,6 +94,8 @@ export type ScaleLevel = {
 export type WorkspaceModule = {
   name?: string
   description?: string
+  /** Components are TimeBite surfaces; goal areas are CYR life domains. */
+  kind?: 'component' | 'goal-area'
   sketch?: SketchKind
   status?: Status
   defaultOn?: boolean
@@ -177,6 +179,8 @@ export type TimeBiteBlock = MediaContent & {
   duration?: string
   transcript?: string
   footnote?: string
+  /** Optional second device standing in front of the hero desktop shot. */
+  phone?: MediaContent & { enabled?: boolean | null }
 }
 
 export type WorkspaceBlockType = Omit<TimeBiteBlock, 'items'> & {
@@ -186,6 +190,18 @@ export type WorkspaceBlockType = Omit<TimeBiteBlock, 'items'> & {
 
 export type AgentsBlockType = Omit<TimeBiteBlock, 'items'> & {
   agents?: AgentCard[]
+  roadmapCta?: Cta
+}
+
+export type DualLoopTab = {
+  label?: string
+  tagline?: string
+  accent?: 'blue' | 'teal' | 'gold' | 'green' | 'pink' | 'lavender'
+  steps?: { title?: string; body?: string; status?: Status }[]
+}
+
+export type DualLoopBlockType = Omit<TimeBiteBlock, 'items'> & {
+  tabs?: DualLoopTab[]
 }
 
 export type FAQBlockType = Omit<TimeBiteBlock, 'items'> & {

@@ -152,6 +152,11 @@
  * chip and stays pastel in both themes.
  */
 #how-it-works { --tb-section-accent: var(--tb-gold); --tb-section-chip: var(--tb-chip-gold); }
+/* The dual loop centres its own tab bar, so its header centres too. */
+.tb-dual-loop .tb-section-header { margin-bottom: 32px; }
+.tb-dual-loop > .tb-shell { display: flex; flex-direction: column; align-items: center; }
+.tb-dual-loop > .tb-shell > * { width: 100%; }
+.tb-dual-loop .tb-loop-tabs { width: auto; }
 #demo { --tb-section-accent: var(--tb-blue); --tb-section-chip: var(--tb-chip-blue); }
 #scale { --tb-section-accent: var(--tb-teal); --tb-section-chip: var(--tb-chip-teal); }
 #features { --tb-section-accent: var(--tb-green); --tb-section-chip: var(--tb-chip-green); }
@@ -748,6 +753,9 @@ a { color: inherit; text-decoration: none; }
 }
 
 .tb-module-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+
+/* Components and goal areas are separate groups — see AdaptiveWorkspace. */
+.tb-module-group + .tb-module-group { margin-top: 26px; }
 
 .tb-module {
   display: grid;
@@ -1528,17 +1536,28 @@ a { color: inherit; text-decoration: none; }
 
 .tb-footer-columns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px 24px; }
 
-/* One hover colour across the whole footer. Rotating accents per column read as
-   decorative; a single blue reads as "this is what a link does here". */
+/*
+ * Each footer column is colour-coded by what it contains, matching the section
+ * palette used up the page. The heading carries the colour; links stay ink and
+ * take the column's colour on hover, so the colour marks the group rather than
+ * competing with the links for attention.
+ */
 .tb-footer-column { --tb-footer-accent: var(--tb-blue); }
+
+.tb-footer-column:nth-child(1) { --tb-footer-accent: var(--tb-teal); }      /* Explore */
+.tb-footer-column:nth-child(2) { --tb-footer-accent: var(--tb-gold); }      /* Product */
+.tb-footer-column:nth-child(3) { --tb-footer-accent: var(--tb-green); }     /* In the works */
+.tb-footer-column:nth-child(4) { --tb-footer-accent: var(--tb-lavender); }  /* Learn */
+.tb-footer-column:nth-child(5) { --tb-footer-accent: var(--tb-pink); }      /* Company */
+.tb-footer-column:nth-child(6) { --tb-footer-accent: var(--tb-blue); }      /* Connect */
 
 .tb-footer-column h3 {
   margin: 0 0 16px;
   font-size: 0.78rem;
-  font-weight: 400;
+  font-weight: 500;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--tb-ink);
+  color: var(--tb-footer-accent);
 }
 
 .tb-footer-column ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 11px; }
@@ -1575,6 +1594,265 @@ a { color: inherit; text-decoration: none; }
   border-top: 1px solid var(--tb-line-soft);
   color: var(--tb-ink);
   font-size: 0.84rem;
+}
+
+/* ---------- Dual loop (tabbed, mirrors the macOS app's top-level nav) ---------- */
+
+.tb-loop-tabs {
+  display: inline-flex;
+  gap: 4px;
+  margin: 0 auto 8px;
+  padding: 4px;
+  border: 1px solid var(--tb-line-soft);
+  border-radius: var(--tb-radius);
+  background: var(--tb-surface-2);
+}
+
+.tb-dual-loop .tb-loop-tabs { display: flex; width: fit-content; }
+
+.tb-loop-tab {
+  min-height: 38px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: var(--tb-radius-sm);
+  background: transparent;
+  color: var(--tb-muted);
+  font-family: var(--font-body), sans-serif;
+  font-size: 0.93rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.tb-loop-tab:hover { color: var(--tb-ink); }
+
+.tb-loop-tab.is-active {
+  background: var(--tb-tab-accent, var(--tb-chip-blue));
+  color: var(--tb-on-chip);
+}
+
+.tb-loop-tagline {
+  max-width: 62ch;
+  margin: 22px auto 0;
+  color: var(--tb-muted);
+  font-size: 1rem;
+  line-height: 1.75;
+  text-align: center;
+}
+
+.tb-loop-stages {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+  max-width: 1000px;
+  margin: 40px auto 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tb-loop-stage {
+  display: grid;
+  gap: 10px;
+  padding: 22px;
+  border: 1px solid var(--tb-line-soft);
+  border-radius: var(--tb-radius);
+  background: var(--tb-surface);
+  /* A short rail in the tab's colour, so each panel reads as one family. */
+  border-top: 3px solid var(--tb-tab-accent, var(--tb-chip-blue));
+}
+
+.tb-loop-stage-index { color: var(--tb-faint); font-size: 0.76rem; letter-spacing: 0.14em; }
+.tb-loop-stage-body h3 { margin: 0 0 8px; font-size: 1.05rem; font-weight: 400; }
+.tb-loop-stage-body p { margin: 0; color: var(--tb-muted); font-size: 0.92rem; line-height: 1.7; }
+.tb-loop-stage-body .tb-status { margin-top: 12px; }
+
+@media (max-width: 620px) {
+  .tb-loop-tabs { width: 100%; }
+  .tb-loop-tab { flex: 1; padding: 0 12px; }
+}
+
+/* ---------- Hero product composition (Mac + optional phone) ---------- */
+
+.tb-showcase-stage { position: relative; }
+
+/* The phone overlaps the desktop shot's bottom-left corner, the way the
+   reference sites stand a device in front of the screen. It is absolutely
+   positioned so it can overhang without adding page height, and drops to a
+   plain stacked layout on small screens where the overlap would collide. */
+.tb-showcase-stage-with-phone { padding-bottom: 40px; }
+
+.tb-showcase-phone {
+  position: absolute;
+  left: 4%;
+  bottom: -40px;
+  width: clamp(110px, 13vw, 168px);
+  z-index: 2;
+}
+
+.tb-phone-frame {
+  position: relative;
+  padding: 7px;
+  border: 1px solid var(--tb-line);
+  border-radius: 22px;
+  background: var(--tb-surface-2);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+}
+
+.tb-phone-notch {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  width: 34%;
+  height: 8px;
+  border-radius: 5px;
+  background: var(--tb-bg);
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+.tb-phone-screen {
+  position: relative;
+  aspect-ratio: 9 / 19.5;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--tb-bg);
+}
+
+.tb-phone-screen img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+.tb-phone-sketch { display: grid; place-items: center; width: 100%; height: 100%; padding: 14px; }
+.tb-phone-sketch .tb-sketch { width: 100%; height: auto; }
+
+@media (max-width: 720px) {
+  /* Overlapping a 375px-wide screenshot just hides the product. */
+  .tb-showcase-stage-with-phone { padding-bottom: 0; }
+  .tb-showcase-phone {
+    position: static;
+    width: 132px;
+    margin: 18px auto 0;
+  }
+}
+
+/* ---------- Blog ---------- */
+
+.tb-blog-head { border-top: 0; padding-bottom: 0; }
+.tb-blog-head h1 { margin: 0; font-size: clamp(2.1rem, 4.4vw, 3.4rem); line-height: 1.12; }
+.tb-blog-list { border-top: 0; padding-top: clamp(40px, 5vw, 64px); }
+
+.tb-blog-empty {
+  max-width: 560px;
+  margin: 0 auto;
+  color: var(--tb-muted);
+  text-align: center;
+}
+
+.tb-post-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(20px, 2.6vw, 32px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tb-post-card {
+  height: 100%;
+  border: 1px solid var(--tb-line-soft);
+  border-radius: var(--tb-radius);
+  background: var(--tb-surface);
+  overflow: hidden;
+  transition: border-color 0.18s ease, transform 0.18s ease;
+}
+
+.tb-post-card:hover { border-color: var(--tb-line); transform: translateY(-2px); }
+.tb-post-card-link { display: flex; flex-direction: column; height: 100%; }
+
+.tb-post-card-media { aspect-ratio: 16 / 10; background: var(--tb-surface-2); overflow: hidden; }
+.tb-post-card-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.tb-post-card-placeholder { width: 100%; height: 100%; }
+
+.tb-post-card-body { display: flex; flex-direction: column; gap: 10px; padding: clamp(18px, 2vw, 24px); }
+
+.tb-post-card-chip {
+  align-self: flex-start;
+  padding: 4px 9px;
+  border-radius: var(--tb-radius-sm);
+  color: var(--tb-on-chip);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.tb-post-card h2 { margin: 0; font-size: 1.15rem; font-weight: 400; line-height: 1.35; }
+.tb-post-card p { margin: 0; color: var(--tb-muted); font-size: 0.92rem; line-height: 1.7; }
+.tb-post-card-meta { margin-top: auto !important; color: var(--tb-faint) !important; font-size: 0.84rem !important; }
+
+/* ---------- Post ---------- */
+
+.tb-post-shell { width: min(720px, calc(100% - 40px)); }
+.tb-post-head { border-top: 0; padding-bottom: clamp(28px, 4vw, 44px); }
+
+/* `block`, not `inline-block`: the category chip below is also inline-block, so
+   the two sat on the same line with the chip jammed against "All writing". */
+.tb-post-back {
+  display: block;
+  width: fit-content;
+  margin-bottom: 30px;
+  color: var(--tb-muted);
+  font-size: 0.89rem;
+  transition: color 0.15s ease;
+}
+
+.tb-post-back:hover { color: var(--tb-blue); }
+.tb-post-head h1 { margin: 0; font-size: clamp(2rem, 4.2vw, 3.1rem); line-height: 1.14; }
+.tb-post-excerpt { margin: 20px 0 0; color: var(--tb-muted); font-size: 1.08rem; line-height: 1.8; }
+.tb-post-meta { margin: 22px 0 0; color: var(--tb-faint); font-size: 0.87rem; }
+.tb-post-cover { margin-bottom: clamp(32px, 4vw, 52px); }
+
+/* Long-form body copy: wider line height and real spacing between blocks. */
+.tb-post-body { padding-bottom: clamp(40px, 5vw, 64px); font-size: 1.05rem; line-height: 1.85; }
+.tb-post-body > * { margin: 0 0 1.35em; }
+.tb-post-body h2 { margin: 2em 0 0.6em; font-size: clamp(1.4rem, 2.4vw, 1.9rem); }
+.tb-post-body h3 { margin: 1.6em 0 0.5em; font-size: clamp(1.15rem, 1.9vw, 1.4rem); }
+.tb-post-body p { color: var(--tb-muted); }
+.tb-post-body a { color: var(--tb-blue); border-bottom: 1px solid var(--tb-line); }
+.tb-post-body ul, .tb-post-body ol { padding-left: 1.3em; color: var(--tb-muted); }
+.tb-post-body li { margin-bottom: 0.5em; }
+.tb-post-body img { max-width: 100%; height: auto; border-radius: var(--tb-radius); }
+
+.tb-post-body blockquote {
+  margin: 1.8em 0;
+  padding: 4px 0 4px 22px;
+  border-left: 2px solid var(--tb-chip-lavender);
+  color: var(--tb-ink);
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.2rem;
+  line-height: 1.55;
+}
+
+/* The automatic Substack call to action at the end of every post. */
+.tb-post-substack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px 28px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: clamp(56px, 7vw, 96px);
+  padding: clamp(24px, 3vw, 32px);
+  border: 1px solid var(--tb-line-soft);
+  border-radius: var(--tb-radius);
+  background: color-mix(in srgb, var(--tb-chip-lavender) var(--tb-card-tint), var(--tb-surface));
+}
+
+.tb-post-substack-lead { margin: 0; max-width: 40ch; color: var(--tb-ink); font-size: 0.98rem; line-height: 1.6; }
+
+@media (max-width: 1024px) {
+  .tb-post-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 700px) {
+  .tb-post-grid { grid-template-columns: 1fr; }
+  .tb-post-substack { flex-direction: column; align-items: flex-start; }
 }
 
 /* ---------- 404 ---------- */

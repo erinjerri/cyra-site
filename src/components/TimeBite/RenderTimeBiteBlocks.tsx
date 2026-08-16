@@ -2,16 +2,19 @@ import { AdaptiveWorkspace } from './AdaptiveWorkspace'
 import { AgentRoadmap } from './AgentRoadmap'
 import { BetaSignup } from './BetaSignup'
 import { CtaLink } from './CtaLink'
+import { DualLoop } from './DualLoop'
 import { MediaFrame } from './MediaFrame'
 import { PricingSection } from './PricingSection'
 import { ProductDemo } from './ProductDemo'
 import { ProductGrid } from './ProductGrid'
+import { ProductShowcase } from './ProductShowcase'
 import { ScaleStory } from './ScaleStory'
 import { StatusBadge } from './StatusBadge'
 import { TimeLoop } from './TimeLoop'
 import { resolveMedia } from './media'
 import type {
   AgentsBlockType,
+  DualLoopBlockType,
   FAQBlockType,
   PricingBlockType,
   ProductGridBlockType,
@@ -57,8 +60,6 @@ function Card({ item, index }: { item: TimeBiteItem; index?: number }) {
  * is the difference between reading the interface and squinting at it.
  */
 function Hero({ block }: { block: TimeBiteBlock }) {
-  const media = resolveMedia(block)
-
   return (
     <section className="tb-hero">
       <div className="tb-shell tb-hero-copy">
@@ -72,7 +73,7 @@ function Hero({ block }: { block: TimeBiteBlock }) {
         {block.availabilityNote ? <p className="tb-hero-availability">{block.availabilityNote}</p> : null}
       </div>
       <div className="tb-shell tb-hero-media">
-        <MediaFrame priority ratio="16 / 10" source={block} title={media.empty ? 'TimeBite' : undefined} />
+        <ProductShowcase desktop={block} phone={block.phone} />
       </div>
     </section>
   )
@@ -351,6 +352,8 @@ export function RenderTimeBiteBlocks({ blocks }: { blocks: TimeBiteBlock[] }) {
             return <Quote block={block} key={index} />
           case 'timelineBlock':
             return <Timeline block={block} key={index} />
+          case 'dualLoopBlock':
+            return <DualLoop block={block as DualLoopBlockType} key={index} />
           case 'productDemoBlock':
             return <ProductDemo block={block} key={index} />
           case 'scaleStoryBlock':

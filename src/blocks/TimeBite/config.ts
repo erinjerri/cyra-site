@@ -21,10 +21,48 @@ export const HeroBlock: Block = {
       label: 'Platform note',
       admin: {
         description:
-          'One quiet line under the buttons, e.g. "macOS first • iPhone, Apple Watch & Apple Vision Pro coming next".',
+          'One quiet line under the buttons, e.g. "Beta on macOS • iOS, watchOS and visionOS coming soon".',
       },
     },
     ...mediaFields,
+    {
+      name: 'phone',
+      type: 'group',
+      label: 'Phone in front of the Mac (optional)',
+      admin: {
+        description:
+          'A second device standing in front of the desktop shot. Uncheck "Show" to render the Mac window alone — do that while the iPhone app is still unreleased rather than showing an invented screen.',
+      },
+      fields: [
+        {
+          name: 'enabled',
+          type: 'checkbox',
+          label: 'Show the phone',
+          defaultValue: true,
+        },
+        {
+          name: 'image',
+          type: 'upload',
+          relationTo: 'media',
+          label: 'Phone screenshot',
+          admin: { description: 'Portrait, 1179×2556 (iPhone) or similar. App content only, no device frame.' },
+        },
+        { name: 'assetUrl', type: 'text', admin: { description: 'Optional public URL used when no upload is set.' } },
+        { name: 'imageAlt', type: 'text', label: 'Alt text' },
+        {
+          name: 'sketch',
+          type: 'select',
+          defaultValue: 'list',
+          label: 'Schematic while empty',
+          options: [
+            { label: 'Action list', value: 'list' },
+            { label: 'Goal + milestones', value: 'goal' },
+            { label: 'Habit grid', value: 'habits' },
+            { label: 'Progress chart', value: 'chart' },
+          ],
+        },
+      ],
+    },
   ],
 }
 
@@ -182,6 +220,65 @@ export const ProductGridBlock: Block = {
 }
 
 /**
+ * The dual loop, presented as tabs.
+ *
+ * The two brands do different jobs, so one linear list could never carry both.
+ * The tab shape is lifted from the macOS app, where the top-level navigation is
+ * Now / Plan / Track / Dashboard on the TimeBite side and Discover on the
+ * Creating Your Reality side — a visitor who later opens the app should
+ * recognise the structure.
+ */
+export const DualLoopBlock: Block = {
+  slug: 'dualLoopBlock',
+  interfaceName: 'DualLoopBlock',
+  labels: { singular: 'Dual Loop (tabbed)', plural: 'Dual Loop Blocks' },
+  fields: [
+    ...headingFields,
+    {
+      name: 'tabs',
+      type: 'array',
+      minRows: 1,
+      maxRows: 3,
+      labels: { singular: 'Tab', plural: 'Tabs' },
+      admin: { description: 'One tab per brand. The first is selected by default.' },
+      fields: [
+        { name: 'label', type: 'text', required: true, admin: { description: 'e.g. TimeBite' } },
+        {
+          name: 'tagline',
+          type: 'text',
+          admin: { description: 'One line under the tab bar saying what this side does.' },
+        },
+        {
+          name: 'accent',
+          type: 'select',
+          defaultValue: 'blue',
+          admin: { description: 'Chip and rail colour for this tab.' },
+          options: [
+            { label: 'Blue', value: 'blue' },
+            { label: 'Teal', value: 'teal' },
+            { label: 'Gold', value: 'gold' },
+            { label: 'Green', value: 'green' },
+            { label: 'Pink', value: 'pink' },
+            { label: 'Lavender', value: 'lavender' },
+          ],
+        },
+        {
+          name: 'steps',
+          type: 'array',
+          minRows: 1,
+          labels: { singular: 'Stage', plural: 'Stages' },
+          fields: [
+            { name: 'title', type: 'text', required: true },
+            { name: 'body', type: 'textarea' },
+            statusField('Leave blank when the stage simply exists.'),
+          ],
+        },
+      ],
+    },
+  ],
+}
+
+/**
  * The 45–60 second Screen Studio demo.
  *
  * Deliberately never autoplays: the section sits mid-page, and a video that
@@ -265,6 +362,21 @@ export const WorkspaceBlock: Block = {
       fields: [
         { name: 'name', type: 'text', required: true },
         { name: 'description', type: 'text' },
+        {
+          name: 'kind',
+          type: 'select',
+          required: true,
+          defaultValue: 'component',
+          label: 'Module type',
+          admin: {
+            description:
+              'Components are TimeBite surfaces — Today, Actions, Calendar. Goal areas are Creating Your Reality life domains — Career, Fitness, Finance. They are grouped separately because they are different things: one is a view, the other is a part of your life.',
+          },
+          options: [
+            { label: 'Component (a TimeBite surface)', value: 'component' },
+            { label: 'Goal area (a CYR life domain)', value: 'goal-area' },
+          ],
+        },
         {
           name: 'sketch',
           type: 'select',
@@ -356,6 +468,16 @@ export const AgentsBlock: Block = {
           admin: { description: 'Scope limit shown in the card, e.g. the Finance Agent boundary.' },
         },
       ],
+    },
+    {
+      name: 'roadmapCta',
+      type: 'group',
+      label: 'Roadmap / changelog link',
+      admin: {
+        description:
+          'Points at the public roadmap and changelog. Hidden until a URL is set, so it never renders a dead button. For reference, Sunsama runs theirs on Canny at roadmap.sunsama.com — that is the obvious option if you want feedback voting alongside a changelog.',
+      },
+      fields: ctaFields,
     },
     { name: 'footnote', type: 'textarea' },
   ],
@@ -603,6 +725,7 @@ export const timeBiteBlocks = [
   HeroBlock,
   QuoteBlock,
   TimelineBlock,
+  DualLoopBlock,
   ProductDemoBlock,
   ScaleStoryBlock,
   AboutBlock,

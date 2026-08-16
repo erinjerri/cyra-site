@@ -6,6 +6,7 @@ export const headerData = {
     { label: 'Demo', url: '/#demo' },
     { label: 'Features', url: '/#features' },
     { label: 'Agents', url: '/#agents' },
+    { label: 'Blog', url: '/blog' },
     { label: 'Pricing', url: '/#pricing' },
   ],
   cta: { label: 'Join Beta', url: '/#beta' },
@@ -19,7 +20,7 @@ export const footerData = {
     links: [
       { label: 'Philosophy', url: '/philosophy' },
       { label: 'Manifesto', comingSoon: true },
-      { label: 'Blog', comingSoon: true },
+      { label: 'Blog', url: '/blog' },
       { label: 'Agents', url: '/#agents' },
     ],
   },
@@ -38,18 +39,18 @@ export const footerData = {
     title: 'In the works',
     links: [
       { label: 'Goal Agent', url: '/#agents' },
-      { label: 'iPhone', url: '/#platforms' },
+      { label: 'Career Agent', url: '/#agents' },
+      { label: 'Fitness Agent', url: '/#agents' },
+      { label: 'Finance Agent', url: '/#agents' },
       { label: 'Paper Planner', url: '/#planner' },
-      { label: 'Apple Watch', url: '/#platforms' },
     ],
   },
   learn: {
     title: 'Learn',
     links: [
       { label: 'Intentional Living', url: '/philosophy' },
-      { label: 'Planning and Review', url: '/#how-it-works' },
-      { label: 'Habits', url: '/#features' },
-      { label: 'Apple Platforms', url: '/#platforms' },
+      { label: 'Productivity', url: '/#features' },
+      { label: 'Blog', url: '/blog' },
     ],
   },
   company: {
@@ -62,7 +63,7 @@ export const footerData = {
     ],
   },
   social: {
-    title: 'Social',
+    title: 'Connect',
     links: [
       { label: 'LinkedIn', comingSoon: true },
       { label: 'GitHub', comingSoon: true },

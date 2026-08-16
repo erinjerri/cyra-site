@@ -5,12 +5,14 @@ import { getPayload, type Payload } from 'payload'
 
 import { footerData, headerData } from '../endpoints/seed/header-footer'
 import { philosophyPage } from '../endpoints/seed/philosophy-page'
+import { postsSeed } from '../endpoints/seed/posts'
 import { productsSeed } from '../endpoints/seed/products'
 import { siteSettingsData } from '../endpoints/seed/site-settings'
 import { timeBiteHome } from '../endpoints/seed/timebite-home'
 
 type SeedPage = { slug: string } & Record<string, unknown>
 type SeedProduct = { slug: string } & Record<string, unknown>
+type SeedPost = { slug: string } & Record<string, unknown>
 
 async function upsertPage(payload: Payload, data: SeedPage) {
   const existing = await payload.find({
@@ -55,6 +57,26 @@ async function upsertProduct(payload: Payload, data: SeedProduct) {
   console.log(`Created product: ${data.slug}`)
 }
 
+/** Posts match on slug, so re-seeding updates rather than duplicating. */
+async function upsertPost(payload: Payload, data: SeedPost) {
+  const existing = await payload.find({
+    collection: 'posts',
+    where: { slug: { equals: data.slug } },
+    limit: 1,
+  })
+
+  const doc = existing.docs[0]
+
+  if (doc) {
+    await payload.update({ collection: 'posts', id: doc.id, data: data as never })
+    console.log(`Updated post: ${data.slug}`)
+    return
+  }
+
+  await payload.create({ collection: 'posts', data: data as never })
+  console.log(`Created post: ${data.slug}`)
+}
+
 async function run() {
   const payload = await getPayload({ config })
 
@@ -69,6 +91,10 @@ async function run() {
 
   for (const product of productsSeed) {
     await upsertProduct(payload, product as SeedProduct)
+  }
+
+  for (const post of postsSeed) {
+    await upsertPost(payload, post as SeedPost)
   }
 
   await upsertPage(payload, timeBiteHome as SeedPage)
