@@ -553,5 +553,6 @@ pnpm generate:importmap
 
 - Payload storage adapters: https://payloadcms.com/docs/upload/storage-adapters
 - Payload uploads overview: https://payloadcms.com/docs/upload/overview
+- Payload + Cloudflare setup: https://www.youtube.com/watch?v=8jPNsLX7XGg
 - Netlify Next.js runtime: https://docs.netlify.com/build/frameworks/framework-setup-guides/nextjs/overview/
 - Netlify environment variables: https://docs.netlify.com/build/configure-builds/environment-variables/

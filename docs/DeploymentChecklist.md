@@ -103,6 +103,7 @@ Follow the MongoDB setup tutorials from All About Payload before you deploy:
 
 - [Building dynamic websites with Payload, App Router, and TypeScript | DB & File Storage](https://www.youtube.com/watch?v=-0CCUkoBDSY&t=692s)
 - [How to set up Payload with Supabase](https://www.youtube.com/watch?v=L5w2QYB9-UU&t=161s)
+- [Payload + Cloudflare setup](https://www.youtube.com/watch?v=8jPNsLX7XGg)
 
 For this repo, prefer MongoDB plus Cloudflare R2 rather than Supabase for the production setup.
 
