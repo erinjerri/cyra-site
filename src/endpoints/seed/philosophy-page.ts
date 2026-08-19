@@ -6,32 +6,32 @@ export const philosophyPage = {
     {
       blockType: 'quoteBlock',
       eyebrow: 'Creating Your Reality',
-      statement: 'Most software asks what you need to do today.',
-      emphasis: 'We start somewhere else: what kind of life are you trying to build?',
+      statement: 'TimeBite starts with a goal, but it is built around the action loop that keeps it moving.',
+      emphasis: 'Goals give direction. Systems create the follow-through that compounds.',
     },
     {
       blockType: 'frameworkSectionBlock',
       eyebrow: 'The framework',
-      headline: 'Intentions are fragile. They deserve infrastructure.',
-      body: 'Creating Your Reality is not a product. It is the belief underneath the products — that the distance between who you are and who you are becoming is crossed in small, ordinary, kept promises.',
-      pillars: [{ label: 'Identity' }, { label: 'Purpose' }, { label: 'Intentional Living' }, { label: 'Long-term Growth' }],
+      headline: 'Identity is built by what you repeat.',
+      body:
+        'A good system does not ask for perfect motivation. It asks for a next action small enough to repeat, then gives that action somewhere to live.',
+      pillars: [{ label: 'Identity' }, { label: 'Systems' }, { label: 'Habits' }, { label: 'Compounding' }],
       closingStatement:
-        'Every tool we build exists for one reason: so the things you decide matter are still there in six months, when life has done its best to bury them.',
-      cta: { label: 'Join the TimeBite beta', url: '/#beta' },
+        'That is the bridge TimeBite is built to hold: a goal at one end, a concrete action at the other, and a daily loop between them.',
+      cta: { label: 'See TimeBite', url: '/' },
     },
     {
       blockType: 'quoteBlock',
       eyebrow: 'Shared memory',
-      statement:
-        'I had this idea last week. I promised myself I would do this. I learned something about myself and already lost it.',
-      emphasis: 'TimeBite is a shared memory between you, your devices, your past, and the person you are becoming.',
+      statement: 'An idea only becomes part of your life when the system remembers it after the moment passes.',
+      emphasis: 'Repeated actions are how intention becomes identity.',
     },
     {
       blockType: 'ctaBlock',
-      headline: 'Come build it with us.',
-      body: 'TimeBite is where this philosophy stops being an idea and becomes a daily practice.',
-      cta: { label: 'Join the beta', url: '/#beta' },
-      secondaryCta: { label: 'Explore TimeBite', url: '/' },
+      headline: 'Build the loop that holds the goal.',
+      body: 'TimeBite is where this philosophy stops being abstract and becomes a daily practice.',
+      cta: { label: 'Explore TimeBite', url: '/' },
+      secondaryCta: { label: 'Start with one action', url: '/#product-ui' },
     },
   ],
 }

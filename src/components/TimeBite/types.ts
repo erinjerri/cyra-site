@@ -8,6 +8,7 @@ export type TimeBiteItem = {
   body?: string
   eyebrow?: string
   assetUrl?: string
+  videoUrl?: string
 }
 
 export type PlatformItem = {
@@ -27,6 +28,8 @@ export type ShowcaseRow = {
   body?: string
   image?: BlockImage
   assetUrl?: string
+  video?: BlockImage
+  videoUrl?: string
   imageAlt?: string
 }
 
@@ -56,6 +59,8 @@ export type TimeBiteBlock = {
   wordParts?: WordPart[]
   image?: BlockImage
   assetUrl?: string
+  video?: BlockImage
+  videoUrl?: string
   imageAlt?: string
 }
 

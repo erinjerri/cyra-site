@@ -1,33 +1,34 @@
 export const headerData = {
   logoText: 'TimeBite',
-  logoTag: 'by Creating Your Reality',
+  logoTag: 'goals, powered by actions',
   navLinks: [
     { label: 'How it Works', url: '/#how-it-works' },
+    { label: 'Why it Works', url: '/#why-it-works' },
+    { label: 'Product UI', url: '/#product-ui' },
     { label: 'Philosophy', url: '/philosophy' },
-    { label: 'FAQ', url: '/#faq' },
   ],
-  cta: { label: 'Join Beta', url: '/#beta' },
+  cta: { label: 'Start with one action', url: '/#product-ui' },
 }
 
 export const footerData = {
   brandStatement:
-    'Creating Your Reality is the philosophy behind TimeBite, and everything we build next.',
+    'TimeBite turns a goal into a repeatable action loop. Creating Your Reality is the philosophy behind the system.',
   explore: {
     title: 'Explore',
     links: [
       { label: 'Philosophy', url: '/philosophy' },
+      { label: 'How it Works', url: '/#how-it-works' },
       { label: 'Manifesto', comingSoon: true },
-      { label: 'Blog', comingSoon: true },
-      { label: 'Roadmap', url: '/#roadmap' },
+      { label: 'Why it Works', url: '/#why-it-works' },
     ],
   },
   product: {
     title: 'Product',
     links: [
       { label: 'TimeBite', url: '/' },
-      { label: 'Features', url: '/#features' },
-      { label: 'Platforms', url: '/#platforms' },
-      { label: 'Beta', url: '/#beta' },
+      { label: 'Product UI', url: '/#product-ui' },
+      { label: 'Benefits', url: '/#benefits' },
+      { label: 'Actions', url: '/#how-it-works' },
     ],
   },
   comingSoon: {
@@ -43,9 +44,9 @@ export const footerData = {
     title: 'Learn',
     links: [
       { label: 'Intentional Living', url: '/philosophy' },
+      { label: 'Systems', comingSoon: true },
+      { label: 'Identity', comingSoon: true },
       { label: 'AI', comingSoon: true },
-      { label: 'Spatial Computing', comingSoon: true },
-      { label: 'Apple', url: '/#platforms' },
     ],
   },
   company: {
@@ -66,5 +67,5 @@ export const footerData = {
       { label: 'Substack', comingSoon: true },
     ],
   },
-  legalNote: `© ${new Date().getFullYear()} Creating Your Reality. All rights reserved.`,
+  legalNote: `© ${new Date().getFullYear()} TimeBite. All rights reserved.`,
 }

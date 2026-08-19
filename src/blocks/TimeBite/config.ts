@@ -97,6 +97,26 @@ export const FeatureGridBlock: Block = {
   ],
 }
 
+export const WorkspaceBlock: Block = {
+  slug: 'workspaceBlock',
+  interfaceName: 'WorkspaceBlock',
+  labels: { singular: 'Workspace', plural: 'Workspace Blocks' },
+  fields: [
+    ...headingFields,
+    { name: 'items', type: 'array', minRows: 1, fields: itemFields },
+  ],
+}
+
+export const AgentsBlock: Block = {
+  slug: 'agentsBlock',
+  interfaceName: 'AgentsBlock',
+  labels: { singular: 'Agents', plural: 'Agents Blocks' },
+  fields: [
+    ...headingFields,
+    { name: 'items', type: 'array', minRows: 1, fields: itemFields },
+  ],
+}
+
 export const PlatformCardsBlock: Block = {
   slug: 'platformCardsBlock',
   interfaceName: 'PlatformCardsBlock',
@@ -113,7 +133,7 @@ export const PlatformCardsBlock: Block = {
         {
           name: 'status',
           type: 'select',
-          defaultValue: 'planned',
+          defaultValue: 'available',
           options: [
             { label: 'Available', value: 'available' },
             { label: 'In development', value: 'in-development' },
@@ -173,6 +193,16 @@ export const ShowcaseBlock: Block = {
           name: 'assetUrl',
           type: 'text',
           admin: { description: 'Optional public image URL used when no upload is set.' },
+        },
+        {
+          name: 'video',
+          type: 'upload',
+          relationTo: 'media',
+        },
+        {
+          name: 'videoUrl',
+          type: 'text',
+          admin: { description: 'Optional public video URL used when no upload is set.' },
         },
         {
           name: 'imageAlt',
@@ -251,6 +281,8 @@ export const timeBiteBlocks = [
   AboutBlock,
   FrameworkSectionBlock,
   FeatureGridBlock,
+  WorkspaceBlock,
+  AgentsBlock,
   ShowcaseBlock,
   PlatformCardsBlock,
   RoadmapBlock,

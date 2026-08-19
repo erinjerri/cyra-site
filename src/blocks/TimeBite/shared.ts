@@ -36,6 +36,13 @@ export const itemFields: Field[] = [
       description: 'Optional public Cloudflare R2 asset URL fallback.',
     },
   },
+  {
+    name: 'videoUrl',
+    type: 'text',
+    admin: {
+      description: 'Optional public video URL fallback.',
+    },
+  },
 ]
 
 export const navLinkFields: Field[] = [

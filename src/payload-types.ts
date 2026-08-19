@@ -143,6 +143,8 @@ export interface Page {
     | AboutBlock
     | FrameworkSectionBlock
     | FeatureGridBlock
+    | WorkspaceBlock
+    | AgentsBlock
     | ShowcaseBlock
     | PlatformCardsBlock
     | RoadmapBlock
@@ -214,6 +216,10 @@ export interface TimelineBlock {
          * Optional public Cloudflare R2 asset URL fallback.
          */
         assetUrl?: string | null;
+        /**
+         * Optional public video URL fallback.
+         */
+        videoUrl?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -317,12 +323,74 @@ export interface FeatureGridBlock {
          * Optional public Cloudflare R2 asset URL fallback.
          */
         assetUrl?: string | null;
+        /**
+         * Optional public video URL fallback.
+         */
+        videoUrl?: string | null;
         id?: string | null;
       }[]
     | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'featureGridBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkspaceBlock".
+ */
+export interface WorkspaceBlock {
+  eyebrow?: string | null;
+  headline: string;
+  body?: string | null;
+  items?:
+    | {
+        title: string;
+        body?: string | null;
+        eyebrow?: string | null;
+        image?: (string | null) | Media;
+        /**
+         * Optional public Cloudflare R2 asset URL fallback.
+         */
+        assetUrl?: string | null;
+        /**
+         * Optional public video URL fallback.
+         */
+        videoUrl?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'workspaceBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "AgentsBlock".
+ */
+export interface AgentsBlock {
+  eyebrow?: string | null;
+  headline: string;
+  body?: string | null;
+  items?:
+    | {
+        title: string;
+        body?: string | null;
+        eyebrow?: string | null;
+        image?: (string | null) | Media;
+        /**
+         * Optional public Cloudflare R2 asset URL fallback.
+         */
+        assetUrl?: string | null;
+        /**
+         * Optional public video URL fallback.
+         */
+        videoUrl?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'agentsBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -341,6 +409,11 @@ export interface ShowcaseBlock {
          * Optional public image URL used when no upload is set.
          */
         assetUrl?: string | null;
+        video?: (string | null) | Media;
+        /**
+         * Optional public video URL used when no upload is set.
+         */
+        videoUrl?: string | null;
         /**
          * Describe the image for screen readers.
          */
@@ -619,6 +692,8 @@ export interface PagesSelect<T extends boolean = true> {
         aboutBlock?: T | AboutBlockSelect<T>;
         frameworkSectionBlock?: T | FrameworkSectionBlockSelect<T>;
         featureGridBlock?: T | FeatureGridBlockSelect<T>;
+        workspaceBlock?: T | WorkspaceBlockSelect<T>;
+        agentsBlock?: T | AgentsBlockSelect<T>;
         showcaseBlock?: T | ShowcaseBlockSelect<T>;
         platformCardsBlock?: T | PlatformCardsBlockSelect<T>;
         roadmapBlock?: T | RoadmapBlockSelect<T>;
@@ -689,6 +764,7 @@ export interface TimelineBlockSelect<T extends boolean = true> {
         eyebrow?: T;
         image?: T;
         assetUrl?: T;
+        videoUrl?: T;
         id?: T;
       };
   image?: T;
@@ -756,6 +832,51 @@ export interface FeatureGridBlockSelect<T extends boolean = true> {
         eyebrow?: T;
         image?: T;
         assetUrl?: T;
+        videoUrl?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkspaceBlock_select".
+ */
+export interface WorkspaceBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  headline?: T;
+  body?: T;
+  items?:
+    | T
+    | {
+        title?: T;
+        body?: T;
+        eyebrow?: T;
+        image?: T;
+        assetUrl?: T;
+        videoUrl?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "AgentsBlock_select".
+ */
+export interface AgentsBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  headline?: T;
+  body?: T;
+  items?:
+    | T
+    | {
+        title?: T;
+        body?: T;
+        eyebrow?: T;
+        image?: T;
+        assetUrl?: T;
+        videoUrl?: T;
         id?: T;
       };
   id?: T;
@@ -776,6 +897,8 @@ export interface ShowcaseBlockSelect<T extends boolean = true> {
         body?: T;
         image?: T;
         assetUrl?: T;
+        video?: T;
+        videoUrl?: T;
         imageAlt?: T;
         id?: T;
       };

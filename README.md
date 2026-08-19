@@ -162,7 +162,7 @@ Required for every real environment:
 | --- | --- |
 | `DATABASE_URI` | MongoDB connection string used by Payload. `MONGODB_URI` is also accepted by `payload.config.ts`, but use `DATABASE_URI` as the standard name for this repo. |
 | `PAYLOAD_SECRET` | Payload encryption/signing secret. Use a long random value and never commit it. |
-| `NEXT_PUBLIC_SERVER_URL` | Canonical public URL for the site, for example `https://timebite.cyra.ai` or `https://www.cyra.ai`. Use `http://localhost:3000` locally. |
+| `NEXT_PUBLIC_SERVER_URL` | Canonical public URL for the site, for example `https://www.creatingyourreality.co`. Use `http://localhost:3000` locally. |
 
 Required after R2 storage is wired:
 
@@ -172,7 +172,170 @@ Required after R2 storage is wired:
 | `R2_ENDPOINT` | R2 S3 API endpoint, used for uploads. Format: `https://<account-id>.r2.cloudflarestorage.com`. |
 | `R2_ACCESS_KEY_ID` | R2 token access key with object read/write permission for the bucket. |
 | `R2_SECRET_ACCESS_KEY` | R2 token secret access key. |
-| `R2_PUBLIC_URL` | Public URL used to serve files, either an R2 public development URL or a custom media domain such as `https://media.cyra.ai`. |
+| `R2_PUBLIC_HOSTNAME` | Public URL used to serve files, either an R2 public development URL or a custom media domain such as `https://media.creatingyourreality.co
+
+# Cloudflare R2 API Credentials
+
+`cyra-site` uses Cloudflare R2 as persistent object storage for media uploaded through Payload CMS.
+
+The R2 configuration intentionally follows the same environment-variable convention used by the Erin Jerri portfolio projects so storage configuration can be ported between sites without changing application code.
+
+## Required environment variables
+
+```bash
+USE_R2_STORAGE=true
+R2_BUCKET=creatingyourreality
+R2_ACCOUNT_ID=<cloudflare-account-id>
+R2_ACCESS_KEY_ID=<cloudflare-r2-access-key-id>
+R2_SECRET_ACCESS_KEY=<cloudflare-r2-secret-access-key>
+R2_PUBLIC_HOSTNAME=media.creatingyourreality.co
+```
+
+`R2_ENDPOINT` normally does not need to be configured. The application derives the standard Cloudflare endpoint from `R2_ACCOUNT_ID`:
+
+```text
+https://<R2_ACCOUNT_ID>.r2.cloudflarestorage.com
+```
+
+Only set `R2_ENDPOINT` when using a jurisdiction-specific or otherwise customized R2 endpoint.
+
+## Creating the CYRA R2 credentials
+
+Go to the Cloudflare dashboard and open:
+
+**Storage & databases → R2 → Manage API Tokens**
+
+Create a new **Account API token**.
+
+Use a site-specific name:
+
+```text
+creatingyourreality-rw
+```
+
+### Permissions
+
+Select:
+
+```text
+Object Read & Write
+```
+
+CYRA requires write access because Payload CMS uploads media to R2.
+
+When possible, choose:
+
+```text
+Apply to specific buckets only
+```
+
+and select:
+
+```text
+creatingyourreality
+```
+
+Do not give the CYRA credential access to unrelated buckets.
+
+Each production site should have its own bucket and R2 credential. For example:
+
+```text
+cyra-site
+  → creatingyourreality
+  → creatingyourreality-rw
+
+erinjerri-portf
+  → erinjerri-media
+  → erinjerri-portf R2 credential
+```
+
+This allows credentials to be revoked or rotated independently without affecting another site.
+
+## Copy the S3 credentials
+
+After the token is created, Cloudflare displays:
+
+```text
+Access Key ID
+Secret Access Key
+```
+
+Map those values directly to:
+
+```bash
+R2_ACCESS_KEY_ID=<Access Key ID>
+R2_SECRET_ACCESS_KEY=<Secret Access Key>
+```
+
+The Secret Access Key is only displayed when the credential is created. Store it securely. If it is lost, revoke the credential and create a new one.
+
+The R2 API token itself should not be confused with the S3-compatible credential fields expected by the application.
+
+The application expects:
+
+```bash
+R2_ACCESS_KEY_ID=
+R2_SECRET_ACCESS_KEY=
+```
+
+## Local development
+
+Real credentials belong in `.env.local` or another ignored environment file:
+
+```bash
+USE_R2_STORAGE=true
+R2_BUCKET=creatingyourreality
+R2_ACCOUNT_ID=<real-account-id>
+R2_ACCESS_KEY_ID=<real-access-key-id>
+R2_SECRET_ACCESS_KEY=<real-secret-access-key>
+R2_PUBLIC_HOSTNAME=media.creatingyourreality.co
+```
+
+Never commit these values to Git.
+
+The checked-in `.env.example` should contain variable names and placeholders only:
+
+```bash
+USE_R2_STORAGE=false
+
+R2_BUCKET=
+R2_ACCOUNT_ID=
+R2_ENDPOINT=
+
+R2_ACCESS_KEY_ID=
+R2_SECRET_ACCESS_KEY=
+
+R2_PUBLIC_HOSTNAME=
+```
+
+## Production deployment
+
+Add the same values through the deployment provider's environment-variable configuration.
+
+After adding or changing R2 credentials, redeploy the application so the new environment variables are loaded.
+
+## Verify the configuration
+
+After deployment:
+
+1. Sign into `/admin`.
+2. Open **Media**.
+3. Upload a test image.
+4. Confirm the object appears inside the `creatingyourreality` R2 bucket.
+5. Confirm the generated media URL uses the configured R2 public hostname.
+6. Redeploy the site.
+7. Reload the image.
+
+If the image continues to load after redeployment, the file is being stored persistently in R2 rather than on the application's temporary filesystem.
+
+## Security rules
+
+* Never commit `R2_SECRET_ACCESS_KEY`.
+* Never put production credentials into `.env.example`.
+* Create a separate R2 token for each application.
+* Scope credentials to a specific bucket whenever possible.
+* Use **Object Read & Write** rather than broader account permissions when the application only needs media access.
+* Rotate a token immediately if its Secret Access Key is exposed.
 
 Optional:
 
@@ -236,12 +399,12 @@ MongoDB stores Payload documents, drafts, users, and media metadata. It does not
 
 R2 must be ready before production editors upload assets.
 
-1. Create an R2 bucket, for example `cyra-site-media`.
+1. Create an R2 bucket, for example `creatingyourreality`.
 2. Create an R2 API token with object read/write permission scoped to that bucket.
 3. Copy the S3 API endpoint into `R2_ENDPOINT`.
 4. Set `R2_BUCKET`, `R2_ACCESS_KEY_ID`, and `R2_SECRET_ACCESS_KEY`.
 5. Configure a public bucket URL or custom media domain.
-6. Set that public URL as `R2_PUBLIC_URL`.
+6. Set that hostname (no scheme, no trailing slash) as `R2_PUBLIC_HOSTNAME`.
 7. Wire Payload to R2 with `@payloadcms/storage-s3` before relying on uploads in production.
 
 For a Netlify/Node runtime, Payload's S3 storage adapter is the correct R2 path because R2 exposes an S3-compatible API. The Cloudflare Workers-only R2 adapter is not the right adapter for this deployment model.
@@ -304,7 +467,7 @@ Run this after MongoDB and R2 are configured.
 1. Push and deploy the same code and environment model.
 2. Open the live site and Payload admin on the hosted URL.
 3. Confirm the test media record is visible in the CMS.
-4. Confirm the image URL points at `R2_PUBLIC_URL` or the configured public media domain.
+4. Confirm the image URL points at `R2_PUBLIC_HOSTNAME` or the configured public media domain.
 5. Redeploy the app without changing the media record.
 6. Confirm the image still renders live after redeploy.
 
@@ -352,15 +515,15 @@ Metadata includes the media document, alt text, filename, MIME type, filesize, a
 
 Without R2, this repo's `media` collection writes uploads to `public/media`. That is acceptable for short local tests, but not for production. App hosts such as Netlify build and redeploy from source; local upload directories are not durable content storage.
 
-With R2 configured through Payload's S3 storage adapter, uploads should be written to the R2 bucket and served from `R2_PUBLIC_URL`. A redeploy should not affect existing media.
+With R2 configured through Payload's S3 storage adapter, uploads should be written to the R2 bucket and served from `R2_PUBLIC_HOSTNAME`. A redeploy should not affect existing media.
 
 ## Domain And Hosting Notes
 
 - Configure the production app domain in Netlify or whichever runtime host serves the Next.js/Payload app.
 - Configure DNS records in Cloudflare so the domain points to that host.
-- Configure the media domain separately if using a custom R2 public domain such as `media.cyra.ai`.
+- Configure the media domain separately if using a custom R2 public domain such as `media.creatingyourreality.co`.
 - Set `NEXT_PUBLIC_SERVER_URL` to the canonical public app URL, not the R2 media URL.
-- Set `R2_PUBLIC_URL` to the public media URL, not the app URL.
+- Set `R2_PUBLIC_HOSTNAME` to the public media URL, not the app URL.
 - Keep analytics dashboard filters aligned with the final production hostname.
 - After changing any public URL, redeploy and rerun the public page, sitemap, media, and analytics smoke tests.
 

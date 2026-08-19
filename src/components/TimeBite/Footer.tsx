@@ -28,7 +28,7 @@ export function Footer({ data }: { data: FooterData | null }) {
     <footer className="tb-footer">
       <div className="tb-shell tb-footer-inner">
         <div className="tb-footer-brand">
-          <span className="tb-logo-mark">Creating Your Reality</span>
+          <span className="tb-logo-mark">TimeBite</span>
           {data?.brandStatement ? <p>{data.brandStatement}</p> : null}
         </div>
         <div className="tb-footer-columns">

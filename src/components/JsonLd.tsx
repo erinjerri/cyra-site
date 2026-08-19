@@ -7,10 +7,10 @@ export function JsonLd() {
     {
       '@context': 'https://schema.org',
       '@type': 'Organization',
-      name: 'Creating Your Reality',
+      name: 'TimeBite',
       url,
       description:
-        'Creating Your Reality is the philosophy, design methodology, and ecosystem behind TimeBite.',
+        'TimeBite is an AI-powered goals system built around actions, repetition, and compounding follow-through.',
     },
     {
       '@context': 'https://schema.org',
@@ -25,7 +25,7 @@ export function JsonLd() {
       applicationCategory: 'LifestyleApplication',
       operatingSystem: 'iOS, macOS',
       description:
-        'TimeBite keeps your notes, calendar, goals, and reflections in one shared memory, so the things you care about stop slipping through the week.',
+        'TimeBite connects goals to small repeated actions so progress becomes sustainable and compounding.',
       url,
       offers: {
         '@type': 'Offer',
