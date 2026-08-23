@@ -2,9 +2,9 @@ export const headerData = {
   logoText: 'TimeBite',
   logoTag: 'by Creating Your Reality',
   navLinks: [
+    { label: 'Shop', url: '/shop' },
+    { label: 'Pricing', url: '/pricing' },
     { label: 'About', url: '/about' },
-    // Download points at the hero, where the beta CTA lives.
-    { label: 'Download', url: '/#top' },
   ],
   cta: { label: 'Join Beta', url: '/#beta' },
 }
@@ -25,13 +25,14 @@ export const footerData = {
       ],
     },
     {
-      title: 'Physical',
+      title: 'Shop',
       accent: 'pink',
       links: [
-        { label: 'Rest', url: '/#planner' },
-        { label: 'Nourish', url: '/#planner' },
-        { label: 'Work', url: '/#planner' },
-        { label: 'Play', url: '/#planner' },
+        { label: 'Shop', url: '/shop' },
+        { label: 'Pricing', url: '/pricing' },
+        { label: 'CYR Planner', url: '/shop/planner' },
+        { label: 'App + planner bundle', url: '/pricing#bundle' },
+        { label: 'Planner list', url: '/shop#planner-interest' },
       ],
     },
     {

@@ -1,17 +1,11 @@
 import { getVisibleProducts } from '@/utilities/getProducts'
 
 import { CtaLink } from './CtaLink'
-import type { BlockImage, ProductDoc, ProductGridBlockType, ProductStatus } from './types'
+import { ProductStatusBadge } from './ProductStatusBadge'
+import { SectionHeader } from './SectionHeader'
+import type { BlockImage, ProductDoc, ProductGridBlockType } from './types'
 
 const cx = (...classes: Array<string | false | undefined>) => classes.filter(Boolean).join(' ')
-
-const PRODUCT_STATUS_LABELS: Record<ProductStatus, string> = {
-  concept: 'Concept',
-  sample: 'Sample',
-  preorder: 'Preorder',
-  available: 'Available',
-  'sold-out': 'Sold out',
-}
 
 function imageOf(entry?: { image?: BlockImage; alt?: string }) {
   if (!entry?.image) return null
@@ -49,11 +43,7 @@ export async function ProductGrid({ block }: { block: ProductGridBlockType }) {
   return (
     <section className="tb-section tb-products" id="planner">
       <div className="tb-shell">
-        <div className="tb-section-header">
-          {block.eyebrow ? <p className="tb-eyebrow">{block.eyebrow}</p> : null}
-          {block.headline ? <h2>{block.headline}</h2> : null}
-          {block.body ? <p>{block.body}</p> : null}
-        </div>
+        <SectionHeader block={block} />
 
         <div className="tb-grid tb-product-grid">
           {visible.map((product, index) => {
@@ -68,11 +58,7 @@ export async function ProductGrid({ block }: { block: ProductGridBlockType }) {
                   </figure>
                 ) : null}
 
-                {product.status ? (
-                  <span className={`tb-product-status tb-product-status-${product.status}`}>
-                    {PRODUCT_STATUS_LABELS[product.status] || product.status}
-                  </span>
-                ) : null}
+                <ProductStatusBadge status={product.status} />
 
                 <h3>{product.name}</h3>
                 {product.variantNote ? <p className="tb-product-variants">{product.variantNote}</p> : null}

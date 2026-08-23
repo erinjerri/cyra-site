@@ -1,5 +1,6 @@
 import type { Block } from 'payload'
 
+import { commerceBlocks } from './commerce'
 import { ctaFields, headingFields, itemFields, itemTextFields, mediaFields, statusField } from './shared'
 
 /**
@@ -678,6 +679,16 @@ export const PricingBlock: Block = {
       admin: { description: 'Free trial line above the plans, e.g. "Try TimeBite free for 30 days."' },
     },
     { name: 'digitalEyebrow', type: 'text', defaultValue: 'Digital' },
+    {
+      name: 'billingToggle',
+      type: 'checkbox',
+      defaultValue: true,
+      label: 'Show the monthly / annual switch',
+      admin: {
+        description:
+          'On when the same plan is sold both ways and the switch is the clearest way to show it. Turn it OFF to lay the billing periods out as separate cards instead — a plan with only a monthly price then shows a monthly price, and one with an annual price shows an annual price, so Free, Monthly and Annual can sit side by side with nothing to click.',
+      },
+    },
     { name: 'monthlyLabel', type: 'text', defaultValue: 'Monthly' },
     { name: 'annualLabel', type: 'text', defaultValue: 'Annual' },
     {
@@ -704,7 +715,18 @@ export const PricingBlock: Block = {
         {
           name: 'annualNote',
           type: 'text',
-          admin: { description: 'Shown only on the annual view, e.g. "Two months free against paying monthly."' },
+          admin: {
+            description:
+              'Shown only on the annual view. Use it for what the annual price works out to per month, e.g. "About $6.58 a month, billed annually."',
+          },
+        },
+        {
+          name: 'annualSavings',
+          type: 'text',
+          admin: {
+            description:
+              'Small marker beside the annual price, e.g. "Save ~34%". Annual view only. Round DOWN — understating a discount is a rounding error, overstating one is a claim.',
+          },
         },
         { name: 'description', type: 'textarea' },
         { name: 'badge', type: 'text' },
@@ -807,6 +829,14 @@ export const TestimonialsBlock: Block = {
   ],
 }
 
+/**
+ * Every block a page can use.
+ *
+ * Commerce blocks are appended from `./commerce` rather than declared here:
+ * they answer a different question (selling the thing rather than explaining
+ * it) and carry their own rules about prices and availability, so keeping them
+ * in one file makes those rules readable in one place.
+ */
 export const timeBiteBlocks = [
   HeroBlock,
   QuoteBlock,
@@ -829,4 +859,5 @@ export const timeBiteBlocks = [
   FAQBlock,
   CtaBlock,
   TestimonialsBlock,
+  ...commerceBlocks,
 ]

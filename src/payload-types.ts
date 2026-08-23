@@ -162,6 +162,15 @@ export interface Page {
     | FAQBlock
     | CtaBlock
     | TestimonialsBlock
+    | AnnouncementBlock
+    | StorefrontHeroBlock
+    | FeaturedProductsBlock
+    | PlannerCampaignBlock
+    | SystemSplitBlock
+    | BundleBlock
+    | MethodologyBlock
+    | PlanComparisonBlock
+    | PlannerInterestBlock
   )[];
   meta?: {
     title?: string | null;
@@ -1020,6 +1029,10 @@ export interface PricingBlock {
    */
   trialCopy?: string | null;
   digitalEyebrow?: string | null;
+  /**
+   * On when the same plan is sold both ways and the switch is the clearest way to show it. Turn it OFF to lay the billing periods out as separate cards instead — a plan with only a monthly price then shows a monthly price, and one with an annual price shows an annual price, so Free, Monthly and Annual can sit side by side with nothing to click.
+   */
+  billingToggle?: boolean | null;
   monthlyLabel?: string | null;
   annualLabel?: string | null;
   /**
@@ -1038,9 +1051,13 @@ export interface PricingBlock {
          */
         annualPrice?: string | null;
         /**
-         * Shown only on the annual view, e.g. "Two months free against paying monthly."
+         * Shown only on the annual view. Use it for what the annual price works out to per month, e.g. "About $6.58 a month, billed annually."
          */
         annualNote?: string | null;
+        /**
+         * Small marker beside the annual price, e.g. "Save ~34%". Annual view only. Round DOWN — understating a discount is a rounding error, overstating one is a claim.
+         */
+        annualSavings?: string | null;
         description?: string | null;
         badge?: string | null;
         featured?: boolean | null;
@@ -1246,6 +1263,598 @@ export interface TestimonialsBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'testimonialsBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "AnnouncementBlock".
+ */
+export interface AnnouncementBlock {
+  /**
+   * Uncheck to hide without deleting the copy.
+   */
+  enabled?: boolean | null;
+  /**
+   * One short sentence, e.g. "TimeBite launches first. CYR Planner presale coming next." No urgency, no countdown.
+   */
+  message: string;
+  /**
+   * Fills the strip. Teal reads as the system rather than as either product.
+   */
+  accent?: ('blue' | 'pink' | 'gold' | 'teal' | 'green' | 'lavender') | null;
+  cta?: {
+    label?: string | null;
+    /**
+     * Internal path (/philosophy), on-page anchor (#beta), or a full external URL (https://…).
+     */
+    url?: string | null;
+    /**
+     * Turn on for links that leave the site, such as Substack. Adds rel="noopener noreferrer".
+     */
+    newTab?: boolean | null;
+    /**
+     * Optional. Rendered as data-analytics-event so this button can be tracked, e.g. join_beta_hero.
+     */
+    analyticsId?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'announcementBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "StorefrontHeroBlock".
+ */
+export interface StorefrontHeroBlock {
+  eyebrow?: string | null;
+  headline: string;
+  body?: string | null;
+  cta?: {
+    label?: string | null;
+    /**
+     * Internal path (/philosophy), on-page anchor (#beta), or a full external URL (https://…).
+     */
+    url?: string | null;
+    /**
+     * Turn on for links that leave the site, such as Substack. Adds rel="noopener noreferrer".
+     */
+    newTab?: boolean | null;
+    /**
+     * Optional. Rendered as data-analytics-event so this button can be tracked, e.g. join_beta_hero.
+     */
+    analyticsId?: string | null;
+  };
+  secondaryCta?: {
+    label?: string | null;
+    /**
+     * Internal path (/philosophy), on-page anchor (#beta), or a full external URL (https://…).
+     */
+    url?: string | null;
+    /**
+     * Turn on for links that leave the site, such as Substack. Adds rel="noopener noreferrer".
+     */
+    newTab?: boolean | null;
+    /**
+     * Optional. Rendered as data-analytics-event so this button can be tracked, e.g. join_beta_hero.
+     */
+    analyticsId?: string | null;
+  };
+  /**
+   * One quiet line under the buttons. Say what is actually purchasable today.
+   */
+  availabilityNote?: string | null;
+  /**
+   * The macOS capture. Falls back to a schematic while empty.
+   */
+  image?: (string | null) | Media;
+  /**
+   * Optional public image URL used when no upload is set.
+   */
+  assetUrl?: string | null;
+  imageAlt?: string | null;
+  sketch?: ('calendar' | 'workspace' | 'goal' | 'list') | null;
+  /**
+   * Drawn while no product photography exists. Clearly a concept drawing, never a fake render of a printed book.
+   */
+  cover?: ('black-gold' | 'midnight-silver') | null;
+  /**
+   * Replaces the concept drawing once real photography exists.
+   */
+  coverImage?: (string | null) | Media;
+  coverAlt?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'storefrontHeroBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FeaturedProductsBlock".
+ */
+export interface FeaturedProductsBlock {
+  eyebrow?: string | null;
+  headline: string;
+  body?: string | null;
+  /**
+   * The first item gets the wide panel, the second the narrow one, and the pair alternates after that. Order is the hierarchy — put the product that is actually launching first.
+   */
+  items?:
+    | {
+        /**
+         * e.g. Digital planning + execution.
+         */
+        eyebrow?: string | null;
+        title: string;
+        body?: string | null;
+        /**
+         * Software and physical products use different availability vocabularies, because "beta" means nothing about a printed book and "sold out" means nothing about an app.
+         */
+        kind: 'software' | 'physical';
+        /**
+         * Software maturity. Available now = shipped. Beta = usable, in the private beta. In development = being built. Planned = committed, not started. Exploring = we are looking at it and nothing more.
+         */
+        status?: ('available' | 'beta' | 'in-development' | 'planned' | 'exploring') | null;
+        /**
+         * Nothing may say "available" until it ships.
+         */
+        productStatus?: ('concept' | 'sample' | 'preorder' | 'available' | 'sold-out') | null;
+        accent?: ('blue' | 'pink' | 'gold' | 'teal' | 'green' | 'lavender') | null;
+        /**
+         * Number only, no currency symbol, e.g. 9.99. Leave blank while pricing is undecided — a blank price renders the note below instead of a number.
+         */
+        price?: string | null;
+        /**
+         * e.g. "From $0 · Premium $9.99/month" or "Founding preorder price to be announced".
+         */
+        priceNote?: string | null;
+        /**
+         * Three or four short lines. Not a feature list — the shape of the thing.
+         */
+        highlights?:
+          | {
+              label: string;
+              id?: string | null;
+            }[]
+          | null;
+        media?: ('app' | 'cover' | 'spread') | null;
+        /**
+         * Replaces whichever placeholder is selected above.
+         */
+        image?: (string | null) | Media;
+        imageAlt?: string | null;
+        sketch?: ('calendar' | 'workspace' | 'goal' | 'list' | 'habits' | 'chart') | null;
+        /**
+         * Drawn while no product photography exists. Clearly a concept drawing, never a fake render of a printed book.
+         */
+        cover?: ('black-gold' | 'midnight-silver') | null;
+        spread?:
+          | ('annual-vision' | 'quarterly-grow' | 'monthly' | 'weekly' | 'rings' | 'journal' | 'priorities' | 'ikigai')
+          | null;
+        cta?: {
+          label?: string | null;
+          /**
+           * Internal path (/philosophy), on-page anchor (#beta), or a full external URL (https://…).
+           */
+          url?: string | null;
+          /**
+           * Turn on for links that leave the site, such as Substack. Adds rel="noopener noreferrer".
+           */
+          newTab?: boolean | null;
+          /**
+           * Optional. Rendered as data-analytics-event so this button can be tracked, e.g. join_beta_hero.
+           */
+          analyticsId?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * The line under the two products saying they are one system. Leave the headline blank to hide the band.
+   */
+  together?: {
+    label?: string | null;
+    headline?: string | null;
+    body?: string | null;
+    cta?: {
+      label?: string | null;
+      /**
+       * Internal path (/philosophy), on-page anchor (#beta), or a full external URL (https://…).
+       */
+      url?: string | null;
+      /**
+       * Turn on for links that leave the site, such as Substack. Adds rel="noopener noreferrer".
+       */
+      newTab?: boolean | null;
+      /**
+       * Optional. Rendered as data-analytics-event so this button can be tracked, e.g. join_beta_hero.
+       */
+      analyticsId?: string | null;
+    };
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'featuredProductsBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PlannerCampaignBlock".
+ */
+export interface PlannerCampaignBlock {
+  eyebrow?: string | null;
+  headline: string;
+  body?: string | null;
+  /**
+   * Optional. When set, the product record supplies the lifecycle status and price so they are not maintained twice.
+   */
+  product?: (string | null) | Product;
+  /**
+   * The editorial line under the title, e.g. "Step back from the screen."
+   */
+  tagline?: string | null;
+  description?: string | null;
+  /**
+   * Target retail, phrased as a target. Do not put a preorder number here until one is decided — say it is to be announced instead.
+   */
+  priceNote?: string | null;
+  /**
+   * e.g. "Founding preorder price to be announced."
+   */
+  preorderNote?: string | null;
+  /**
+   * Conceptual colourways. Labelled as concepts on the page — these are not manufactured.
+   */
+  covers?:
+    | {
+        /**
+         * e.g. Concept A — Black.
+         */
+        label: string;
+        /**
+         * Material or finish note.
+         */
+        note?: string | null;
+        /**
+         * Drawn while no product photography exists. Clearly a concept drawing, never a fake render of a printed book.
+         */
+        cover?: ('black-gold' | 'midnight-silver') | null;
+        /**
+         * Replaces the concept drawing once real photography exists.
+         */
+        coverImage?: (string | null) | Media;
+        coverAlt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * What the book is built around — annual, quarterly, monthly, weekly, GROW, priorities, reflection. Say how each one complements the app rather than duplicating it.
+   */
+  designedAround?:
+    | {
+        label: string;
+        body?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Physical specifications. Everything still undecided should say so — "to be confirmed" is a real answer and an invented page count is not.
+   */
+  specs?:
+    | {
+        label: string;
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Schematic previews of the interior. Upload artwork to replace a schematic.
+   */
+  spreads?:
+    | {
+        title: string;
+        body?: string | null;
+        spread?:
+          | ('annual-vision' | 'quarterly-grow' | 'monthly' | 'weekly' | 'rings' | 'journal' | 'priorities' | 'ikigai')
+          | null;
+        image?: (string | null) | Media;
+        imageAlt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Close-up detail imagery — binding, foil, paper. Empty slots render as marked placeholders.
+   */
+  details?:
+    | {
+        title: string;
+        body?: string | null;
+        image?: (string | null) | Media;
+        imageAlt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  cta?: {
+    label?: string | null;
+    /**
+     * Internal path (/philosophy), on-page anchor (#beta), or a full external URL (https://…).
+     */
+    url?: string | null;
+    /**
+     * Turn on for links that leave the site, such as Substack. Adds rel="noopener noreferrer".
+     */
+    newTab?: boolean | null;
+    /**
+     * Optional. Rendered as data-analytics-event so this button can be tracked, e.g. join_beta_hero.
+     */
+    analyticsId?: string | null;
+  };
+  secondaryCta?: {
+    label?: string | null;
+    /**
+     * Internal path (/philosophy), on-page anchor (#beta), or a full external URL (https://…).
+     */
+    url?: string | null;
+    /**
+     * Turn on for links that leave the site, such as Substack. Adds rel="noopener noreferrer".
+     */
+    newTab?: boolean | null;
+    /**
+     * Optional. Rendered as data-analytics-event so this button can be tracked, e.g. join_beta_hero.
+     */
+    analyticsId?: string | null;
+  };
+  footnote?: string | null;
+  /**
+   * Emits Product structured data. Tick it on the product’s own page only — the same campaign shown on the shop landing page would otherwise publish a second, competing description of the same product. The offer inside it appears only once the linked product is actually on preorder or shipping.
+   */
+  canonical?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'plannerCampaignBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SystemSplitBlock".
+ */
+export interface SystemSplitBlock {
+  eyebrow?: string | null;
+  headline: string;
+  body?: string | null;
+  columns?:
+    | {
+        /**
+         * e.g. TIMEBITE.
+         */
+        label: string;
+        /**
+         * e.g. Digital, for execution.
+         */
+        tagline?: string | null;
+        accent?: ('blue' | 'pink' | 'gold' | 'teal' | 'green' | 'lavender') | null;
+        items?:
+          | {
+              text: string;
+              /**
+               * Only for the software side. Leave blank on the paper side — a printed page has no build status. Available now = shipped. Beta = usable, in the private beta. In development = being built. Planned = committed, not started. Exploring = we are looking at it and nothing more.
+               */
+              status?: ('available' | 'beta' | 'in-development' | 'planned' | 'exploring') | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  center?: {
+    label?: string | null;
+    body?: string | null;
+  };
+  /**
+   * Separated by →, e.g. "Vision → GROW → Systems → Priorities → TimeBites → Reflection". Leave blank to hide.
+   */
+  flow?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'systemSplitBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BundleBlock".
+ */
+export interface BundleBlock {
+  eyebrow?: string | null;
+  headline: string;
+  body?: string | null;
+  /**
+   * e.g. TimeBite + CYR Annual.
+   */
+  name: string;
+  /**
+   * Small marker, e.g. "Bundle". Keep it quiet.
+   */
+  badge?: string | null;
+  /**
+   * Number only, no currency symbol, e.g. 119.
+   */
+  price?: string | null;
+  cadence?: string | null;
+  /**
+   * What the pieces cost bought separately, e.g. 128.
+   */
+  separatePrice?: string | null;
+  /**
+   * e.g. "Save $9". Stated once, quietly.
+   */
+  savingsNote?: string | null;
+  includes?:
+    | {
+        text: string;
+        /**
+         * Optional qualifier under the line.
+         */
+        note?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Required in spirit: say plainly that the planner half depends on the preorder lifecycle and is not shipping yet. Never imply immediate dispatch unless the product status is "available".
+   */
+  availabilityNote?: string | null;
+  cta?: {
+    label?: string | null;
+    /**
+     * Internal path (/philosophy), on-page anchor (#beta), or a full external URL (https://…).
+     */
+    url?: string | null;
+    /**
+     * Turn on for links that leave the site, such as Substack. Adds rel="noopener noreferrer".
+     */
+    newTab?: boolean | null;
+    /**
+     * Optional. Rendered as data-analytics-event so this button can be tracked, e.g. join_beta_hero.
+     */
+    analyticsId?: string | null;
+  };
+  footnote?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'bundleBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MethodologyBlock".
+ */
+export interface MethodologyBlock {
+  eyebrow?: string | null;
+  headline: string;
+  body?: string | null;
+  /**
+   * Ordered. Numbered automatically — do not type numbers into the labels.
+   */
+  stages?:
+    | {
+        /**
+         * e.g. Direction.
+         */
+        label: string;
+        /**
+         * The method used at this stage, e.g. GROW.
+         */
+        title?: string | null;
+        body?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  closingStatement?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'methodologyBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PlanComparisonBlock".
+ */
+export interface PlanComparisonBlock {
+  eyebrow?: string | null;
+  headline: string;
+  body?: string | null;
+  /**
+   * Two is the readable maximum on a phone. Three is the hard limit.
+   */
+  columns?:
+    | {
+        label: string;
+        /**
+         * Small line under the heading, e.g. "$9.99/month".
+         */
+        note?: string | null;
+        featured?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Only list capabilities that exist in the product or on the roadmap. Anything unshipped must carry a status on its value.
+   */
+  rows?:
+    | {
+        label: string;
+        /**
+         * One per column, in column order.
+         */
+        values?:
+          | {
+              /**
+               * e.g. "Included", "—", "Up to 3". Leave blank for a dash.
+               */
+              value?: string | null;
+              /**
+               * Tags an unshipped capability so availability is never written into the value text. Available now = shipped. Beta = usable, in the private beta. In development = being built. Planned = committed, not started. Exploring = we are looking at it and nothing more.
+               */
+              status?: ('available' | 'beta' | 'in-development' | 'planned' | 'exploring') | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  footnote?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'planComparisonBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PlannerInterestBlock".
+ */
+export interface PlannerInterestBlock {
+  eyebrow?: string | null;
+  headline: string;
+  body?: string | null;
+  /**
+   * Where the form submits. A Payload form-builder submission URL, or any endpoint that accepts a POST. Leave blank to fall back to NEXT_PUBLIC_PLANNER_INTEREST_URL, and then to the button below — the form is never rendered with nowhere to post.
+   */
+  formAction?: string | null;
+  interestLabel?: string | null;
+  interestOptions?:
+    | {
+        label: string;
+        /**
+         * Submitted value, e.g. planner-only.
+         */
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  coverLabel?: string | null;
+  coverOptions?:
+    | {
+        label: string;
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  submitLabel?: string | null;
+  /**
+   * What happens to the address, and what is not being charged.
+   */
+  formNote?: string | null;
+  /**
+   * Shown instead of the form when no endpoint is configured.
+   */
+  cta?: {
+    label?: string | null;
+    /**
+     * Internal path (/philosophy), on-page anchor (#beta), or a full external URL (https://…).
+     */
+    url?: string | null;
+    /**
+     * Turn on for links that leave the site, such as Substack. Adds rel="noopener noreferrer".
+     */
+    newTab?: boolean | null;
+    /**
+     * Optional. Rendered as data-analytics-event so this button can be tracked, e.g. join_beta_hero.
+     */
+    analyticsId?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'plannerInterestBlock';
 }
 /**
  * Written posts. Shown at /blog, newest first.
@@ -1475,6 +2084,15 @@ export interface PagesSelect<T extends boolean = true> {
         faqBlock?: T | FAQBlockSelect<T>;
         ctaBlock?: T | CtaBlockSelect<T>;
         testimonialsBlock?: T | TestimonialsBlockSelect<T>;
+        announcementBlock?: T | AnnouncementBlockSelect<T>;
+        storefrontHeroBlock?: T | StorefrontHeroBlockSelect<T>;
+        featuredProductsBlock?: T | FeaturedProductsBlockSelect<T>;
+        plannerCampaignBlock?: T | PlannerCampaignBlockSelect<T>;
+        systemSplitBlock?: T | SystemSplitBlockSelect<T>;
+        bundleBlock?: T | BundleBlockSelect<T>;
+        methodologyBlock?: T | MethodologyBlockSelect<T>;
+        planComparisonBlock?: T | PlanComparisonBlockSelect<T>;
+        plannerInterestBlock?: T | PlannerInterestBlockSelect<T>;
       };
   meta?:
     | T
@@ -1935,6 +2553,7 @@ export interface PricingBlockSelect<T extends boolean = true> {
       };
   trialCopy?: T;
   digitalEyebrow?: T;
+  billingToggle?: T;
   monthlyLabel?: T;
   annualLabel?: T;
   annualBadge?: T;
@@ -1945,6 +2564,7 @@ export interface PricingBlockSelect<T extends boolean = true> {
         monthlyPrice?: T;
         annualPrice?: T;
         annualNote?: T;
+        annualSavings?: T;
         description?: T;
         badge?: T;
         featured?: T;
@@ -2087,6 +2707,355 @@ export interface TestimonialsBlockSelect<T extends boolean = true> {
         company?: T;
         avatar?: T;
         id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "AnnouncementBlock_select".
+ */
+export interface AnnouncementBlockSelect<T extends boolean = true> {
+  enabled?: T;
+  message?: T;
+  accent?: T;
+  cta?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        newTab?: T;
+        analyticsId?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "StorefrontHeroBlock_select".
+ */
+export interface StorefrontHeroBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  headline?: T;
+  body?: T;
+  cta?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        newTab?: T;
+        analyticsId?: T;
+      };
+  secondaryCta?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        newTab?: T;
+        analyticsId?: T;
+      };
+  availabilityNote?: T;
+  image?: T;
+  assetUrl?: T;
+  imageAlt?: T;
+  sketch?: T;
+  cover?: T;
+  coverImage?: T;
+  coverAlt?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FeaturedProductsBlock_select".
+ */
+export interface FeaturedProductsBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  headline?: T;
+  body?: T;
+  items?:
+    | T
+    | {
+        eyebrow?: T;
+        title?: T;
+        body?: T;
+        kind?: T;
+        status?: T;
+        productStatus?: T;
+        accent?: T;
+        price?: T;
+        priceNote?: T;
+        highlights?:
+          | T
+          | {
+              label?: T;
+              id?: T;
+            };
+        media?: T;
+        image?: T;
+        imageAlt?: T;
+        sketch?: T;
+        cover?: T;
+        spread?: T;
+        cta?:
+          | T
+          | {
+              label?: T;
+              url?: T;
+              newTab?: T;
+              analyticsId?: T;
+            };
+        id?: T;
+      };
+  together?:
+    | T
+    | {
+        label?: T;
+        headline?: T;
+        body?: T;
+        cta?:
+          | T
+          | {
+              label?: T;
+              url?: T;
+              newTab?: T;
+              analyticsId?: T;
+            };
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PlannerCampaignBlock_select".
+ */
+export interface PlannerCampaignBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  headline?: T;
+  body?: T;
+  product?: T;
+  tagline?: T;
+  description?: T;
+  priceNote?: T;
+  preorderNote?: T;
+  covers?:
+    | T
+    | {
+        label?: T;
+        note?: T;
+        cover?: T;
+        coverImage?: T;
+        coverAlt?: T;
+        id?: T;
+      };
+  designedAround?:
+    | T
+    | {
+        label?: T;
+        body?: T;
+        id?: T;
+      };
+  specs?:
+    | T
+    | {
+        label?: T;
+        value?: T;
+        id?: T;
+      };
+  spreads?:
+    | T
+    | {
+        title?: T;
+        body?: T;
+        spread?: T;
+        image?: T;
+        imageAlt?: T;
+        id?: T;
+      };
+  details?:
+    | T
+    | {
+        title?: T;
+        body?: T;
+        image?: T;
+        imageAlt?: T;
+        id?: T;
+      };
+  cta?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        newTab?: T;
+        analyticsId?: T;
+      };
+  secondaryCta?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        newTab?: T;
+        analyticsId?: T;
+      };
+  footnote?: T;
+  canonical?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SystemSplitBlock_select".
+ */
+export interface SystemSplitBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  headline?: T;
+  body?: T;
+  columns?:
+    | T
+    | {
+        label?: T;
+        tagline?: T;
+        accent?: T;
+        items?:
+          | T
+          | {
+              text?: T;
+              status?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  center?:
+    | T
+    | {
+        label?: T;
+        body?: T;
+      };
+  flow?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BundleBlock_select".
+ */
+export interface BundleBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  headline?: T;
+  body?: T;
+  name?: T;
+  badge?: T;
+  price?: T;
+  cadence?: T;
+  separatePrice?: T;
+  savingsNote?: T;
+  includes?:
+    | T
+    | {
+        text?: T;
+        note?: T;
+        id?: T;
+      };
+  availabilityNote?: T;
+  cta?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        newTab?: T;
+        analyticsId?: T;
+      };
+  footnote?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MethodologyBlock_select".
+ */
+export interface MethodologyBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  headline?: T;
+  body?: T;
+  stages?:
+    | T
+    | {
+        label?: T;
+        title?: T;
+        body?: T;
+        id?: T;
+      };
+  closingStatement?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PlanComparisonBlock_select".
+ */
+export interface PlanComparisonBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  headline?: T;
+  body?: T;
+  columns?:
+    | T
+    | {
+        label?: T;
+        note?: T;
+        featured?: T;
+        id?: T;
+      };
+  rows?:
+    | T
+    | {
+        label?: T;
+        values?:
+          | T
+          | {
+              value?: T;
+              status?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  footnote?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PlannerInterestBlock_select".
+ */
+export interface PlannerInterestBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  headline?: T;
+  body?: T;
+  formAction?: T;
+  interestLabel?: T;
+  interestOptions?:
+    | T
+    | {
+        label?: T;
+        value?: T;
+        id?: T;
+      };
+  coverLabel?: T;
+  coverOptions?:
+    | T
+    | {
+        label?: T;
+        value?: T;
+        id?: T;
+      };
+  submitLabel?: T;
+  formNote?: T;
+  cta?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        newTab?: T;
+        analyticsId?: T;
       };
   id?: T;
   blockName?: T;

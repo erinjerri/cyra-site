@@ -42,6 +42,11 @@ Three rules follow from that:
 
 1. **One accent per section.** Never two. A section with three colours reads as
    a dashboard, not a document.
+   *The one exception, and it is narrow:* a section that contains **two product
+   layers** — TimeBite and Creating Your Reality — may mark each layer with a
+   3px rail in its own hue while the card wash stays the section's single
+   accent. `.tb-feature-group`, `.tb-featured` and `.tb-system-column` all do
+   this. A rail is a label; it is not a second colour scheme.
 2. **Colour lives in large areas, not tiny badges.** A 9% wash across a card is
    worth more than a saturated 12px dot.
 3. **Depth comes from elevation, not borders.** Surfaces sit visibly above the
@@ -136,7 +141,16 @@ pastel).
 #tour          blue        #planner    pink
 #about         lavender    #beta       green
 #roadmap       lavender    #faq        gold
+
+/* Commerce */
+#shop-hero     blue        #bundle             blue
+#featured      teal        #compare            blue
+#system        teal        #methodology        gold
+#planner-campaign  pink    #planner-interest   pink
 ```
+
+Blue is software and pricing, pink is the physical product, gold is the
+methodology, and teal is the two of them read as one system.
 
 Adding a section? Give it a pair from the six hues above, and **add both
 variables**. A section with only `--tb-section-accent` falls back to a gold
@@ -323,6 +337,76 @@ from a reference into a rumour.
 
 ---
 
+## 9b. Commerce patterns
+
+Three patterns introduced by the storefront. They belong here because each one
+is reusable and each one encodes a rule that is easy to break by accident.
+
+### The asymmetric product grid
+
+Three columns; the first panel spans two, the second spans one, and
+`grid-auto-flow: row dense` lets a fourth panel back-fill the column a third
+leaves empty so pairs alternate sides down the page.
+
+The asymmetry is the message: an equal-card grid says two products are
+equivalent choices, and they are not. **Array order is the hierarchy** — the
+product that is actually launching goes first, and that survives into the
+single-column mobile layout as source order.
+
+Both panels put the object above the copy, at a fixed `aspect-ratio` on the
+media stage. Without that ratio the taller panel dictates the row and its
+neighbour fills with dead space; with it, a wide panel gets a big picture and
+short lines while a narrow one gets a smaller picture and longer lines, and
+the two land at nearly the same height. The CTA carries `margin-top: auto`, so
+whatever height a panel inherits collects above the button rather than below
+it, and both buttons align.
+
+Collapses to one full-width column at `920px`.
+
+### The concept object
+
+A physical product that has not been manufactured is drawn in CSS, never
+rendered photorealistically, and carries a **"Concept" flag as part of the
+drawing**. The same reasoning as the media schematics in section 8: a
+placeholder must be obviously a placeholder, and on a page with a price beside
+it a convincing render is a claim rather than a stand-in.
+
+Two rules that are easy to get wrong:
+
+- **The colourways are not theme tokens.** A concept object depicts a physical
+  thing — a black book is black on a white page too. Only the frame around it
+  follows the theme.
+- **Foil is flat colour.** A metallic finish is a gradient, and gradients are
+  ruled out. Name the finish in the caption; draw it in flat brand gold or flat
+  silver.
+- The mock must stay a **positioned element**. Its spine and flag are absolutely
+  positioned children, so `position: static` sends both to the nearest
+  positioned ancestor and paints a stray band across the page.
+
+Type inside the object scales with `cqw` under `container-type: inline-size`,
+held above the sheet's floor with `max(0.72rem, …)` — the minimum type size
+applies to drawn covers too.
+
+### Interior-spread schematics
+
+`SpreadSketch` is a sibling of `LayoutSketch`, kept separate because it draws
+paper rather than screens. Every spread is a **two-page opening with a visible
+gutter**, which is what stops it reading as a screenshot. Abstract throughout:
+no invented dates, no fake handwriting, no legible copy that could pass for
+final artwork.
+
+### Comparison tables
+
+A comparison stays a real `<table>` at every width. Restyling table elements to
+`display: block` on small screens drops the implicit table roles in several
+browsers and a screen-reader user loses the column headers. Cap the schema at
+**three columns**, use `table-layout: fixed`, and the grid fits inside 375px
+with nothing to scroll sideways. Status badges inside cells need
+`white-space: normal` — the shared badge is `nowrap`, which is right for a card
+and 40px too wide for a table cell.
+
+---
+
 ## 10. What not to do
 
 - Do not add a seventh accent colour
@@ -338,3 +422,9 @@ from a reference into a rumour.
 - Do not drop body copy below weight 400 or `0.72rem`
 - Do not add a `prefers-color-scheme` block without deciding, deliberately,
   that light should greet half your visitors
+- Do not render a concept product photorealistically, or drop its "Concept" flag
+- Do not bind a concept object's cover colours to theme tokens
+- Do not put a price on a product whose price is undecided — render the note
+  saying so instead
+- Do not let a comparison table scroll sideways, or restyle it out of being a
+  table

@@ -1,3 +1,14 @@
+import {
+  BUNDLE_ANNUAL_PRICE,
+  TIMEBITE_ANNUAL_PRICE,
+  TIMEBITE_FREE_PRICE,
+  TIMEBITE_MONTHLY_PRICE,
+  amount,
+  annualMonthlyEquivalent,
+  annualSavingsPercent,
+  money,
+} from '@/utilities/catalog'
+
 /**
  * Homepage copy. Every line here is editable in /admin without touching code.
  *
@@ -514,71 +525,60 @@ export const timeBiteHome = {
     },
     {
       // Launch pricing. Every number is content — change it in /admin, not in
-      // code. Optional bundles ship with `enabled: false` so they can be
-      // switched on without a deploy. See docs/launch-pricing.md.
+      // code — and the seeded values come from utilities/catalog.ts so the
+      // homepage, /pricing and the bundle cannot quote three different prices
+      // for the same product. See docs/launch-pricing.md.
       blockType: 'pricingBlock',
       eyebrow: 'Pricing',
-      headline: 'Choose how you want to build your reality.',
-      body: 'Start on the Mac, work on paper, or move between the two. TimeBite and the Creating Your Reality planner were designed as one system.',
-      trialCopy: 'Try TimeBite free for 30 days — long enough to plan a month and see whether it held.',
-      cta: { label: 'Try TimeBite free', url: '#beta', analyticsId: 'start_free_trial' },
-      secondaryCta: { label: 'See the planners', url: '#planner', analyticsId: 'view_planners' },
-      digitalEyebrow: 'Digital',
+      headline: 'Free to start. Premium when it earns it.',
+      body: 'One subscription, billed monthly or once a year. The Creating Your Reality planner is priced separately, and together in the annual bundle.',
+      trialCopy: 'Try Premium free for 30 days — long enough to plan a month and see whether it held.',
+      cta: { label: 'Start free', url: '#beta', analyticsId: 'timebite-start-free' },
+      secondaryCta: { label: 'See full pricing', url: '/pricing', analyticsId: 'view-pricing-home' },
+      digitalEyebrow: 'TimeBite',
       monthlyLabel: 'Monthly',
       annualLabel: 'Annual',
       annualBadge: 'Best value',
       digitalPlans: [
         {
-          name: 'Free Trial',
-          monthlyPrice: '0',
-          annualPrice: '0',
-          badge: 'First month free',
-          description: 'A full month of the loop, free. Long enough to plan a month and see whether it held.',
+          name: 'Free',
+          monthlyPrice: amount(TIMEBITE_FREE_PRICE),
+          annualPrice: amount(TIMEBITE_FREE_PRICE),
+          description: 'Enough to plan a week properly and decide whether the loop suits you.',
           features: [
-            { text: 'Everything in Starter Kit' },
+            { text: 'Now — today’s intent and focus sessions', status: 'available' },
+            { text: 'Calendar planning and time blocking', status: 'available' },
+            { text: 'Daily and weekly tracking', status: 'available' },
             { text: 'One device' },
-            { text: 'No card required during the beta' },
           ],
-          cta: { label: 'Join the TimeBite Beta', url: '#beta', analyticsId: 'join_beta_plan_free' },
+          cta: { label: 'Start free', url: '#beta', analyticsId: 'timebite-start-free' },
         },
         {
-          name: 'Starter Kit',
-          monthlyPrice: '35.55',
-          annualPrice: '355.50',
-          annualNote: 'Two months free against paying monthly.',
+          name: 'Premium',
+          monthlyPrice: amount(TIMEBITE_MONTHLY_PRICE),
+          annualPrice: amount(TIMEBITE_ANNUAL_PRICE),
+          annualNote: `About ${money(Number(annualMonthlyEquivalent()))} a month, billed annually.`,
+          annualSavings: `Save ~${annualSavingsPercent()}%`,
           featured: true,
           badge: 'Recommended',
-          description: 'The whole loop — direction, planning, calendar time and review. The planner bundle adds the printed planner to the app.',
+          description: 'The whole loop — direction, planning, calendar time and review — with the measurement layer arriving as it is built.',
           features: [
-            { text: 'Discover, Ikigai and Boards' },
-            { text: 'Calendar planning with drag-and-drop' },
-            { text: 'Daily, weekly, monthly and annual tracking' },
-            { text: 'Habits and activity rings' },
-            { text: 'Sync across your devices' },
-            { text: 'Add the planner — $75.55 a quarter, or $255.55 a year' },
-          ],
-          cta: { label: 'Try TimeBite free', url: '#beta', analyticsId: 'start_free_trial_starter' },
-        },
-        {
-          name: 'Executive',
-          monthlyPrice: '111.11',
-          annualPrice: '1111.10',
-          badge: 'Premium Subscriber',
-          description: 'The measurement and assistance layer, arriving as each piece is built.',
-          features: [
-            { text: 'Everything in Starter Kit' },
-            { text: 'Progress dashboards and charts', status: 'in-development' },
+            { text: 'Everything in Free' },
+            { text: 'Discover, Ikigai and Boards', status: 'available' },
+            { text: 'Timeline — goals laid across the months', status: 'available' },
+            { text: 'Activity: intended time against actual', status: 'available' },
+            { text: 'Monthly and annual tracking', status: 'available' },
+            { text: 'Dashboard — planned against actual, per goal', status: 'in-development' },
             { text: 'Goals, Actions and Kanban', status: 'in-development' },
-            { text: 'Goal Agent', status: 'in-development' },
             { text: 'Domain agents as they arrive', status: 'planned' },
           ],
-          cta: { label: 'Join the waitlist', url: '#beta', analyticsId: 'join_waitlist_executive' },
+          cta: { label: 'Try Premium free', url: '#beta', analyticsId: 'timebite-annual' },
         },
       ],
       betaPromotion: {
         enabled: true,
         label: 'Friends of TimeBite',
-        body: 'An invite code adds two more months on top of the 30-day trial. Codes go to the people in the private beta.',
+        body: 'An invite code adds two more months on top of the trial. Codes go to the people in the private beta.',
         cta: { label: 'Have an invite code?', url: '#beta', analyticsId: 'beta_code_click' },
       },
       platformNote: {
@@ -586,7 +586,7 @@ export const timeBiteHome = {
         cta: { label: 'See what runs where', url: '#platforms' },
       },
       footnote:
-        'Launch pricing. Nothing is charged during the beta — paid plans open to the beta list first.',
+        'Conceptual launch pricing. Nothing is charged during the beta — paid plans open to the beta list first. Full detail on the pricing page.',
     },
     {
       // Physical products come AFTER the subscription, and pull from the
@@ -656,7 +656,7 @@ export const timeBiteHome = {
         {
           question: 'What does it cost?',
           answer:
-            'Free for 30 days, then $12.55 a month or $125.55 a year for Plus — the annual price is two months lighter. There is a free tier to begin with, and a Pro tier for measurement, long-range planning and agents as they are built. Nothing is charged during the beta.',
+            `There is a free tier. Premium is ${money(TIMEBITE_MONTHLY_PRICE)} a month or ${money(TIMEBITE_ANNUAL_PRICE)} a year — about ${money(Number(annualMonthlyEquivalent()))} a month billed annually, roughly ${annualSavingsPercent()}% less than paying monthly. The planner is priced separately, and the two together are ${money(BUNDLE_ANNUAL_PRICE)} a year. Nothing is charged during the beta.`,
         },
         {
           question: 'Can I buy the paper planner yet?',

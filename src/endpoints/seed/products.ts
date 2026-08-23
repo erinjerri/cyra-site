@@ -10,21 +10,25 @@
  */
 export const productsSeed = [
   {
-    name: 'Planner',
+    // The flagship physical product, and the one /shop/planner is about. Its
+    // slug is what that page's URL is built from, so it should not change.
+    // Price stays blank on purpose: $49 is a target we can talk about in
+    // campaign copy, not a price anyone can pay, and the price field renders
+    // as an actual price.
+    name: 'Creating Your Reality Planner',
     slug: 'planner',
     productType: 'planner',
-    variantNote: 'Quarterly · Annual · Undated',
+    variantNote: 'Annual · Black or midnight',
     description:
-      'The TimeBite loop on paper. Goals at the front, weeks in the middle, and room to review what actually happened.',
+      'The year on paper. Annual vision, quarterly direction, monthly goals, weekly priorities and room to write down what you learned.',
     status: 'concept',
     sortOrder: 10,
     featured: true,
     enabled: true,
     cta: {
-      label: 'Get notified',
-      url: 'https://erinjerri.substack.com/',
-      newTab: true,
-      analyticsId: 'product_notify_planner',
+      label: 'Preview the planner',
+      url: '/shop/planner',
+      analyticsId: 'planner-preview-grid',
     },
   },
   {

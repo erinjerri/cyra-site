@@ -135,6 +135,8 @@ export type DigitalPlan = {
   monthlyPrice?: string
   annualPrice?: string
   annualNote?: string
+  /** Small marker beside the annual price, e.g. "Save ~34%". Annual view only. */
+  annualSavings?: string
   description?: string
   badge?: string
   featured?: boolean
@@ -229,6 +231,8 @@ export type FAQBlockType = Omit<TimeBiteBlock, 'items'> & {
 export type PricingBlockType = Omit<TimeBiteBlock, 'items'> & {
   trialCopy?: string
   digitalEyebrow?: string
+  /** False lays the billing periods out as separate cards. See PricingSection. */
+  billingToggle?: boolean
   monthlyLabel?: string
   annualLabel?: string
   annualBadge?: string
@@ -245,4 +249,185 @@ export type TestimonialsBlockType = Omit<TimeBiteBlock, 'items'> & {
     role?: string
     company?: string
   }[]
+}
+
+/* -------------------------------------------------------------------------
+   Commerce
+
+   Shapes for the storefront blocks in `blocks/TimeBite/commerce.ts`. Nullable
+   throughout for the same reason as everything above: Payload returns `null`
+   for a field an editor has never filled in.
+   ------------------------------------------------------------------------- */
+
+/** The six brand hues. There is no seventh — see design.md §10. */
+export type Accent = 'blue' | 'teal' | 'gold' | 'green' | 'pink' | 'lavender'
+
+/** Conceptual planner colourways. Drawings, never renders of a printed book. */
+export type CoverConcept = 'black-gold' | 'midnight-silver'
+
+/** Interior-spread schematics — see SpreadSketch. */
+export type SpreadKind =
+  | 'annual-vision'
+  | 'quarterly-grow'
+  | 'monthly'
+  | 'weekly'
+  | 'rings'
+  | 'journal'
+  | 'priorities'
+  | 'ikigai'
+
+export type CoverSource = {
+  cover?: CoverConcept
+  coverImage?: BlockImage
+  coverAlt?: string
+}
+
+export type AnnouncementBlockType = {
+  blockType: string
+  enabled?: boolean
+  message?: string
+  accent?: Accent
+  cta?: Cta
+}
+
+export type StorefrontHeroBlockType = MediaContent &
+  CoverSource & {
+    blockType: string
+    eyebrow?: string
+    headline?: string
+    body?: string
+    cta?: Cta
+    secondaryCta?: Cta
+    availabilityNote?: string
+  }
+
+export type FeaturedProduct = CoverSource & {
+  eyebrow?: string
+  title?: string
+  body?: string
+  kind?: 'software' | 'physical'
+  status?: Status
+  productStatus?: ProductStatus
+  accent?: Accent
+  price?: string
+  priceNote?: string
+  highlights?: Pillar[]
+  media?: 'app' | 'cover' | 'spread'
+  image?: BlockImage
+  imageAlt?: string
+  sketch?: SketchKind
+  spread?: SpreadKind
+  cta?: Cta
+}
+
+export type FeaturedProductsBlockType = {
+  blockType: string
+  eyebrow?: string
+  headline?: string
+  body?: string
+  items?: FeaturedProduct[]
+  together?: {
+    label?: string
+    headline?: string
+    body?: string
+    cta?: Cta
+  }
+}
+
+export type PlannerSpread = {
+  title?: string
+  body?: string
+  spread?: SpreadKind
+  image?: BlockImage
+  imageAlt?: string
+}
+
+export type PlannerCampaignBlockType = {
+  blockType: string
+  eyebrow?: string
+  headline?: string
+  body?: string
+  product?: ProductDoc | string
+  tagline?: string
+  description?: string
+  priceNote?: string
+  preorderNote?: string
+  covers?: (CoverSource & { label?: string; note?: string })[]
+  designedAround?: { label?: string; body?: string }[]
+  specs?: { label?: string; value?: string }[]
+  spreads?: PlannerSpread[]
+  details?: { title?: string; body?: string; image?: BlockImage; imageAlt?: string }[]
+  cta?: Cta
+  secondaryCta?: Cta
+  footnote?: string
+  /** Emits Product structured data. True on the product's own page only. */
+  canonical?: boolean
+}
+
+export type SystemColumn = {
+  label?: string
+  tagline?: string
+  accent?: Accent
+  items?: { text?: string; status?: Status }[]
+}
+
+export type SystemSplitBlockType = {
+  blockType: string
+  eyebrow?: string
+  headline?: string
+  body?: string
+  columns?: SystemColumn[]
+  center?: { label?: string; body?: string }
+  flow?: string
+}
+
+export type BundleBlockType = {
+  blockType: string
+  eyebrow?: string
+  headline?: string
+  body?: string
+  name?: string
+  badge?: string
+  price?: string
+  cadence?: string
+  separatePrice?: string
+  savingsNote?: string
+  includes?: { text?: string; note?: string }[]
+  availabilityNote?: string
+  cta?: Cta
+  footnote?: string
+}
+
+export type MethodologyBlockType = {
+  blockType: string
+  eyebrow?: string
+  headline?: string
+  body?: string
+  stages?: { label?: string; title?: string; body?: string }[]
+  closingStatement?: string
+}
+
+export type PlanComparisonBlockType = {
+  blockType: string
+  eyebrow?: string
+  headline?: string
+  body?: string
+  columns?: { label?: string; note?: string; featured?: boolean }[]
+  rows?: { label?: string; values?: { value?: string; status?: Status }[] }[]
+  footnote?: string
+}
+
+export type PlannerInterestBlockType = {
+  blockType: string
+  eyebrow?: string
+  headline?: string
+  body?: string
+  formAction?: string
+  interestLabel?: string
+  interestOptions?: { label?: string; value?: string }[]
+  coverLabel?: string
+  coverOptions?: { label?: string; value?: string }[]
+  submitLabel?: string
+  formNote?: string
+  cta?: Cta
 }

@@ -7,8 +7,8 @@
 | Field | Type | Notes |
 |---|---|---|
 | `title` | text, required | Doc title, also the SEO fallback title |
-| `slug` | text, required, unique | Route: `home` → `/`, anything else → `/[slug]` |
-| `layout` | blocks, required | The 11 TimeBite blocks below, in any order/combination |
+| `slug` | text, required, unique | Route: `home` → `/`, `shop/planner` → `/shop/planner`, anything else → `/[slug]` |
+| `layout` | blocks, required | The TimeBite and commerce blocks below, in any order/combination |
 | `meta.title`, `meta.description`, `meta.image` | — | Injected automatically by `plugin-seo` |
 
 Drafts are enabled (`versions.drafts`). Read access is public (`access.read: () => true`) — this is a public
@@ -153,3 +153,54 @@ Cards), `#pricing` (Pricing), `#planner` (Product Grid), `#beta` (Newsletter), `
 These are plain `id` attributes on each block's `<section>`,
 not a CMS field — fine for the current one-of-each-block-per-page layout; if a page ever needs two Timeline
 blocks, revisit with a per-block `anchorId` field.
+
+
+---
+
+## Commerce blocks
+
+Declared in `src/blocks/TimeBite/commerce.ts` and appended to `timeBiteBlocks`. They are kept in their own
+file because they carry rules the explanatory blocks do not: a price is a promise, availability is a field
+rather than a sentence, and no component may contain a checkout URL.
+
+Seeded values come from `src/utilities/catalog.ts` — see `docs/launch-pricing.md`.
+
+| Block | Slug | What it is |
+|---|---|---|
+| Announcement strip | `announcementBlock` | One restrained line stating launch order. `enabled` hides it |
+| Storefront hero | `storefrontHeroBlock` | Copy beside the app window with the planner standing in front of it |
+| Featured products | `featuredProductsBlock` | Asymmetric two-product merchandising plus the "Together" band |
+| Planner campaign | `plannerCampaignBlock` | The planner as a product launch: covers, spreads, details, specs |
+| App + planner system | `systemSplitBlock` | Two columns, a centre join, and the flow line |
+| Bundle | `bundleBlock` | Bundle price against the honest sum of its parts |
+| Methodology band | `methodologyBlock` | Direction → Goals → Systems → Priorities → Execution → Feedback |
+| Plan comparison | `planComparisonBlock` | Max three columns. Values carry a `status` |
+| Planner interest form | `plannerInterestBlock` | Email capture. Renders a form only when an endpoint exists |
+
+### Fields worth knowing about
+
+- **`featuredProductsBlock.items[].kind`** — `software` or `physical`. Switches which availability vocabulary
+  the item uses (`status` vs `productStatus`), because "beta" says nothing about a printed book and "sold out"
+  says nothing about an app.
+- **`featuredProductsBlock.items[].media`** — `app` (screen schematic), `cover` (planner mockup) or `spread`
+  (interior schematic). Uploading an image replaces whichever placeholder is selected.
+- **`plannerCampaignBlock.product`** — optional relationship to `products`. When set, that record supplies the
+  lifecycle status and price so they are not maintained twice.
+- **`plannerCampaignBlock.canonical`** — emits `Product` structured data. Tick on the product's own page only.
+- **`plannerInterestBlock.formAction`** — POST endpoint. Falls back to `NEXT_PUBLIC_PLANNER_INTEREST_URL`, then
+  to the button. **The form is never rendered with nowhere to post** — a form submitting to `#` looks like it
+  worked and silently loses the address.
+- **`pricingBlock.billingToggle`** — off lays the billing periods out as separate cards instead of behind a
+  switch, so Free, Monthly and Annual can sit side by side. Used on `/pricing`.
+- **`pricingBlock.digitalPlans[].annualSavings`** — annual-only marker, e.g. "Save ~34%".
+
+## Commerce pages
+
+| Slug | URL | Seed |
+|---|---|---|
+| `shop` | `/shop` | `src/endpoints/seed/shop-page.ts` |
+| `pricing` | `/pricing` | `src/endpoints/seed/pricing-page.ts` |
+| `shop/planner` | `/shop/planner` | `src/endpoints/seed/planner-page.ts` |
+
+The planner page's slug is the **full path**. That keeps one slug per URL: `getPageBySlug` finds it unchanged,
+`sitemap.ts` already emits `${url}/${slug}` correctly, and the SEO plugin's canonical URL comes out right.

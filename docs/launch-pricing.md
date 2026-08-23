@@ -1,85 +1,117 @@
-# Launch Pricing — 2026
+# Launch Pricing & Commerce
 
-Every number below is content, not code. It lives in the `pricingBlock` and is editable in
-`/admin`; the seeded defaults are in `src/endpoints/seed/timebite-home.ts`. Changing a price should
-never mean grepping the codebase.
+Conceptual launch pricing for TimeBite and the Creating Your Reality planner. **No payment provider is
+connected.** Everything on the commerce pages is a link or a mailing-list signup.
 
-## Where it lives
+## Where a price lives
 
-| Concern | File |
-| --- | --- |
-| Payload schema | `src/blocks/TimeBite/config.ts` (`PricingBlock`) |
-| TypeScript types | `src/components/TimeBite/types.ts` (`PricingBlockType`) |
-| Renderer | `src/components/TimeBite/PricingSection.tsx` |
-| Seeded content | `src/endpoints/seed/timebite-home.ts` |
-| Nav links | `src/endpoints/seed/header-footer.ts` |
-| Styles | `src/app/(frontend)/globals.css`, "Pricing" section |
+There are two layers, and the distinction matters:
 
-## Digital — TimeBite subscription
+| Layer | File | Role |
+|---|---|---|
+| **Authoring source** | `src/utilities/catalog.ts` | The canonical numbers, and every figure derived from them |
+| **Runtime source** | Payload (`/admin`) | What the site actually renders. An editor changes a price here with no deploy |
 
-| Plan | Monthly | Annual |
-| --- | --- | --- |
-| Free | $0 | $0 |
-| Plus | $12.55 | $125.55 |
-| Pro | $25.55 | $255.55 |
+Seeds are generated *from* `catalog.ts`, so re-seeding restores a coherent set of numbers rather than whatever
+was typed into six files on six different days. Editors then own it in `/admin`.
 
-- Annual is the default view and carries the "Best value" badge, so the first price a visitor sees
-  is the one we recommend.
-- Plus annual is two months lighter than paying monthly; that claim is per-plan copy (`annualNote`)
-  and only renders on the annual view.
-- A plan priced `0` renders as "Free" and never says "billed annually".
-- Pro's unbuilt capabilities are labelled "in development" or "planned" in the feature list. Leave
-  those labels until the features actually ship.
+Every derived figure is **calculated**, never typed:
 
-## Trial and beta promotion
+| Figure | Derivation | Today |
+|---|---|---|
+| Annual monthly equivalent | `TIMEBITE_ANNUAL_PRICE / 12` | `$6.58` |
+| Annual saving | `1 − annual / (monthly × 12)`, floored | `~34%` |
+| Bundle comparison price | `TIMEBITE_ANNUAL_PRICE + PLANNER_RETAIL_PRICE` | `$128` |
+| Bundle saving | comparison − bundle | `$9` |
 
-- 30 days free. The copy makes no claim about a credit card, because no billing exists to require
-  one either way.
-- `betaPromotion` adds two further months for invited testers. The **code itself never appears on
-  the site** — the group holds only label, body, and CTA. Redemption belongs to whichever billing
-  provider gets chosen.
-- `betaPromotion.enabled` hides the strip without touching a component.
+Rounded **down** deliberately: understating a discount is a rounding error, overstating one is a claim.
 
-## Platforms
+## TimeBite — software subscription
 
-Pricing does **not** carry its own device list. `platformCardsBlock` owns availability, and the
-pricing section shows a single `platformNote` line that links to it — one source of truth, so the
-two can't drift apart.
+| Plan | Price |
+|---|---|
+| Free | `$0` |
+| Premium monthly | `$9.99 / month` |
+| Premium annual | `$79 / year` — about `$6.58/month`, `Save ~34%` |
 
-## Physical — Creating Your Reality planner
+- `/pricing` lays all three out as separate cards (`billingToggle: false` on the pricing block).
+- The homepage keeps the monthly/annual switch: one Premium card, two billing periods.
+- Every feature line that is not shipped carries a `status`. Check them against the feature grid on the
+  homepage — the pricing page must never be where something quietly graduates from "in development" to a
+  plain bullet point.
 
-| Product | Price | State |
-| --- | --- | --- |
-| Six-Month Planner | $35.55 | Pre-order, visible |
-| Year of Planning (two planners) | $65.55 | Pre-order, visible, best value |
-| Stationery Kit | $55.55 | Pre-order, visible |
-| Planner + Stationery | $85.55 | Configured, `enabled: false` |
-| Full Year Analog Set | $115.55 | Configured, `enabled: false` |
+## Creating Your Reality planner — physical
 
-- All physical products are one-time and labelled "Pre-order", visually distinct from the recurring
-  digital plans (gold accent rather than blue).
-- The two bundles exist in the data so they can be switched on by flipping `enabled` in `/admin`.
-  They're hidden today to keep the page hierarchy readable.
-- Stationery contents are described loosely so the SKU can change before printing.
+| Figure | Value | State |
+|---|---|---|
+| Target retail | `$49` | A target, presented as one |
+| Founding preorder | **Undecided** | Rendered as "Price to be announced" |
+| Lifecycle status | `concept` | Not printed, not for sale |
 
-## Commerce status
+`PLANNER_PREORDER_RANGE` (`$39–45`) exists in `catalog.ts` for internal reference and is **not rendered**.
+`PLANNER_PREORDER_PRICE` is `null` on purpose: the Bookblock landed cost, shipping and tax are all open, so
+any number on the page would be invented.
 
-No billing or ecommerce provider exists in this repository — no Stripe, Shopify, Lemon Squeezy,
-Paddle, RevenueCat, or Apple subscriptions. None was added.
+The lifecycle lives on the `products` document, not in copy. Moving `concept → sample → preorder` is one edit
+in `/admin` and every surface follows.
 
-Every CTA is a plain link to the existing beta capture (`#beta`, backed by
-`NEXT_PUBLIC_BETA_SIGNUP_URL` / `NEXT_PUBLIC_SUBSTACK_EMBED_URL`). Integration points when a
-provider is chosen:
+## Bundle
 
-- **Digital plans** — `digitalPlans[].cta`. iOS subscriptions will likely have to run through
-  Apple's in-app purchase rules, so keep the web CTA a lead surface rather than a web checkout for
-  the iOS product.
-- **Physical products** — `physicalProducts[].cta`. Repointing these at Shopify or Stripe is a
-  content change.
-- **Beta promotion** — `betaPromotion.cta`. The site should never validate or display a code.
+| | |
+|---|---|
+| TimeBite + CYR Annual | `$119 / year` |
+| Separately | `$128` |
+| Saving | `$9` |
+
+`$128` is the honest sum of the two products, not an inflated comparison price. The bundle contains a book
+that has not been printed, so `availabilityNote` says so directly beneath the price — not in a footnote.
+
+## Commerce status — what is NOT built
+
+No Stripe, Shopify, Lemon Squeezy, Paddle, RevenueCat or Apple subscription. `CHECKOUT_PROVIDER` in
+`catalog.ts` is `'none'` and is the seam to change when one is chosen.
+
+Open decisions, all of which must be settled before anything can be bought:
+
+- **App Store vs web billing.** An iOS subscription may have to run through Apple's in-app purchase rules.
+  Keep the web CTA a lead surface rather than a web checkout for the iOS product.
+- **Stripe for the planner preorder** — plus shipping zones, tax, and a fulfilment partner.
+- **Bookblock landed COGS**, which sets the floor under both the retail and the preorder price.
+- **Preorder fulfilment dates.** No date appears anywhere on the site until this is known.
+- **One transaction or two** for the bundle. The FAQ currently says this is undecided, because it is.
+
+### Integration points
+
+| Surface | Field to repoint |
+|---|---|
+| Plan CTAs | `pricingBlock.digitalPlans[].cta` |
+| Bundle CTA | `bundleBlock.cta` |
+| Planner CTAs | `plannerCampaignBlock.cta` / `secondaryCta`, and `products[].cta` |
+| Planner interest form | `plannerInterestBlock.formAction`, or `NEXT_PUBLIC_PLANNER_INTEREST_URL` |
+| Beta promotion | `betaPromotion.cta` — the site never validates or displays a code |
+
+## Structured data
+
+`ProductJsonLd` (`src/components/ProductJsonLd.tsx`) emits an `offers` node **only** when the linked product's
+status is `preorder` or `available` and a price exists. The planner is `concept`, so `/shop/planner` currently
+publishes a `Product` with a name, brand and description and **no offer** — valid schema.org, and true.
+Marking an unprinted book `InStock` would put a machine-readable claim into search results that the site
+itself does not make.
+
+`plannerCampaignBlock.canonical` gates this so the same campaign shown on `/shop` cannot publish a second,
+competing description of the same product.
 
 ## Analytics
 
-No analytics vendor is installed and none was added. CTAs carry `data-analytics-event` attributes
-so a vendor can bind to them later without editing markup: `start_free_trial`, `select_monthly`,
-`select_annual`, `beta_code_click`, `planner_preorder_click`.
+No analytics vendor is installed and none was added. Every CTA carries `data-analytics-event` via the
+CMS `analyticsId` field, so a vendor can bind to them later without editing markup:
+
+`timebite-start-free` · `timebite-monthly` · `timebite-annual` · `planner-interest` · `planner-preview` ·
+`bundle-annual` · `beta_code_click` · `select_monthly` · `select_annual`
+
+## Rules that hold regardless of price
+
+- No fake reviews, fake scarcity, inventory counts, countdown timers or dark-pattern pricing.
+- Nothing unshipped is described as shipped — availability is a `status` field, never a sentence.
+- A blank price renders a note explaining that the number is undecided, never a placeholder number.
+- Nothing implies immediate dispatch unless a product's status is `available`.
