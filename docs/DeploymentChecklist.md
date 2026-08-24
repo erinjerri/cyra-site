@@ -196,18 +196,29 @@ Important:
 
 If you are deploying the app on Netlify, treat Netlify as the runtime host and Cloudflare as the domain/DNS host.
 
+`netlify.toml` in the repo root already declares the build command, the Node version, and
+`@netlify/plugin-nextjs`. That plugin is required, not optional: every frontend route is `force-dynamic` (see
+the note in `app/(frontend)/[slug]/page.tsx`) and Payload serves `/admin` and `/api/[...slug]` at request
+time, so the deploy needs the Next.js server runtime rather than a folder of static files. Netlify reads
+`netlify.toml` automatically — there is nothing left to set in the dashboard for build command, publish
+directory, or Node version, and setting a publish directory manually (e.g. to `.next`) will conflict with
+what the plugin manages.
+
 ### Netlify setup checklist
 
-1. Connect the GitHub repository to a Netlify site.
-2. Set the build command to `pnpm build`.
-3. Set the publish directory to `.next`.
-4. Set the Node version in Netlify to match the repo's local runtime as closely as possible.
-5. Add all env vars from `.env.example` in the Netlify site settings.
-6. Make sure `DATABASE_URI` points to the production MongoDB cluster.
-7. Make sure `PAYLOAD_SECRET` is set to the same value for that production environment.
-8. Set `NEXT_PUBLIC_SERVER_URL=https://creatingyourreality.co`.
-9. Wire the media adapter to Cloudflare R2 before relying on image uploads.
-10. Deploy once from Netlify and confirm the app boots.
+1. Connect the GitHub repository to a Netlify site. Netlify picks up `netlify.toml` from the repo root with
+   no dashboard configuration needed.
+2. Add the env vars from `.env.example` in the Netlify site settings — at minimum `DATABASE_URI`,
+   `PAYLOAD_SECRET`, and `NEXT_PUBLIC_SERVER_URL`.
+3. Make sure `DATABASE_URI` points to the production MongoDB cluster.
+4. Make sure `PAYLOAD_SECRET` is set to the same value for that production environment.
+5. Set `NEXT_PUBLIC_SERVER_URL=https://creatingyourreality.co`. This is still the right thing to set
+   explicitly — `src/utilities/getURL.ts` falls back to Netlify's own `URL`/`DEPLOY_PRIME_URL` env vars when
+   it is unset, so the site works before the domain is live, but canonical URLs, JSON-LD, and the sitemap
+   would all say the Netlify subdomain instead of the real domain until you set it.
+6. Wire the media adapter to Cloudflare R2 before relying on image uploads.
+7. Deploy once from Netlify and confirm the app boots at the Netlify subdomain — you do not need
+   `creatingyourreality.co` pointed at it yet to verify the deploy.
 
 ### Cloudflare domain step for Netlify
 
