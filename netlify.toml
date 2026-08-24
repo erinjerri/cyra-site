@@ -1,0 +1,4 @@
+[build.environment]
+  # Bucket names and public hostnames are identifiers, not credentials. They
+  # are also included in the generated server configuration at build time.
+  SECRETS_SCAN_OMIT_KEYS = "R2_PUBLIC_HOSTNAME,R2_BUCKET"
