@@ -19,8 +19,9 @@ Payload (MongoDB)
 src/utilities/getPage.ts, getGlobals.ts   (Local API reads, no access-control bypass concerns — public read)
         │
         ▼
-src/app/(frontend)/page.tsx        → pages.slug = 'home'
-src/app/(frontend)/[slug]/page.tsx → any other published page (e.g. 'philosophy')
+src/app/(frontend)/page.tsx             → pages.slug = 'home'
+src/app/(frontend)/[slug]/page.tsx      → any single-segment page (e.g. 'about', 'shop', 'pricing')
+src/app/(frontend)/shop/[slug]/page.tsx → pages.slug = 'shop/<slug>' (e.g. 'shop/planner')
         │
         ▼
 src/components/TimeBite/FrontendShell.tsx  (Header + RenderTimeBiteBlocks + Footer)
@@ -170,3 +171,27 @@ production-ready":
 The existing hand-authored CSS system (`tb-` prefixed classes, CSS custom properties, offset shadows, hairline
 grids) was extended, not replaced. No move to a component library or full Tailwind utility rewrite — the
 existing visual language was already distinctive and matched the CYR Figma direction.
+
+
+---
+
+## The commerce area
+
+`/shop`, `/pricing` and `/shop/planner` are ordinary Payload pages built from the commerce blocks in
+`src/blocks/TimeBite/commerce.ts`. No new routing concept was introduced for `/shop` itself — a single-segment
+path still falls through to `[slug]`.
+
+`shop/[slug]/page.tsx` exists only so product pages can sit one level down. It resolves the Payload page whose
+slug is the **full path** (`shop/planner`), which means the sitemap and the SEO plugin's canonical URL both
+come out correct with no special case.
+
+Prices have two layers, and the distinction is deliberate:
+
+- `src/utilities/catalog.ts` is the **authoring** source — the canonical numbers and every figure derived from
+  them. The seeds are generated from it, so re-seeding restores a coherent set rather than whatever was typed
+  into six files on six different days.
+- Payload is the **runtime** source. An editor changes a price in `/admin` with no deploy, exactly like any
+  other content.
+
+No payment provider is connected. `CHECKOUT_PROVIDER` in `catalog.ts` is the seam; every CTA is a CMS-managed
+link. See `docs/launch-pricing.md` for the open checkout decisions.

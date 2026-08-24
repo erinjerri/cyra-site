@@ -5,8 +5,11 @@ import { getPayload, type Payload } from 'payload'
 
 import { aboutPage } from '../endpoints/seed/about-page'
 import { footerData, headerData } from '../endpoints/seed/header-footer'
+import { plannerPage } from '../endpoints/seed/planner-page'
 import { postsSeed } from '../endpoints/seed/posts'
+import { pricingPage } from '../endpoints/seed/pricing-page'
 import { productsSeed } from '../endpoints/seed/products'
+import { shopPage } from '../endpoints/seed/shop-page'
 import { siteSettingsData } from '../endpoints/seed/site-settings'
 import { timeBiteHome } from '../endpoints/seed/timebite-home'
 
@@ -99,7 +102,26 @@ async function run() {
 
   await upsertPage(payload, timeBiteHome as SeedPage)
   await upsertPage(payload, aboutPage as SeedPage)
+  await upsertPage(payload, shopPage as SeedPage)
+  await upsertPage(payload, pricingPage as SeedPage)
 
+  /*
+   * The planner page relates to the planner product, and a relationship needs
+   * the document's id — which only exists once the products above have been
+   * written. Resolved by slug rather than hard-coded, so a database that was
+   * seeded before this page existed still links up correctly.
+   *
+   * With no planner found the page still seeds; the campaign simply falls back
+   * to its own copy and reports the product as a concept.
+   */
+  const planner = await payload.find({
+    collection: 'products',
+    where: { slug: { equals: 'planner' } },
+    limit: 1,
+    depth: 0,
+  })
+
+  await upsertPage(payload, plannerPage(planner.docs[0]?.id as string | undefined) as SeedPage)
 
   console.log('Seed complete.')
   process.exit(0)

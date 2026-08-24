@@ -124,7 +124,13 @@
 :root .tb-faq-list details,
 :root .tb-signup-form,
 :root .tb-word-part,
-:root .tb-media-sketch {
+:root .tb-media-sketch,
+:root .tb-featured,
+:root .tb-together,
+:root .tb-campaign-object,
+:root .tb-spread-frame,
+:root .tb-bundle-card,
+:root .tb-method-stage {
   background: color-mix(
     in srgb,
     var(--tb-section-accent, var(--tb-blue)) var(--tb-card-tint),
@@ -173,6 +179,18 @@
 #beta { --tb-section-accent: var(--tb-green); --tb-section-chip: var(--tb-chip-green); }
 #faq { --tb-section-accent: var(--tb-gold); --tb-section-chip: var(--tb-chip-gold); }
 #roadmap { --tb-section-accent: var(--tb-lavender); --tb-section-chip: var(--tb-chip-lavender); }
+
+/* Commerce. Blue is software and pricing, pink is the physical product, gold
+   is the methodology, teal is the two of them read as one system. No seventh
+   hue, and every id sets both variables. */
+#shop-hero      { --tb-section-accent: var(--tb-blue); --tb-section-chip: var(--tb-chip-blue); }
+#featured       { --tb-section-accent: var(--tb-teal); --tb-section-chip: var(--tb-chip-teal); }
+#system         { --tb-section-accent: var(--tb-teal); --tb-section-chip: var(--tb-chip-teal); }
+#planner-campaign  { --tb-section-accent: var(--tb-pink); --tb-section-chip: var(--tb-chip-pink); }
+#planner-interest  { --tb-section-accent: var(--tb-pink); --tb-section-chip: var(--tb-chip-pink); }
+#bundle         { --tb-section-accent: var(--tb-blue); --tb-section-chip: var(--tb-chip-blue); }
+#compare        { --tb-section-accent: var(--tb-blue); --tb-section-chip: var(--tb-chip-blue); }
+#methodology    { --tb-section-accent: var(--tb-gold); --tb-section-chip: var(--tb-chip-gold); }
 
 /* ---------------------------------------------------------------------------
    Light mode
@@ -1308,7 +1326,12 @@ a { color: inherit; text-decoration: none; }
 
 .tb-billing-option:not(.tb-billing-option-active) .tb-billing-badge { color: var(--tb-blue); }
 
-.tb-plan-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+/* `auto-fit`, not a fixed three: the number of plans is content now, not a
+   constant. Three plans (Free / Monthly / Annual on /pricing) still lay out
+   three across; two (Free / Premium on the homepage, where the billing switch
+   carries the third option) fill the width instead of leaving an empty column
+   where a plan used to be. `min()` keeps the track from overflowing a phone. */
+.tb-plan-grid { grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); }
 
 .tb-plan {
   display: flex;
@@ -2106,6 +2129,874 @@ p.tb-plan-badge {
 .tb-not-found-inner { max-width: 540px; text-align: center; }
 .tb-not-found-inner h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin: 8px 0 16px; }
 .tb-not-found-inner p { color: var(--tb-muted); margin: 0; }
+
+
+/* ===========================================================================
+   COMMERCE
+
+   The storefront layer: announcement strip, storefront hero, editorial product
+   merchandising, the planner campaign, the bundle, the methodology band, the
+   plan comparison and the interest form.
+
+   Everything here obeys the same rules as the rest of the sheet — one accent
+   per section, 8px radius, flat colour, separation by border and spacing. Two
+   patterns are new and are documented in design.md: the ASYMMETRIC PRODUCT
+   GRID (two thirds beside one third, so the layout states the hierarchy before
+   anyone reads a word) and the CONCEPT OBJECT (a planner drawn in CSS, marked
+   as a concept, standing in for photography that does not exist yet).
+
+   Where a section contains two product layers, the layer is marked by a 3px
+   rail in its own hue while the card wash stays the section's single accent —
+   the same device `.tb-feature-group` already uses. That is how two brands
+   share a section without breaking "one accent per section".
+   =========================================================================== */
+
+/* ---------- Announcement strip ---------- */
+
+/* Launch sequencing, not promotion. No countdown, no scarcity, no inventory
+   count — and an editor can switch it off without touching a component. */
+.tb-announce {
+  background: var(--tb-announce-accent, var(--tb-chip-teal));
+  color: var(--tb-on-chip);
+}
+
+.tb-announce-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 0;
+  text-align: center;
+}
+
+.tb-announce p { margin: 0; font-size: 0.87rem; }
+
+.tb-announce-link {
+  border-bottom: 1px solid color-mix(in srgb, var(--tb-on-chip) 45%, transparent);
+  font-size: 0.87rem;
+  font-weight: 500;
+}
+
+.tb-announce-link:hover { border-bottom-color: var(--tb-on-chip); }
+
+/* ---------- Storefront hero ---------- */
+
+/* `heroBlock` centres copy over a full-width window: one product, shown large.
+   A storefront has to answer "what is for sale here" first, so the copy moves
+   to one side and both objects share the other. */
+.tb-store-hero { padding: clamp(48px, 7vw, 96px) 0 clamp(64px, 8vw, 104px); }
+
+.tb-store-hero-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  gap: clamp(32px, 5vw, 76px);
+  align-items: center;
+}
+
+.tb-store-hero-copy h1 {
+  margin: 0 0 20px;
+  font-size: clamp(2.1rem, 4.2vw, 3.6rem);
+  line-height: 1.08;
+}
+
+.tb-store-hero-body {
+  margin: 0;
+  max-width: 46ch;
+  color: var(--tb-muted);
+  font-size: clamp(1rem, 1.4vw, 1.12rem);
+  line-height: 1.75;
+}
+
+.tb-store-hero-note { margin: 24px 0 0; color: var(--tb-faint); font-size: 0.87rem; }
+
+/* The book stands in front of the window rather than beside it. Two objects in
+   two boxes read as two products; one in front of the other reads as a set,
+   which is the argument the whole page is making. */
+.tb-store-hero-stage { position: relative; padding-bottom: 30px; }
+
+.tb-store-hero-book {
+  position: absolute;
+  left: -3%;
+  bottom: -4px;
+  width: clamp(102px, 12vw, 152px);
+  z-index: 2;
+}
+
+/* ---------- Concept planner object ----------
+
+   Drawn in CSS while no book has been printed. The colourways are deliberately
+   NOT theme tokens: this depicts a physical object, and a black book is black
+   on a white page too. Only the frame around it follows the theme.
+
+   The foil is flat colour. A metallic finish is a gradient, and gradients are
+   ruled out (design.md §10) — so the metal is named in the caption and drawn
+   as flat brand gold or flat silver. The shadow is neutral, the same device
+   `.tb-phone-frame` already uses to lift a depicted object off the page.
+   ---------- */
+
+.tb-planner-mock {
+  /* Load-bearing: the spine and the "Concept" flag are absolutely positioned
+     children. Anything repositioning a mock must keep it a positioned element
+     — `static` sends both of them to the nearest positioned ancestor. */
+  position: relative;
+  container-type: inline-size;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--tb-radius);
+  overflow: hidden;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+}
+
+.tb-planner-mock img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+.tb-planner-mock-black-gold {
+  --tb-cover-base: #101014;
+  --tb-cover-spine: #17171d;
+  --tb-cover-foil: #ead9ab;
+  --tb-cover-edge: rgba(234, 217, 171, 0.26);
+}
+
+.tb-planner-mock-midnight-silver {
+  --tb-cover-base: #141c2e;
+  --tb-cover-spine: #1c2439;
+  --tb-cover-foil: #d8dce4;
+  --tb-cover-edge: rgba(216, 220, 228, 0.28);
+}
+
+.tb-planner-mock-face {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 8%;
+  height: 100%;
+  padding: 12% 12% 12% 22%;
+  border: 1px solid var(--tb-cover-edge);
+  border-radius: var(--tb-radius);
+  background: var(--tb-cover-base);
+}
+
+.tb-planner-mock-spine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  width: 9%;
+  border-right: 1px solid var(--tb-cover-edge);
+  background: var(--tb-cover-spine);
+}
+
+.tb-planner-mock-rule { width: 34%; height: 1px; background: var(--tb-cover-foil); opacity: 0.55; }
+
+.tb-planner-mock-brand,
+.tb-planner-mock-sub { margin: 0; color: var(--tb-cover-foil); }
+
+/* `cqw` scales the wordmark with the object, and `max()` holds the floor at
+   0.72rem — the sheet's minimum type size applies to drawn covers too. The
+   plain rem value in front is the fallback where container units are absent. */
+.tb-planner-mock-brand {
+  font-family: var(--font-display), sans-serif;
+  font-size: 1rem;
+  font-size: max(0.72rem, 8.5cqw);
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  line-height: 1.22;
+  text-transform: uppercase;
+}
+
+.tb-planner-mock-sub {
+  font-size: 0.72rem;
+  font-size: max(0.72rem, 3.4cqw);
+  letter-spacing: 0.18em;
+  opacity: 0.72;
+  text-transform: uppercase;
+}
+
+/* Part of the drawing, not decoration: a price beside an object that does not
+   exist needs the object to say so. */
+.tb-planner-mock-flag {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  z-index: 2;
+  padding: 3px 8px;
+  border-radius: var(--tb-radius-sm);
+  background: var(--tb-chip-gold);
+  color: var(--tb-on-chip);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Below roughly 150px the subtitle is a smudge rather than a word. */
+@container (max-width: 150px) {
+  .tb-planner-mock-sub { display: none; }
+  .tb-planner-mock-face { padding: 14% 12% 14% 20%; }
+  /* The flag holds its 0.72rem floor; only the padding around it gives way, so
+     it stays legible without swallowing a 118px cover. */
+  .tb-planner-mock-flag { top: 5px; right: 5px; padding: 2px 6px; letter-spacing: 0.08em; }
+}
+
+/* ---------- Featured products (the asymmetric grid) ---------- */
+
+/* Three columns, so the first panel takes two of them and the second takes
+   one. `dense` lets the fourth panel back-fill the column the third leaves
+   empty, which is what makes the pairs alternate sides down the page. */
+.tb-featured-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-flow: row dense;
+  gap: 16px;
+}
+
+.tb-featured-major { grid-column: span 2; }
+.tb-featured-minor { grid-column: span 1; }
+.tb-featured-grid > :nth-child(4n + 3) { grid-column: 2 / -1; }
+.tb-featured-grid > :nth-child(4n + 4) { grid-column: 1 / 2; }
+
+/* The rail names which product layer this is; the wash stays the section's one
+   accent. Same device as `.tb-feature-group`. */
+.tb-featured {
+  display: grid;
+  border: 1px solid var(--tb-line-soft);
+  border-top: 3px solid var(--tb-featured-accent, var(--tb-blue));
+  border-radius: var(--tb-radius);
+  overflow: hidden;
+  transition: border-color 0.15s ease;
+}
+
+.tb-featured:hover { border-bottom-color: var(--tb-line); }
+
+/* Object above copy in both panels — the storefront order, and the one the
+   brief asks for on mobile applied everywhere: nobody reads a description of
+   something they have not seen yet. The asymmetry lives in the WIDTH, not in
+   the internal arrangement, which is also what keeps the two panels close in
+   height: a wide panel gets a big picture and short lines, a narrow one a
+   smaller picture and longer ones.
+   `aspect-ratio` on the stage is what makes that predictable — without it the
+   taller panel dictates the row and the other fills with dead space. */
+.tb-featured { display: flex; flex-direction: column; }
+
+.tb-featured-media {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 10;
+  /* Caps how tall the wide panel's picture gets on a large screen. Without it
+     a 1440 shell gives the major stage a 466px image and drags the whole row
+     past a viewport height. */
+  max-height: 420px;
+  padding: clamp(20px, 2.4vw, 34px);
+  background: var(--tb-surface-2);
+}
+
+.tb-featured-media img { display: block; max-width: 100%; max-height: 100%; border-radius: var(--tb-radius); }
+
+/* The app and spread schematics are drawn 16:10 and `preserveAspectRatio` is
+   `meet`, so filling the stage scales the drawing to fit without distorting
+   it — which is what lets the stage be capped in height above. */
+.tb-featured-media .tb-sketch { width: 100%; height: 100%; }
+
+/* A book is 3:4, so it is sized by the stage's height instead. */
+.tb-featured-media-cover { aspect-ratio: 4 / 3; padding: clamp(24px, 3vw, 40px); }
+.tb-featured-media-cover .tb-planner-mock { height: 100%; width: auto; }
+
+.tb-featured-copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: clamp(26px, 3vw, 38px);
+}
+
+.tb-featured-eyebrow {
+  margin: 0;
+  color: var(--tb-faint);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.tb-featured-copy h3 {
+  margin: 0;
+  font-size: clamp(1.4rem, 2.2vw, 1.95rem);
+  font-weight: 300;
+  line-height: 1.2;
+}
+
+/* The narrow panel takes a smaller title. Display sizes are set from viewport
+   width, so the same clamp that reads well across two thirds of the shell puts
+   a 31px heading into a 286px column and wraps a product name over three
+   lines. The step down is the hierarchy saying the same thing the width does. */
+.tb-featured-minor .tb-featured-copy h3 { font-size: clamp(1.25rem, 1.7vw, 1.5rem); }
+
+.tb-featured-body { margin: 0; color: var(--tb-muted); font-size: 0.98rem; line-height: 1.75; max-width: 46ch; }
+
+.tb-featured-highlights {
+  display: grid;
+  gap: 7px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--tb-muted);
+  font-size: 0.92rem;
+}
+
+.tb-featured-highlights li { position: relative; padding-left: 18px; }
+
+.tb-featured-highlights li::before {
+  content: '';
+  position: absolute;
+  top: 9px;
+  left: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--tb-featured-accent, var(--tb-blue));
+}
+
+.tb-featured-price { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; margin: 6px 0 0; }
+.tb-featured-price-note { color: var(--tb-faint); font-size: 0.88rem; }
+
+/* A blank price is not a gap to fill with a guess. */
+.tb-featured-price-pending { margin: 6px 0 0; color: var(--tb-faint); font-size: 0.9rem; line-height: 1.6; }
+
+/* Pushed to the foot of the copy, so the height a panel inherits from its
+   taller neighbour collects above the button rather than below it — and both
+   panels' buttons land on the same line. */
+.tb-featured-copy .tb-button { margin-top: auto; }
+
+/* ---------- Together band ---------- */
+
+.tb-together {
+  margin-top: clamp(28px, 3.4vw, 44px);
+  padding: clamp(30px, 3.6vw, 46px);
+  border: 1px solid var(--tb-line-soft);
+  border-radius: var(--tb-radius);
+  text-align: center;
+}
+
+.tb-together-label {
+  margin: 0 0 12px;
+  color: var(--tb-faint);
+  font-size: 0.78rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.tb-together h3 { margin: 0; font-size: clamp(1.4rem, 2.4vw, 2rem); font-weight: 300; }
+.tb-together p { margin: 14px auto 0; max-width: 60ch; color: var(--tb-muted); line-height: 1.75; }
+.tb-together .tb-button { margin-top: 24px; }
+
+/* ---------- Planner campaign ---------- */
+
+.tb-campaign-lead {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: clamp(32px, 5vw, 72px);
+  align-items: center;
+}
+
+.tb-campaign-object {
+  display: grid;
+  place-items: center;
+  padding: clamp(30px, 4vw, 60px);
+  border: 1px solid var(--tb-line-soft);
+  border-radius: var(--tb-radius);
+}
+
+.tb-campaign-cover { width: min(300px, 80%); }
+
+.tb-campaign-tagline {
+  margin: 20px 0 0;
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(1.5rem, 2.8vw, 2.3rem);
+  font-weight: 300;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+
+.tb-campaign-description { margin: 18px 0 0; max-width: 52ch; color: var(--tb-muted); line-height: 1.8; }
+
+/* Price and preorder state read side by side, both hedged. The target retail
+   figure is real; the founding preorder figure is not decided, and says so
+   rather than showing an invented number. */
+.tb-campaign-price {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 44px;
+  margin: 28px 0 0;
+  padding: 20px 0;
+  border-top: 1px solid var(--tb-line-soft);
+  border-bottom: 1px solid var(--tb-line-soft);
+}
+
+.tb-campaign-price dt {
+  margin: 0 0 5px;
+  color: var(--tb-faint);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.tb-campaign-price dd { margin: 0; color: var(--tb-ink); font-size: 0.98rem; line-height: 1.5; }
+
+.tb-campaign-label {
+  margin: 0 0 22px;
+  color: var(--tb-faint);
+  font-size: 0.78rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.tb-campaign-covers,
+.tb-campaign-layers,
+.tb-campaign-spreads,
+.tb-campaign-details,
+.tb-campaign-specs { margin-top: clamp(52px, 6vw, 88px); }
+
+.tb-campaign-covers ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: clamp(20px, 2.6vw, 34px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-width: 720px;
+}
+
+/* These are swatches, not the hero object. Left uncapped, a two-column grid
+   across 720px draws two 340px books — bigger than the one at the top of the
+   page, which inverts the hierarchy. */
+.tb-campaign-covers li .tb-planner-mock { max-width: 210px; }
+
+.tb-campaign-cover-label { margin: 18px 0 0; color: var(--tb-ink); font-size: 0.95rem; }
+.tb-campaign-cover-note { margin: 5px 0 0; color: var(--tb-faint); font-size: 0.87rem; line-height: 1.6; }
+
+.tb-campaign-layers dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  margin: 0;
+}
+
+.tb-campaign-layers dl > div { padding: 20px 0; border-top: 1px solid var(--tb-line-soft); }
+.tb-campaign-layers dl > div:nth-child(odd) { padding-right: clamp(20px, 3vw, 44px); }
+.tb-campaign-layers dl > div:nth-child(even) { padding-left: clamp(20px, 3vw, 44px); }
+.tb-campaign-layers dt { margin: 0 0 6px; color: var(--tb-ink); font-size: 1rem; }
+.tb-campaign-layers dd { margin: 0; color: var(--tb-muted); font-size: 0.92rem; line-height: 1.7; }
+
+.tb-spread-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(18px, 2.4vw, 28px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tb-spread-frame {
+  display: grid;
+  place-items: center;
+  padding: 14px;
+  border: 1px solid var(--tb-line-soft);
+  border-radius: var(--tb-radius);
+}
+
+.tb-spread-frame img { display: block; width: 100%; height: auto; border-radius: var(--tb-radius-sm); }
+.tb-spread-sketch { width: 100%; height: auto; }
+.tb-spread h4 { margin: 16px 0 0; font-size: 1rem; font-weight: 500; }
+.tb-spread p { margin: 6px 0 0; color: var(--tb-muted); font-size: 0.9rem; line-height: 1.65; }
+
+.tb-campaign-details ul {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(18px, 2.4vw, 28px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tb-campaign-details img { display: block; width: 100%; height: auto; border-radius: var(--tb-radius); }
+
+/* An empty detail slot says what it is waiting for rather than pretending to
+   be a photograph. Dashed, so it can never be mistaken for content. */
+.tb-detail-empty {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  padding: 16px;
+  border: 1px dashed var(--tb-line);
+  border-radius: var(--tb-radius);
+  color: var(--tb-faint);
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+.tb-detail-title { margin: 14px 0 0; color: var(--tb-ink); font-size: 0.95rem; }
+.tb-detail-body { margin: 5px 0 0; color: var(--tb-faint); font-size: 0.87rem; line-height: 1.6; }
+
+.tb-campaign-specs dl { display: grid; gap: 0; margin: 0; max-width: 720px; }
+
+.tb-campaign-specs dl > div {
+  display: grid;
+  grid-template-columns: minmax(0, 0.6fr) minmax(0, 1fr);
+  gap: 12px 24px;
+  padding: 15px 0;
+  border-top: 1px solid var(--tb-line-soft);
+}
+
+.tb-campaign-specs dt { margin: 0; color: var(--tb-faint); font-size: 0.9rem; }
+.tb-campaign-specs dd { margin: 0; color: var(--tb-ink); font-size: 0.92rem; }
+
+/* ---------- App + planner system ---------- */
+
+.tb-system-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: clamp(24px, 3.4vw, 56px);
+  align-items: start;
+}
+
+.tb-system-column { padding-left: 16px; border-left: 3px solid var(--tb-system-accent, var(--tb-chip-blue)); }
+
+.tb-system-label {
+  margin: 0;
+  color: var(--tb-ink);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* Ink rather than muted, and more air beneath it: at the same colour and size
+   as the lines below, the tagline read as the first item in the list. */
+.tb-system-tagline { margin: 12px 0 0; color: var(--tb-ink); font-size: 1rem; line-height: 1.6; }
+
+.tb-system-column ul { display: grid; gap: 10px; margin: 30px 0 0; padding: 0; list-style: none; }
+
+.tb-system-column li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--tb-line-soft);
+  color: var(--tb-muted);
+  font-size: 0.94rem;
+}
+
+.tb-system-column li:last-child { border-bottom: 0; }
+
+/* The join, not a divider. Without it the section reads as a comparison, and a
+   comparison invites a visitor to pick one of the two. */
+.tb-system-center { display: grid; gap: 12px; justify-items: center; max-width: 190px; padding-top: 6px; }
+.tb-system-center-rule { width: 1px; height: 44px; background: var(--tb-line); }
+
+.tb-system-center-label {
+  margin: 0;
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(1.1rem, 1.9vw, 1.4rem);
+  font-weight: 300;
+  text-align: center;
+}
+
+.tb-system-center-body { margin: 0; color: var(--tb-faint); font-size: 0.87rem; line-height: 1.6; text-align: center; }
+
+.tb-system-flow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 14px;
+  margin: clamp(44px, 5vw, 72px) auto 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tb-system-flow li {
+  display: inline-flex;
+  gap: 8px;
+  align-items: baseline;
+  padding: 8px 14px;
+  border: 1px solid var(--tb-line-soft);
+  border-radius: var(--tb-radius);
+  color: var(--tb-muted);
+  font-size: 0.82rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.tb-system-flow-index { color: var(--tb-faint); font-size: 0.72rem; }
+
+/* ---------- Bundle ---------- */
+
+.tb-bundle-card {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: clamp(28px, 4vw, 60px);
+  max-width: 900px;
+  margin: 0 auto;
+  padding: clamp(28px, 3.4vw, 44px);
+  border: 1px solid var(--tb-line-soft);
+  border-radius: var(--tb-radius);
+}
+
+.tb-bundle-head { display: flex; flex-direction: column; align-items: flex-start; }
+
+.tb-bundle-badge {
+  margin: 0 0 14px;
+  padding: 5px 10px;
+  border-radius: var(--tb-radius-sm);
+  background: var(--tb-chip-blue);
+  color: var(--tb-on-chip);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.tb-bundle-head h3 { margin: 0; font-size: clamp(1.35rem, 2.2vw, 1.8rem); font-weight: 300; }
+.tb-bundle-price { margin: 16px 0 0 !important; }
+
+.tb-bundle-compare {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  align-items: baseline;
+  margin: 10px 0 0;
+  color: var(--tb-faint);
+  font-size: 0.9rem;
+}
+
+/* A nine dollar saving, stated once and quietly. The comparison price is the
+   real sum of the two products, not an inflated "value" number. */
+.tb-bundle-saving { color: var(--tb-blue); }
+
+/* Directly under the price, never in a footnote: a bundle containing a book
+   that has not been printed has to say so where the price is read. */
+.tb-bundle-availability {
+  margin: 18px 0 0;
+  max-width: 42ch;
+  color: var(--tb-muted);
+  font-size: 0.89rem;
+  line-height: 1.7;
+}
+
+.tb-bundle-head .tb-button { margin-top: 26px; }
+
+/* `align-content: start` matters: as a stretched grid item this list would
+   otherwise distribute its three rows down the whole card, opening gaps
+   between the included items that look like missing content. */
+.tb-bundle-includes { display: grid; align-content: start; gap: 0; margin: 0; padding: 0; list-style: none; }
+
+.tb-bundle-includes li { padding: 14px 0; border-bottom: 1px solid var(--tb-line-soft); }
+.tb-bundle-includes li:first-child { padding-top: 0; }
+.tb-bundle-includes li:last-child { border-bottom: 0; }
+.tb-bundle-include-text { display: block; color: var(--tb-ink); font-size: 0.95rem; }
+.tb-bundle-include-note { display: block; margin-top: 4px; color: var(--tb-faint); font-size: 0.87rem; line-height: 1.6; }
+
+/* ---------- Methodology band ---------- */
+
+.tb-method-stages {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tb-method-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: clamp(24px, 2.6vw, 32px);
+  border: 1px solid var(--tb-line-soft);
+  border-radius: var(--tb-radius);
+}
+
+.tb-method-index { color: var(--tb-faint); font-size: 0.79rem; letter-spacing: 0.16em; }
+
+.tb-method-label {
+  margin: 0;
+  color: var(--tb-ink);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.tb-method-stage h3 {
+  margin: 2px 0 0;
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.25rem;
+  font-weight: 300;
+}
+
+.tb-method-body { margin: 0; color: var(--tb-muted); font-size: 0.93rem; line-height: 1.7; text-wrap: pretty; }
+
+.tb-method-closing {
+  max-width: 62ch;
+  margin: clamp(36px, 4vw, 56px) auto 0;
+  color: var(--tb-muted);
+  font-size: 1rem;
+  line-height: 1.8;
+  text-align: center;
+}
+
+/* ---------- Plan comparison ----------
+
+   A real `<table>` at every width. Restyling it into cards on small screens
+   drops the implicit table roles in several browsers, and a screen-reader user
+   loses the column headers that make the grid mean anything. The schema caps
+   this at three columns instead, and `table-layout: fixed` shares the width so
+   two value columns and a wrapping row label fit inside 375px with nothing to
+   scroll sideways.
+   ---------- */
+
+.tb-compare-table {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.tb-compare-table th,
+.tb-compare-table td {
+  padding: 15px 14px;
+  border-bottom: 1px solid var(--tb-line-soft);
+  font-size: 0.92rem;
+  font-weight: 400;
+  text-align: left;
+  vertical-align: top;
+}
+
+.tb-compare-table thead th,
+.tb-compare-table thead td { border-bottom: 1px solid var(--tb-line); }
+.tb-compare-table tbody th { color: var(--tb-ink); }
+.tb-compare-table td { color: var(--tb-muted); }
+.tb-compare-table tr > :first-child { width: 44%; padding-left: 0; }
+
+.tb-compare-column-label { display: block; color: var(--tb-ink); font-size: 1rem; }
+.tb-compare-column-note { display: block; margin-top: 4px; color: var(--tb-faint); font-size: 0.84rem; }
+
+/* The recommended column, marked by a wash rather than by a shout. */
+.tb-compare-featured { background: color-mix(in srgb, var(--tb-section-accent) var(--tb-card-tint), transparent); }
+
+.tb-compare-value { display: block; }
+
+/* `.tb-status` is nowrap everywhere else, which is right for a card but not
+   for a 100px table cell: "IN DEVELOPMENT" at 0.12em tracking is 141px wide
+   and pushed the whole page into a horizontal scroll on a phone. Inside the
+   table it wraps and stays within its column instead. */
+.tb-compare-table .tb-status {
+  max-width: 100%;
+  margin-top: 7px;
+  white-space: normal;
+  text-align: left;
+}
+
+/* ---------- Planner interest form ---------- */
+
+.tb-interest-form { gap: 16px; }
+.tb-interest-field { display: grid; gap: 6px; }
+
+.tb-interest-field label { color: var(--tb-faint); font-size: 0.82rem; letter-spacing: 0.02em; }
+
+.tb-signup-form select {
+  min-height: 52px;
+  width: 100%;
+  padding: 0 16px;
+  border: 1px solid var(--tb-line);
+  border-radius: var(--tb-radius);
+  background: var(--tb-surface-2);
+  color: var(--tb-ink);
+  font: inherit;
+}
+
+/* ---------- Pricing additions ---------- */
+
+/* Annual only, and a marker rather than a starburst. */
+.tb-plan-saving {
+  margin: 10px 0 0 !important;
+  align-self: flex-start;
+  padding: 4px 9px;
+  border-radius: var(--tb-radius-sm);
+  background: var(--tb-chip-blue);
+  color: var(--tb-on-chip) !important;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ---------- Commerce responsive ---------- */
+
+@media (max-width: 1024px) {
+  .tb-spread-grid,
+  .tb-campaign-details ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tb-method-stages { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 920px) {
+  /* One column each. The wide/narrow ranking survives as source order, which
+     is the order the hierarchy was written in. */
+  .tb-store-hero-inner,
+  .tb-campaign-lead,
+  .tb-bundle-card { grid-template-columns: minmax(0, 1fr); }
+
+  .tb-featured-grid { grid-template-columns: minmax(0, 1fr); }
+  .tb-featured-major,
+  .tb-featured-minor,
+  .tb-featured-grid > :nth-child(4n + 3),
+  .tb-featured-grid > :nth-child(4n + 4) { grid-column: 1 / -1; }
+
+  .tb-system-split { grid-template-columns: minmax(0, 1fr); }
+  .tb-system-center { max-width: none; justify-items: start; }
+  .tb-system-center-rule { height: 28px; }
+  .tb-system-center-label,
+  .tb-system-center-body { text-align: left; }
+
+  .tb-campaign-layers dl { grid-template-columns: minmax(0, 1fr); }
+  .tb-campaign-layers dl > div:nth-child(odd),
+  .tb-campaign-layers dl > div:nth-child(even) { padding-left: 0; padding-right: 0; }
+
+  /* The object leads on a phone. Reading a description of something you have
+     not seen yet is backwards — the same rule the showcase rows follow. Source
+     order stays copy-then-stage, so a screen reader still hears the heading
+     first; only the visual order flips. */
+  .tb-store-hero-stage { order: -1; padding-bottom: 0; }
+
+  /* Overlapping a 375px-wide screenshot with a book just hides the product, so
+     the book drops below it.
+     `relative`, never `static`: the mock's spine and its "Concept" flag are
+     absolutely positioned inside it, and an unpositioned mock stops being
+     their containing block — they escape to the hero stage and paint a stray
+     band down the page and a flag over the app window. */
+  .tb-store-hero-book {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    width: 118px;
+    margin: 16px 0 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .tb-spread-grid,
+  .tb-campaign-details ul,
+  .tb-method-stages { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 620px) {
+  .tb-compare-table th,
+  .tb-compare-table td { padding: 13px 8px; font-size: 0.87rem; }
+  .tb-compare-table tr > :first-child { width: 42%; }
+  .tb-compare-column-label { font-size: 0.92rem; }
+}
 
 /* ---------- Responsive ---------- */
 
