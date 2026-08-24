@@ -109,7 +109,7 @@ Settings → Environment Variables):
 
 ```bash
 USE_R2_STORAGE=true
-R2_BUCKET=cyra-site-media
+R2_BUCKET=your-r2-bucket-name
 R2_ACCOUNT_ID=<32-char account id>
 R2_ACCESS_KEY_ID=<from Part 3>
 R2_SECRET_ACCESS_KEY=<from Part 3>

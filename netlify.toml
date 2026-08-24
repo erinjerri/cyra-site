@@ -15,14 +15,19 @@
   NODE_VERSION = "20"
 
   # Netlify scans build output for anything that looks like a secret and fails
-  # the build on a hit. NEXT_PUBLIC_* values are *meant* to be in the bundle —
-  # that is what the prefix means — so they trip it every time.
+  # the build on a hit. Two different kinds of false positive land here:
+  #
+  #  - NEXT_PUBLIC_* values are *meant* to be in the client bundle — that is
+  #    what the prefix means — so they trip the scan every time.
+  #  - R2_BUCKET and R2_PUBLIC_HOSTNAME are identifiers, not credentials
+  #    (the bucket name and its public hostname), but they still end up in
+  #    the generated server config at build time and get flagged the same way.
   #
   # Omitting the specific keys rather than setting SECRETS_SCAN_ENABLED=false:
   # the scan still runs, so a real leak (DATABASE_URI, PAYLOAD_SECRET, an R2
-  # key) still fails the build. Add to this list only for values that are
-  # genuinely public.
-  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SERVER_URL,NEXT_PUBLIC_BETA_SIGNUP_URL,NEXT_PUBLIC_SUBSTACK_EMBED_URL,NEXT_PUBLIC_PLANNER_INTEREST_URL,R2_PUBLIC_HOSTNAME"
+  # access key) still fails the build. Add to this list only for values that
+  # are genuinely public.
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SERVER_URL,NEXT_PUBLIC_BETA_SIGNUP_URL,NEXT_PUBLIC_SUBSTACK_EMBED_URL,NEXT_PUBLIC_PLANNER_INTEREST_URL,R2_PUBLIC_HOSTNAME,R2_BUCKET"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"

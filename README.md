@@ -323,7 +323,7 @@ Locally in `.env`, and on your host under environment variables:
 
 ```bash
 USE_R2_STORAGE=true
-R2_BUCKET=creatingyourreality
+R2_BUCKET=your-r2-bucket-name
 R2_ACCOUNT_ID=<from step B>
 R2_ACCESS_KEY_ID=<from step C>
 R2_SECRET_ACCESS_KEY=<from step C>
