@@ -1,23 +1,42 @@
 import { AdaptiveWorkspace } from './AdaptiveWorkspace'
 import { AgentRoadmap } from './AgentRoadmap'
+import { AnnouncementStrip } from './AnnouncementStrip'
 import { BetaSignup } from './BetaSignup'
+import { BundleOffer } from './BundleOffer'
 import { CtaLink } from './CtaLink'
 import { DualLoop } from './DualLoop'
+import { FeaturedProducts } from './FeaturedProducts'
 import { MediaFrame } from './MediaFrame'
+import { MethodologyBand } from './MethodologyBand'
+import { PlanComparison } from './PlanComparison'
+import { PlannerCampaign } from './PlannerCampaign'
+import { PlannerInterestForm } from './PlannerInterestForm'
 import { PricingSection } from './PricingSection'
 import { ProductDemo } from './ProductDemo'
 import { ProductGrid } from './ProductGrid'
 import { ProductShowcase } from './ProductShowcase'
 import { ScaleStory } from './ScaleStory'
+import { SectionHeader } from './SectionHeader'
 import { StatusBadge } from './StatusBadge'
+import { StorefrontHero } from './StorefrontHero'
+import { SystemSplit } from './SystemSplit'
 import { TimeLoop } from './TimeLoop'
 import { resolveMedia } from './media'
 import type {
   AgentsBlockType,
+  AnnouncementBlockType,
+  BundleBlockType,
   DualLoopBlockType,
   FAQBlockType,
+  FeaturedProductsBlockType,
+  MethodologyBlockType,
+  PlanComparisonBlockType,
+  PlannerCampaignBlockType,
+  PlannerInterestBlockType,
   PricingBlockType,
   ProductGridBlockType,
+  StorefrontHeroBlockType,
+  SystemSplitBlockType,
   TestimonialsBlockType,
   TimeBiteBlock,
   TimeBiteItem,
@@ -26,18 +45,6 @@ import type {
 } from './types'
 
 const cx = (...classes: Array<string | false | undefined>) => classes.filter(Boolean).join(' ')
-
-type HeaderContent = { eyebrow?: string; headline?: string; body?: string }
-
-function SectionHeader({ block, align = 'center' }: { block: HeaderContent; align?: 'center' | 'left' }) {
-  return (
-    <div className={cx('tb-section-header', align === 'left' && 'tb-section-header-left')}>
-      {block.eyebrow ? <p className="tb-eyebrow">{block.eyebrow}</p> : null}
-      {block.headline ? <h2>{block.headline}</h2> : null}
-      {block.body ? <p>{block.body}</p> : null}
-    </div>
-  )
-}
 
 // Buttons render through CtaLink so new-tab behaviour and analytics ids stay
 // CMS-controlled. Nothing in this file contains a URL.
@@ -467,6 +474,26 @@ export function RenderTimeBiteBlocks({ blocks }: { blocks: TimeBiteBlock[] }) {
             return <CtaBanner block={block} key={index} />
           case 'testimonialsBlock':
             return <Testimonials block={block as TestimonialsBlockType} key={index} />
+
+          /* Commerce. See blocks/TimeBite/commerce.ts. */
+          case 'announcementBlock':
+            return <AnnouncementStrip block={block as unknown as AnnouncementBlockType} key={index} />
+          case 'storefrontHeroBlock':
+            return <StorefrontHero block={block as unknown as StorefrontHeroBlockType} key={index} />
+          case 'featuredProductsBlock':
+            return <FeaturedProducts block={block as unknown as FeaturedProductsBlockType} key={index} />
+          case 'plannerCampaignBlock':
+            return <PlannerCampaign block={block as unknown as PlannerCampaignBlockType} key={index} />
+          case 'systemSplitBlock':
+            return <SystemSplit block={block as unknown as SystemSplitBlockType} key={index} />
+          case 'bundleBlock':
+            return <BundleOffer block={block as unknown as BundleBlockType} key={index} />
+          case 'methodologyBlock':
+            return <MethodologyBand block={block as unknown as MethodologyBlockType} key={index} />
+          case 'planComparisonBlock':
+            return <PlanComparison block={block as unknown as PlanComparisonBlockType} key={index} />
+          case 'plannerInterestBlock':
+            return <PlannerInterestForm block={block as unknown as PlannerInterestBlockType} key={index} />
           default:
             return null
         }

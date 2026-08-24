@@ -3,6 +3,7 @@
 import { useState } from 'react'
 
 import { CtaLink } from './CtaLink'
+import { SectionHeader } from './SectionHeader'
 import { StatusBadge } from './StatusBadge'
 import type { DigitalPlan, PricingBlockType, PricingFeature } from './types'
 
@@ -38,7 +39,9 @@ function FeatureList({ items }: { items?: PricingFeature[] }) {
       {items.map((item, index) => (
         <li key={index}>
           {item.text}
-          {item.status && item.status !== 'available' ? <StatusBadge size="sm" status={item.status} /> : null}
+          {item.status && item.status !== 'available' ? (
+            <StatusBadge size="sm" status={item.status} />
+          ) : null}
         </li>
       ))}
     </ul>
@@ -61,7 +64,15 @@ function DigitalPlanCard({ plan, cycle }: { plan: DigitalPlan; cycle: BillingCyc
           <span className="tb-plan-cadence">{price.cadence}</span>
         </p>
       ) : null}
-      {cycle === 'annual' && plan.annualNote ? <p className="tb-plan-note">{plan.annualNote}</p> : null}
+      {/* Annual-only, both of them: on the monthly view "about $6.58 a month"
+          and "save 34%" would be describing a price the visitor is not looking
+          at. The saving is a quiet marker, not a starburst. */}
+      {cycle === 'annual' && plan.annualSavings ? (
+        <p className="tb-plan-saving">{plan.annualSavings}</p>
+      ) : null}
+      {cycle === 'annual' && plan.annualNote ? (
+        <p className="tb-plan-note">{plan.annualNote}</p>
+      ) : null}
       {plan.description ? <p>{plan.description}</p> : null}
       <FeatureList items={plan.features} />
       <CtaLink compact cta={plan.cta} variant={plan.featured ? 'primary' : 'secondary'} />
@@ -71,12 +82,21 @@ function DigitalPlanCard({ plan, cycle }: { plan: DigitalPlan; cycle: BillingCyc
 
 export function PricingSection({ block }: { block: PricingBlockType }) {
   /*
-   * Monthly first. Annual was the default so the recommended price led, but it
-   * meant a visitor's first impression of Executive was $1,111.10 rather than
-   * $111.11 — the same offer reading roughly ten times more expensive. The
-   * annual saving is still one click away, and the toggle announces it.
+   * Monthly first. Annual was the default so the recommended price led, but a
+   * visitor's first impression then became the annual figure — the same offer
+   * reading roughly twelve times more expensive than it is. The annual saving
+   * is one click away, the toggle announces it, and the annual card carries
+   * both the monthly equivalent and the percentage saved.
+   *
+   * With the switch turned off, the section lays the billing periods out as
+   * separate cards instead. It settles on 'annual' because `planPrice` falls
+   * back to the monthly figure whenever a plan has no annual price: a
+   * monthly-only card then shows "$9.99 per month", an annual-only card shows
+   * "$79 per year", and a card priced 0 still just says Free. Three prices
+   * visible at once, nothing to click.
    */
-  const [cycle, setCycle] = useState<BillingCycle>('monthly')
+  const showToggle = block.billingToggle !== false
+  const [cycle, setCycle] = useState<BillingCycle>(showToggle ? 'monthly' : 'annual')
 
   const plans = block.digitalPlans || []
   const promotion = block.betaPromotion
@@ -85,11 +105,7 @@ export function PricingSection({ block }: { block: PricingBlockType }) {
   return (
     <section className="tb-section tb-pricing" id="pricing">
       <div className="tb-shell">
-        <div className="tb-section-header">
-          {block.eyebrow ? <p className="tb-eyebrow">{block.eyebrow}</p> : null}
-          {block.headline ? <h2>{block.headline}</h2> : null}
-          {block.body ? <p>{block.body}</p> : null}
-        </div>
+        <SectionHeader block={block} />
 
         {block.trialCopy ? <p className="tb-trial-line">{block.trialCopy}</p> : null}
 
@@ -104,29 +120,39 @@ export function PricingSection({ block }: { block: PricingBlockType }) {
           <>
             <div className="tb-lane-head">
               <p className="tb-lane-eyebrow">{block.digitalEyebrow || 'Digital'}</p>
-              <div className="tb-billing-toggle" role="radiogroup" aria-label="Billing period">
-                <button
-                  aria-checked={cycle === 'monthly'}
-                  className={cx('tb-billing-option', cycle === 'monthly' && 'tb-billing-option-active')}
-                  data-analytics-event="select_monthly"
-                  onClick={() => setCycle('monthly')}
-                  role="radio"
-                  type="button"
-                >
-                  {block.monthlyLabel || 'Monthly'}
-                </button>
-                <button
-                  aria-checked={cycle === 'annual'}
-                  className={cx('tb-billing-option', cycle === 'annual' && 'tb-billing-option-active')}
-                  data-analytics-event="select_annual"
-                  onClick={() => setCycle('annual')}
-                  role="radio"
-                  type="button"
-                >
-                  {block.annualLabel || 'Annual'}
-                  {block.annualBadge ? <span className="tb-billing-badge">{block.annualBadge}</span> : null}
-                </button>
-              </div>
+              {showToggle ? (
+                <div className="tb-billing-toggle" role="radiogroup" aria-label="Billing period">
+                  <button
+                    aria-checked={cycle === 'monthly'}
+                    className={cx(
+                      'tb-billing-option',
+                      cycle === 'monthly' && 'tb-billing-option-active',
+                    )}
+                    data-analytics-event="select_monthly"
+                    onClick={() => setCycle('monthly')}
+                    role="radio"
+                    type="button"
+                  >
+                    {block.monthlyLabel || 'Monthly'}
+                  </button>
+                  <button
+                    aria-checked={cycle === 'annual'}
+                    className={cx(
+                      'tb-billing-option',
+                      cycle === 'annual' && 'tb-billing-option-active',
+                    )}
+                    data-analytics-event="select_annual"
+                    onClick={() => setCycle('annual')}
+                    role="radio"
+                    type="button"
+                  >
+                    {block.annualLabel || 'Annual'}
+                    {block.annualBadge ? (
+                      <span className="tb-billing-badge">{block.annualBadge}</span>
+                    ) : null}
+                  </button>
+                </div>
+              ) : null}
             </div>
 
             <div className="tb-grid tb-plan-grid">
