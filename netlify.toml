@@ -1,4 +1,53 @@
+# Netlify build configuration.
+#
+# This is a Payload CMS app, not a static site. Every frontend route is
+# `force-dynamic` (see the note in app/(frontend)/[slug]/page.tsx), and Payload
+# serves /admin and /api/[...slug] at request time. So the Next.js runtime has
+# to be present — publishing `.next` as a folder of static files would 404 every
+# page on the site. That is what the plugin below is for.
+
+[build]
+  command = "pnpm build"
+
 [build.environment]
-  # Bucket names and public hostnames are identifiers, not credentials. They
-  # are also included in the generated server configuration at build time.
-  SECRETS_SCAN_OMIT_KEYS = "R2_PUBLIC_HOSTNAME,R2_BUCKET"
+  # package.json allows ^18.20.2 || >=20.9.0. Pinned to 20 because Payload 3 and
+  # sharp both prefer it, and Netlify's default has moved under us before.
+  NODE_VERSION = "20"
+
+  # Netlify scans build output for anything that looks like a secret and fails
+  # the build on a hit. Two different kinds of false positive land here:
+  #
+  #  - NEXT_PUBLIC_* values are *meant* to be in the client bundle — that is
+  #    what the prefix means — so they trip the scan every time.
+  #  - R2_BUCKET and R2_PUBLIC_HOSTNAME are identifiers, not credentials
+  #    (the bucket name and its public hostname), but they still end up in
+  #    the generated server config at build time and get flagged the same way.
+  #
+  # Omitting the specific keys rather than setting SECRETS_SCAN_ENABLED=false:
+  # the scan still runs, so a real leak (DATABASE_URI, PAYLOAD_SECRET, an R2
+  # access key) still fails the build. Add to this list only for values that
+  # are genuinely public.
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SERVER_URL,NEXT_PUBLIC_BETA_SIGNUP_URL,NEXT_PUBLIC_SUBSTACK_EMBED_URL,NEXT_PUBLIC_PLANNER_INTEREST_URL,R2_PUBLIC_HOSTNAME,R2_BUCKET"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Hashed build assets never change under the same URL, so they can be cached
+# permanently. Everything else is left alone: pages are dynamic and must not be
+# cached at the edge, or an editor's change in /admin would not appear.
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/_next/image/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Media proxied through Payload when R2_PUBLIC_HOSTNAME is unset. A week, with
+# revalidation, so replacing an image in /admin is picked up without a deploy.
+[[headers]]
+  for = "/api/media/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800, stale-while-revalidate=86400"
